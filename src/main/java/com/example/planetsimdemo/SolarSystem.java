@@ -21,7 +21,7 @@ public class SolarSystem {
     }
 
     private void createSun() {
-        Sphere sun = new Sphere(40);
+        Sphere sun = new Sphere(0.9276/2);
 
         PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(Color.YELLOW);
