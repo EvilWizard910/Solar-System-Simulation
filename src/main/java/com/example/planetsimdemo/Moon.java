@@ -1,0 +1,53 @@
+package com.example.planetsimdemo;
+
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Sphere;
+
+public class Moon {
+
+    private final Sphere body;
+    private final Planet parent;
+
+    private final double orbitRadius;
+    private final double speed;
+    private double angle;
+
+    public Moon(Planet parent, double size, double orbitRadius, double speed, Color color) {
+        this.parent = parent;
+        this.orbitRadius = orbitRadius;
+        this.speed = speed;
+        this.angle = 0;
+
+        this.body = new Sphere(size);
+
+        PhongMaterial material = new PhongMaterial(color);
+        body.setMaterial(material);
+    }
+
+    public void update() {
+        angle += speed;
+
+        double localX = orbitRadius * Math.cos(angle);
+        double localZ = orbitRadius * Math.sin(angle);
+
+        // Offset from planet position
+        double planetX = parent.getBody().getTranslateX();
+        double planetZ = parent.getBody().getTranslateZ();
+
+        body.setTranslateX(planetX + localX);
+        body.setTranslateZ(planetZ + localZ);
+    }
+
+    public Sphere getBody() {
+        return body;
+    }
+
+    public double getOrbitRadius() {
+        return orbitRadius;
+    }
+
+    public Planet getParent() {
+        return parent;
+    }
+}
