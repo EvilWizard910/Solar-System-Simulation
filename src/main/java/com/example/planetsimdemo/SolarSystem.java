@@ -34,12 +34,12 @@ public class SolarSystem {
     private void createPlanets() {
 /*100pixel = 1au= 150,000,000km
 * 1 pixel = 1,500,000km
-* (diameter or distane(km)) / (1500000km) = pixels*/
-        Planet earth = new Planet(0.0085/2, 100, 0.01, Color.BLUE);
-        Planet mars  = new Planet(0.004528/2, 152, 0.008, Color.RED);
+* (diameter or distance(km)) / (1500000km) = pixels*/
         Planet venus = new Planet(0.00807/2, 72, 0.015, Color.ORANGE);
+        Planet earth = new Planet(0.0085/2, 100, 0.01, Color.BLUE);
+        Planet mars  = new Planet(0.00453/2, 152, 0.008, Color.RED);
 
-        Moon moon = new Moon(earth, 1.738/2, 0.00257, 0.03, Color.LIGHTGRAY);
+        Moon moon = new Moon(earth, 0.00116/2, 0.256, 0.03, Color.LIGHTGRAY);
 
         earth.addMoon(moon);
 
