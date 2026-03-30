@@ -53,6 +53,10 @@ public class SolarSystem {
         Moon callisto =new Moon(jupiter,2410,1833000, Color.GRAY);
 
         earth.addMoon(moon);
+        jupiter.addMoon(io);
+        jupiter.addMoon(europa);
+        jupiter.addMoon(ganymede);
+        jupiter.addMoon(callisto);
 
         planets.add(mercury);
         planets.add(venus);
