@@ -31,18 +31,20 @@ public class SolarSystem {
         root.getChildren().add(sun);
     }
 
+
     private void createPlanets() {
-/*100pixel = 1au= 150,000,000km
-* 1 pixel = 1,500,000km
-* (diameter or distance(km)) / (1500000km) = pixels*/
-        Planet venus = new Planet(0.00807/2, 72, 0.015, Color.ORANGE);
-        Planet earth = new Planet(0.0085/2, 100, 0.01, Color.BLUE);
-        Planet mars  = new Planet(0.00453/2, 152, 0.008, Color.RED);
+/*size = diameter in KM
+* Orbit radius = distance from sun in au*/
+        Planet mercury = new Planet(4879,.39, Color.RED);
+        Planet venus = new Planet(12104, .72, Color.ORANGE);
+        Planet earth = new Planet(12756, 1,  Color.BLUE);
+        Planet mars  = new Planet(6792, 1.52,  Color.RED);
 
         Moon moon = new Moon(earth, 0.00116/2, 0.256, 0.03, Color.LIGHTGRAY);
 
         earth.addMoon(moon);
 
+        planets.add(mercury);
         planets.add(earth);
         planets.add(mars);
         planets.add(venus);
