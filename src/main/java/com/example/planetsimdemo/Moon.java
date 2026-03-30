@@ -1,5 +1,7 @@
 package com.example.planetsimdemo;
 
+import static com.example.planetsimdemo.Conversions.kmToPixel;
+import static com.example.planetsimdemo.Conversions.orbitalMoonSpeed;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -13,13 +15,17 @@ public class Moon {
     private final double speed;
     private double angle;
 
-    public Moon(Planet parent, double size, double orbitRadius, double speed, Color color) {
+    public double kmToPixel(double km) {
+        return km / 1500000;
+    }
+
+    public Moon(Planet parent, double size, double orbitRadius, Color color) {
         this.parent = parent;
-        this.orbitRadius = orbitRadius;
-        this.speed = speed;
+        this.orbitRadius = kmToPixel(orbitRadius);
+        this.speed = orbitalMoonSpeed(orbitRadius);
         this.angle = 0;
 
-        this.body = new Sphere(size);
+        this.body = new Sphere(kmToPixel(size));
 
         PhongMaterial material = new PhongMaterial(color);
         body.setMaterial(material);
