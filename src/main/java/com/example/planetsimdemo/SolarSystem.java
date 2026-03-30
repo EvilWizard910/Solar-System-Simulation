@@ -1,5 +1,6 @@
 package com.example.planetsimdemo;
 
+import static com.example.planetsimdemo.Conversions.kmToPixel;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -21,7 +22,7 @@ public class SolarSystem {
     }
 
     private void createSun() {
-        Sphere sun = new Sphere(0.9276/2);
+        Sphere sun = new Sphere(kmToPixel(1391400)/2);
 
         PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(Color.YELLOW);
@@ -35,17 +36,21 @@ public class SolarSystem {
     private void createPlanets() {
 /*size = diameter in KM
 * Orbit radius = distance from sun in au*/
-        Planet mercury = new Planet(4879,.39, Color.RED);
-        Planet venus = new Planet(12104, .72, Color.ORANGE);
+        Planet mercury = new Planet(4879,.39, Color.SADDLEBROWN);
+        Planet venus = new Planet(12104, .72, Color.TAN);
         Planet earth = new Planet(12756, 1,  Color.BLUE);
         Planet mars  = new Planet(6792, 1.52,  Color.RED);
         Planet jupiter = new Planet(142984, 5.2,  Color.ORANGE);
-        Planet saturn = new Planet(120536, 9.54,  Color.RED);
-        Planet uranus = new Planet(51118, 19.2,  Color.BLUE);
-        Planet neptune = new Planet(49528, 30.06,  Color.BLUE);
+        Planet saturn = new Planet(120536, 9.54,  Color.BEIGE);
+        Planet uranus = new Planet(51118, 19.2,  Color.TURQUOISE);
+        Planet neptune = new Planet(49528, 30.06,  Color.DARKBLUE);
 
+       /*takes size in km and radius in km*/
         Moon moon = new Moon(earth, 3480, 384000,  Color.LIGHTGRAY);
-
+        Moon io =new Moon(jupiter,1821.6,422000, Color.YELLOWGREEN);
+        Moon europa =new Moon(jupiter,1560.8,671000, Color.WHITE);
+        Moon ganymede =new Moon(jupiter,2631,1070000, Color.DARKSLATEGRAY);
+        Moon callisto =new Moon(jupiter,2410,1833000, Color.GRAY);
 
         earth.addMoon(moon);
 
