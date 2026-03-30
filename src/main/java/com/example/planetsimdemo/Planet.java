@@ -1,5 +1,11 @@
 package com.example.planetsimdemo;
 
+import static com.example.planetsimdemo.Conversions.auToMeters;
+import static com.example.planetsimdemo.Conversions.auToPixel;
+import static com.example.planetsimdemo.Conversions.kmToPixel;
+import static com.example.planetsimdemo.Conversions.orbitalPlanetSpeed;
+
+
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -12,23 +18,9 @@ public class Planet {
     private final double orbitRadius;
     private final double speed;
     private double angle;
-    double g = 0.00000000006674;
-    double massOfSun = 4385000000000000000000000000000.0;
+
     private final List<Moon> moons = new ArrayList<>();
 
-     double auToPixel(double au){
-        return au*100.0;
-    }
-     double kmToPixel(double km){
-        return km/1500000;
-    }
-    double orbitalSpeed( double au){
-        return 2* Math.PI * Math.sqrt( (this.orbitRadius * this.orbitRadius * this.orbitRadius)/ (g*massOfSun) ) ;
-    }
-
-    double auToMeters( double au){
-         return au * 150000000000.0;
-    }
 
 
 
@@ -36,7 +28,7 @@ public class Planet {
     public Planet(double size, double orbitRadius, Color color) {
         this.body = new Sphere(kmToPixel(size)/2);
         this.orbitRadius = auToPixel(orbitRadius);
-        this.speed = (Math.PI * 2 * auToMeters(orbitRadius) )/orbitalSpeed(auToMeters(orbitRadius));
+        this.speed = orbitalPlanetSpeed(orbitRadius);
         this.angle = 0;
 
         PhongMaterial material = new PhongMaterial(color);

@@ -44,7 +44,8 @@ public class SolarSystem {
         Planet uranus = new Planet(51118, 19.2,  Color.BLUE);
         Planet neptune = new Planet(49528, 30.06,  Color.BLUE);
 
-        Moon moon = new Moon(earth, 0.00116/2, 0.256, 0.03, Color.LIGHTGRAY);
+        Moon moon = new Moon(earth, 3480, 384000,  Color.LIGHTGRAY);
+
 
         earth.addMoon(moon);
 
