@@ -1,5 +1,8 @@
 package com.example.planetsimdemo;
 
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.*;
@@ -61,11 +64,36 @@ public class Main extends Application {
         };
         timer.start();
 
-        Group root = new Group(subScene);
-        root.setFocusTraversable(true);
-        root.requestFocus();
+        BorderPane root = new BorderPane();
 
-        Scene scene = new Scene(root, 800, 600, true);
+        // put the 3D scene in the center
+        root.setCenter(subScene);
+
+        // create controls
+        VBox controlsBox = new VBox(10);
+
+        Button startStopButton = new Button("⏹️");
+
+        final boolean[] isRunning = {true};
+
+        startStopButton.setOnAction(_ -> {
+            if (isRunning[0]) {
+                timer.stop();
+                startStopButton.setText("▶️");
+                isRunning[0] = false;
+            } else {
+                timer.start();
+                startStopButton.setText("⏹️");
+                isRunning[0] = true;
+            }
+        });
+
+        controlsBox.getChildren().add(startStopButton);
+
+        // place controls on the right side
+        root.setRight(controlsBox);
+
+        Scene scene = new Scene(root, 850, 600, true);
 
         scene.setOnKeyPressed(event -> {
             switch (event.getCode()) {
