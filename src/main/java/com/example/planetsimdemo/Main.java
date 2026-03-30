@@ -62,6 +62,7 @@ public class Main extends Application {
                 }
             }
         };
+
         timer.start();
 
         BorderPane root = new BorderPane();
