@@ -1,5 +1,11 @@
 package com.example.planetsimdemo;
 
+import static com.example.planetsimdemo.Conversions.auToMeters;
+import static com.example.planetsimdemo.Conversions.auToPixel;
+import static com.example.planetsimdemo.Conversions.kmToPixel;
+import static com.example.planetsimdemo.Conversions.orbitalPlanetSpeed;
+
+
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -12,13 +18,17 @@ public class Planet {
     private final double orbitRadius;
     private final double speed;
     private double angle;
+
     private final List<Moon> moons = new ArrayList<>();
 
 
-    public Planet(double size, double orbitRadius, double speed, Color color) {
-        this.body = new Sphere(size);
-        this.orbitRadius = orbitRadius;
-        this.speed = speed;
+
+
+
+    public Planet(double size, double orbitRadius, Color color) {
+        this.body = new Sphere(kmToPixel(size)/2);
+        this.orbitRadius = auToPixel(orbitRadius);
+        this.speed = orbitalPlanetSpeed(orbitRadius);
         this.angle = 0;
 
         PhongMaterial material = new PhongMaterial(color);
