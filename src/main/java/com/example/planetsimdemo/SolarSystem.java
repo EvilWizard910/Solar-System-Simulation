@@ -39,15 +39,23 @@ public class SolarSystem {
         Planet venus = new Planet(12104, .72, Color.ORANGE);
         Planet earth = new Planet(12756, 1,  Color.BLUE);
         Planet mars  = new Planet(6792, 1.52,  Color.RED);
+        Planet jupiter = new Planet(142984, 5.2,  Color.ORANGE);
+        Planet saturn = new Planet(120536, 9.54,  Color.RED);
+        Planet uranus = new Planet(51118, 19.2,  Color.BLUE);
+        Planet neptune = new Planet(49528, 30.06,  Color.BLUE);
 
         Moon moon = new Moon(earth, 0.00116/2, 0.256, 0.03, Color.LIGHTGRAY);
 
         earth.addMoon(moon);
 
         planets.add(mercury);
+        planets.add(venus);
         planets.add(earth);
         planets.add(mars);
-        planets.add(venus);
+        planets.add(jupiter);
+        planets.add(saturn);
+        planets.add(uranus);
+        planets.add(neptune);
 
         for (Planet p : planets) {
             root.getChildren().add(createOrbitRing(p.getOrbitRadius()));
