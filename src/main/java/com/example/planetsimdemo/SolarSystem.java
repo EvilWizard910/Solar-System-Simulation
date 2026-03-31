@@ -47,16 +47,35 @@ public class SolarSystem {
 
        /*takes size in km and radius in km*/
         Moon moon = new Moon(earth, 3480, 384000,  Color.LIGHTGRAY);
+
         Moon io =new Moon(jupiter,1821.6,422000, Color.YELLOWGREEN);
         Moon europa =new Moon(jupiter,1560.8,671000, Color.WHITE);
         Moon ganymede =new Moon(jupiter,2631,1070000, Color.DARKSLATEGRAY);
         Moon callisto =new Moon(jupiter,2410,1833000, Color.GRAY);
 
+        Moon titan =new Moon(saturn, 5150, 1221830, Color.WHEAT);
+        Moon rhea =new Moon(saturn, 1528, 527040, Color.WHEAT);
+        Moon iapetus =new Moon(saturn, 1436, 3561300, Color.WHEAT);
+        Moon dione =new Moon(saturn, 1120, 377400, Color.WHEAT);
+        Moon tethys =new Moon(saturn, 1061, 294660, Color.WHEAT);
+        Moon enceladus =new Moon(saturn, 504, 238020, Color.WHEAT);
+        Moon mimas =new Moon(saturn, 396, 185520, Color.WHEAT);
+
         earth.addMoon(moon);
+
         jupiter.addMoon(io);
         jupiter.addMoon(europa);
         jupiter.addMoon(ganymede);
         jupiter.addMoon(callisto);
+
+        saturn.addMoon(titan);
+        saturn.addMoon(rhea);
+        saturn.addMoon(iapetus);
+        saturn.addMoon(dione);
+        saturn.addMoon(tethys);
+        saturn.addMoon(enceladus);
+        saturn.addMoon(mimas);
+
 
         planets.add(mercury);
         planets.add(venus);
