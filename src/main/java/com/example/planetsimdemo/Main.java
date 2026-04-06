@@ -29,8 +29,8 @@ public class Main extends Application {
 
         PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setTranslateZ(-600);
-        camera.setNearClip(0.1);
-        camera.setFarClip(10000);
+        camera.setNearClip(1);
+        camera.setFarClip(20000);
         subScene.setCamera(camera);
 
         // Light positioned at the sun (center)
@@ -45,7 +45,7 @@ public class Main extends Application {
         root3D.getChildren().add(ambient);
 
         // View angle
-        Rotate tilt = new Rotate(-45, Rotate.X_AXIS);
+        Rotate tilt = new Rotate(-90, Rotate.X_AXIS);
         Rotate spin = new Rotate(0, Rotate.Y_AXIS);
         Rotate pitch = new Rotate(0, Rotate.X_AXIS);
         root3D.getTransforms().addAll(tilt, spin, pitch);
