@@ -7,7 +7,7 @@ public class Conversions {
     public static double auToPixel(double au) {
         return au * 100.0;
     }
-
+//km / 1500000
     public static double kmToPixel(double km) {
         return km / 1500000;
     }

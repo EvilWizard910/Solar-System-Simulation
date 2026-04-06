@@ -100,22 +100,22 @@ public class Main extends Application {
             switch (event.getCode()) {
 
                 // Zoom
-                case W -> camera.setTranslateZ(camera.getTranslateZ() + 20);
-                case S -> camera.setTranslateZ(camera.getTranslateZ() - 20);
+                case UP -> camera.setTranslateZ(camera.getTranslateZ() + 20);
+                case DOWN -> camera.setTranslateZ(camera.getTranslateZ() - 20);
 
 //                // Pan
                case A -> camera.setTranslateX(camera.getTranslateX() - 20);
                case D -> camera.setTranslateX(camera.getTranslateX() + 20);
-               case Q -> camera.setTranslateY(camera.getTranslateY() - 20);
-                case E -> camera.setTranslateY(camera.getTranslateY() + 20);
+               case S -> camera.setTranslateY(camera.getTranslateY() - 20);
+                case W -> camera.setTranslateY(camera.getTranslateY() + 20);
 
                 // Rotate LEFT / RIGHT (Y axis)
-                case LEFT -> spin.setAngle(spin.getAngle() - 5);
-                case RIGHT -> spin.setAngle(spin.getAngle() + 5);
+                //case LEFT -> spin.setAngle(spin.getAngle() - 5);
+                //case RIGHT -> spin.setAngle(spin.getAngle() + 5);
 
                 // Rotate UP / DOWN (X axis)
-                case UP -> pitch.setAngle(pitch.getAngle() - 5);
-                case DOWN -> pitch.setAngle(pitch.getAngle() + 5);
+                case  LEFT-> pitch.setAngle(pitch.getAngle() - 5);
+                case RIGHT -> pitch.setAngle(pitch.getAngle() + 5);
             }
         });
 
