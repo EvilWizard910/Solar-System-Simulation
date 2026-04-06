@@ -105,7 +105,9 @@ public class SolarSystem {
 
         int segments = 100; // more = smoother circle
         double thickness = 0.5;
-
+        if (radius > 200) {
+             thickness = 4;
+        }
         for (int i = 0; i < segments; i++) {
             double angle1 = 2 * Math.PI * i / segments;
             double angle2 = 2 * Math.PI * (i + 1) / segments;

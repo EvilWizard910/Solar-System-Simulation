@@ -94,7 +94,7 @@ public class Main extends Application {
         // place controls on the right side
         root.setRight(controlsBox);
 
-        Scene scene = new Scene(root, 1920, 1080, true);
+        Scene scene = new Scene(root, 3200, 3200, true);
 
         scene.setOnKeyPressed(event -> {
             switch (event.getCode()) {
