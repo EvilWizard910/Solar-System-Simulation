@@ -20,7 +20,7 @@ public class Main extends Application {
 
         SubScene subScene = new SubScene(
                 root3D,
-                800, 600,
+                1920, 1080,
                 true,
                 SceneAntialiasing.BALANCED
         );
@@ -94,7 +94,7 @@ public class Main extends Application {
         // place controls on the right side
         root.setRight(controlsBox);
 
-        Scene scene = new Scene(root, 850, 600, true);
+        Scene scene = new Scene(root, 1920, 1080, true);
 
         scene.setOnKeyPressed(event -> {
             switch (event.getCode()) {
@@ -121,6 +121,7 @@ public class Main extends Application {
 
         stage.setTitle("Planetary Simulation");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 

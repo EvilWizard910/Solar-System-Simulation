@@ -61,6 +61,15 @@ public class SolarSystem {
         Moon enceladus =new Moon(saturn, 504, 238020, Color.WHEAT);
         Moon mimas =new Moon(saturn, 396, 185520, Color.WHEAT);
 
+        planets.add(mercury);
+        planets.add(venus);
+        planets.add(earth);
+        planets.add(mars);
+        planets.add(jupiter);
+        planets.add(saturn);
+        planets.add(uranus);
+        planets.add(neptune);
+
         earth.addMoon(moon);
 
         jupiter.addMoon(io);
@@ -77,14 +86,6 @@ public class SolarSystem {
         saturn.addMoon(mimas);
 
 
-        planets.add(mercury);
-        planets.add(venus);
-        planets.add(earth);
-        planets.add(mars);
-        planets.add(jupiter);
-        planets.add(saturn);
-        planets.add(uranus);
-        planets.add(neptune);
 
         for (Planet p : planets) {
             root.getChildren().add(createOrbitRing(p.getOrbitRadius()));
