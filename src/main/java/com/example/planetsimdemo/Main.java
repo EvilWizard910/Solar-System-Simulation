@@ -106,8 +106,8 @@ public class Main extends Application {
 //                // Pan
                case A -> camera.setTranslateX(camera.getTranslateX() - 20);
                case D -> camera.setTranslateX(camera.getTranslateX() + 20);
-               case S -> camera.setTranslateY(camera.getTranslateY() - 20);
-                case W -> camera.setTranslateY(camera.getTranslateY() + 20);
+               case W -> camera.setTranslateY(camera.getTranslateY() - 20);
+               case S -> camera.setTranslateY(camera.getTranslateY() + 20);
 
                 // Rotate LEFT / RIGHT (Y axis)
                 //case LEFT -> spin.setAngle(spin.getAngle() - 5);
