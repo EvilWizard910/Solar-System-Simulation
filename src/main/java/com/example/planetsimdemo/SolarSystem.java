@@ -13,6 +13,7 @@ import java.util.List;
 
 public class SolarSystem {
 
+    private static final double YOffset = -6;
     private final List<Planet> planets = new ArrayList<>();
     private final Group root = new Group();
 

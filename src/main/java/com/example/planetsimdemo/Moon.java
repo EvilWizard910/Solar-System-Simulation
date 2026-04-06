@@ -43,6 +43,7 @@ public class Moon {
 
         body.setTranslateX(planetX + localX);
         body.setTranslateZ(planetZ + localZ);
+        body.setTranslateY(-3);
     }
 
     public Sphere getBody() {
