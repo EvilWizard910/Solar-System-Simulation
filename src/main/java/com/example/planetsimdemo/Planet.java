@@ -36,13 +36,14 @@ public class Planet {
     }
 
     public void update() {
-        angle += speed;
+        angle = speed * 0.001;
 
         double x = orbitRadius * Math.cos(angle);
         double z = orbitRadius * Math.sin(angle);
 
         body.setTranslateX(x);
         body.setTranslateZ(z);
+        body.setTranslateY(-3);
 
         // Update moons AFTER planet moves
         for (Moon moon : moons) {

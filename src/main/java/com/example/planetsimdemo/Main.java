@@ -45,7 +45,7 @@ public class Main extends Application {
         root3D.getChildren().add(ambient);
 
         // View angle
-        Rotate tilt = new Rotate(-90, Rotate.X_AXIS);
+        Rotate tilt = new Rotate(90, Rotate.X_AXIS);
         Rotate spin = new Rotate(0, Rotate.Y_AXIS);
         Rotate pitch = new Rotate(0, Rotate.X_AXIS);
         root3D.getTransforms().addAll(tilt, spin, pitch);
@@ -104,10 +104,10 @@ public class Main extends Application {
                 case S -> camera.setTranslateZ(camera.getTranslateZ() - 20);
 
 //                // Pan
-//                case A -> camera.setTranslateX(camera.getTranslateX() - 20);
-//                case D -> camera.setTranslateX(camera.getTranslateX() + 20);
-//                case Q -> camera.setTranslateY(camera.getTranslateY() - 20);
-//                case E -> camera.setTranslateY(camera.getTranslateY() + 20);
+               case A -> camera.setTranslateX(camera.getTranslateX() - 20);
+               case D -> camera.setTranslateX(camera.getTranslateX() + 20);
+               case Q -> camera.setTranslateY(camera.getTranslateY() - 20);
+                case E -> camera.setTranslateY(camera.getTranslateY() + 20);
 
                 // Rotate LEFT / RIGHT (Y axis)
                 case LEFT -> spin.setAngle(spin.getAngle() - 5);
