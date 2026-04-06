@@ -26,7 +26,7 @@ public class Moon {
         this.angle = 0;
 
         this.body = new Sphere(kmToPixel(size));
-
+        //this.body = new Sphere(2);
         PhongMaterial material = new PhongMaterial(color);
         body.setMaterial(material);
     }
