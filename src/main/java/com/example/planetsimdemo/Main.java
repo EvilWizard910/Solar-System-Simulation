@@ -52,7 +52,25 @@ public class Main extends Application {
 
         boolean enableRotation = true;
 
+        long[] lastTime = {0};
+        double simulationSpeed = 86400; // 1 real second = 1 simulated day
+
         AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (lastTime[0] == 0) {
+                    lastTime[0] = now;
+                    return;
+                }
+
+                double dt = (now - lastTime[0]) / 1_000_000_000.0;
+                lastTime[0] = now;
+
+                solarSystem.updatePhysics(dt * simulationSpeed);
+            }
+        };
+
+        /* AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 solarSystem.update();
@@ -61,7 +79,7 @@ public class Main extends Application {
                     spin.setAngle(spin.getAngle() + 0.1);
                 }
             }
-        };
+        };*/
 
         timer.start();
 
