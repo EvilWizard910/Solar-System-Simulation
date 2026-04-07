@@ -9,9 +9,9 @@ public class Conversions {
     public static final double Mercury_Mass = 330104e18;
     public static final double Venus_Mass = 486732e20;
     public static final double Mars_Mass = 641693000000000000000000.0;
-    public static final double jupiter_Mass = 1898130000000000000000000000.0;
+    public static final double Jupiter_Mass = 1898130000000000000000000000.0;
     public static final double Saturn_Mass = 568319000000000000000000000.0;
-    public static final double Uranus_mass = 86810300000000000000000000.0;
+    public static final double Uranus_Mass = 86810300000000000000000000.0;
     public static final double Neptune_Mass = 102410000000000000000000000.0;
 
     //using meters as pixels
