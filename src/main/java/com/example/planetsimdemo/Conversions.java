@@ -5,6 +5,7 @@ public class Conversions {
     public static final double massOfSun = 1.98847e30;
     public static final double EARTH_MASS = 5.9722e24;
     public static final double AU_IN_METERS = 1.496e11;
+    public static final double Mercury_Mass = 330104e18;
 
     //using meters as pixels
     public static double metersToScene(double meters) {

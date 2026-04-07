@@ -20,11 +20,20 @@ public class SolarSystem {
     public SolarSystem() {
         createBodies();
     }
-
+    //Radii for spheres
+    double sunRadius = 6;
+    double mercuryRadius= 1;
+    double venusRadius;
+    double earthRadius = 3;
+    double marsRadius;
+    double jupiterRadius;
+    double saturnRadius;
+    double uranusRadius;
+    double neptuneRadius;
 
     private void createBodies() {
         //creates the sun :)
-        Sphere sunView = new Sphere(25);
+        Sphere sunView = new Sphere(sunRadius);
         sunView.setMaterial(new PhongMaterial(Color.YELLOW));
 
         Body sun = new Body(
@@ -38,7 +47,8 @@ public class SolarSystem {
         double earthDistance = Conversions.AU_IN_METERS;
         double earthSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / earthDistance);
 
-        Sphere earthView = new Sphere(6);
+        //enter earth scale
+        Sphere earthView = new Sphere(earthRadius);
         earthView.setMaterial(new PhongMaterial(Color.DODGERBLUE));
 
        //EARTH!!!!
@@ -50,15 +60,31 @@ public class SolarSystem {
                 0, 0, earthSpeed
         );
 
+        //added mercury
+        double mercuryDistance = Conversions.AU_IN_METERS*0.39;
+        double mercurySpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / mercuryDistance);
+        Sphere mercuryView = new Sphere(mercuryRadius);
+        mercuryView.setMaterial(new PhongMaterial(Color.MISTYROSE));
+
+        Body mercury = new Body(
+                "Mercury",
+                    Conversions.Mercury_Mass,
+                mercuryView,
+                mercuryDistance, 0, 0, 0, 0, mercurySpeed
+        );
+
         //add all bodies:Sun, 8 planets, a number of moons
         bodies.add(sun);
         bodies.add(earth);
+        bodies.add(mercury);
 
         root.getChildren().add(sunView);
         root.getChildren().add(earthView);
+        root.getChildren().add(mercuryView);
 
         renderBodies();
     }
+    //places the body in the proper x, y and z coordinates
     private void renderBodies() {
         for (Body body : bodies) {
             body.getView().setTranslateX(Conversions.metersToScene(body.getX()));
@@ -66,6 +92,9 @@ public class SolarSystem {
             body.getView().setTranslateZ(Conversions.metersToScene(body.getZ()));
         }
     }
+
+
+    //resets acceleration and recalculates it every time signature
     public void updatePhysics(double dt) {
         for (Body body : bodies) {
             body.resetAcceleration();
@@ -83,6 +112,8 @@ public class SolarSystem {
 
         renderBodies();
     }
+
+    //Uses Newtonian physics to calculate gravity
     private void applyGravity(Body a, Body b) {
         double dx = b.getX() - a.getX();
         double dy = b.getY() - a.getY();
