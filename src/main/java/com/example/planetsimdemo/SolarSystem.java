@@ -22,7 +22,8 @@ public class SolarSystem {
     }
     //Radii for spheres in km
     double scale = 0.00001;
-    double sunRadius = 700000*scale;
+    double solarScale = 0.00001;
+    double sunRadius = 700000*solarScale;
     double mercuryRadius= 2439.7*scale;
     double venusRadius=6051.8*scale;
     double earthRadius = 6371*scale;
@@ -86,16 +87,88 @@ public class SolarSystem {
                 venusDistance, 0, 0, 0, 0, venusSpeed
         );
 
+        double marsDistance = Conversions.AU_IN_METERS*1.52;
+        double marsSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / marsDistance);
+        Sphere marsView = new Sphere(marsRadius);
+        marsView.setMaterial(new PhongMaterial(Color.ORANGERED));
+
+        Body  mars = new Body(
+                "Mars",
+                Conversions.Mars_Mass,
+                marsView,
+                marsDistance, 0, 0, 0, 0, marsSpeed
+        );
+
+
+        double jupiterDistance = Conversions.AU_IN_METERS*5.2;
+        double jupiterSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / jupiterDistance);
+        Sphere jupiterView = new Sphere(jupiterRadius);
+        jupiterView.setMaterial(new PhongMaterial(Color.CORAL));
+
+        Body jupiter = new Body(
+                "Jupiter",
+                Conversions.Jupiter_Mass,
+                jupiterView,
+                jupiterDistance, 0, 0, 0, 0, jupiterSpeed
+        );
+
+        double saturnDistance = Conversions.AU_IN_METERS*9.54;
+        double saturnSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / saturnDistance);
+        Sphere saturnView = new Sphere(saturnRadius);
+        saturnView.setMaterial(new PhongMaterial(Color.DARKSALMON));
+
+        Body saturn = new Body(
+                "Saturn",
+                Conversions.Saturn_Mass,
+                saturnView,
+                saturnDistance, 0, 0, 0, 0, saturnSpeed
+        );
+
+        double uranusDistance = Conversions.AU_IN_METERS*19.2;
+        double uranusSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / uranusDistance);
+        Sphere uranusView = new Sphere(uranusRadius);
+        uranusView.setMaterial(new PhongMaterial(Color.DARKTURQUOISE));
+
+        Body uranus = new Body(
+                "Uranus",
+                Conversions.Uranus_Mass,
+                uranusView,
+                uranusDistance, 0, 0, 0, 0, uranusSpeed
+        );
+
+        double neptuneDistance = Conversions.AU_IN_METERS*30.02;
+        double Speed = Math.sqrt(Conversions.G * Conversions.massOfSun / neptuneDistance);
+        Sphere neptuneView = new Sphere(neptuneRadius);
+        neptuneView.setMaterial(new PhongMaterial(Color.MIDNIGHTBLUE));
+
+        Body neptune = new Body(
+                "Neptune",
+                Conversions.Neptune_Mass,
+                neptuneView,
+                neptuneDistance, 0, 0, 0, 0, Speed
+        );
+
+
         //add all bodies:Sun, 8 planets, a number of moons
         bodies.add(sun);
         bodies.add(earth);
         bodies.add(mercury);
         bodies.add(venus);
+        bodies.add(mars);
+        bodies.add(jupiter);
+        bodies.add(saturn);
+        bodies.add(uranus);
+        bodies.add(neptune);
 
         root.getChildren().add(sunView);
         root.getChildren().add(earthView);
         root.getChildren().add(mercuryView);
         root.getChildren().add(venusView);
+        root.getChildren().add(marsView);
+        root.getChildren().add(jupiterView);
+        root.getChildren().add(saturnView);
+        root.getChildren().add(uranusView);
+        root.getChildren().add(neptuneView);
         renderBodies();
     }
     //places the body in the proper x, y and z coordinates
