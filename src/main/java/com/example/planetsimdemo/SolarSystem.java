@@ -20,16 +20,17 @@ public class SolarSystem {
     public SolarSystem() {
         createBodies();
     }
-    //Radii for spheres
-    double sunRadius = 6;
-    double mercuryRadius= 1;
-    double venusRadius;
-    double earthRadius = 3;
-    double marsRadius;
-    double jupiterRadius;
-    double saturnRadius;
-    double uranusRadius;
-    double neptuneRadius;
+    //Radii for spheres in km
+    double scale = 0.00001;
+    double sunRadius = 700000*scale;
+    double mercuryRadius= 2439.7*scale;
+    double venusRadius=6051.8*scale;
+    double earthRadius = 6371*scale;
+    double marsRadius=3389.5*scale;
+    double jupiterRadius=69911*scale;
+    double saturnRadius=58232*scale;
+    double uranusRadius=25362*scale;
+    double neptuneRadius=24622*scale;
 
     private void createBodies() {
         //creates the sun :)
@@ -73,15 +74,28 @@ public class SolarSystem {
                 mercuryDistance, 0, 0, 0, 0, mercurySpeed
         );
 
+        double venusDistance = Conversions.AU_IN_METERS*0.72;
+        double venusSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / venusDistance);
+        Sphere venusView = new Sphere(venusRadius);
+        venusView.setMaterial(new PhongMaterial(Color.BURLYWOOD));
+
+        Body venus = new Body(
+                "Venus",
+                Conversions.Venus_Mass,
+                venusView,
+                venusDistance, 0, 0, 0, 0, venusSpeed
+        );
+
         //add all bodies:Sun, 8 planets, a number of moons
         bodies.add(sun);
         bodies.add(earth);
         bodies.add(mercury);
+        bodies.add(venus);
 
         root.getChildren().add(sunView);
         root.getChildren().add(earthView);
         root.getChildren().add(mercuryView);
-
+        root.getChildren().add(venusView);
         renderBodies();
     }
     //places the body in the proper x, y and z coordinates
