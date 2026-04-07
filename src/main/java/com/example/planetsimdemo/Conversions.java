@@ -2,7 +2,14 @@ package com.example.planetsimdemo;
 
 public class Conversions {
     public static final double G = 0.00000000006674;
-    public static final double massOfSun = 4385000000000000000000000000000.0;
+    public static final double massOfSun = 1.98847e30;
+    public static final double EARTH_MASS = 5.9722e24;
+    public static final double AU_IN_METERS = 1.496e11;
+
+    //using meters as pixels
+    public static double metersToScene(double meters) {
+        return meters / 2.0e9;
+    }
 
     public static double auToPixel(double au) {
         return au * 100.0;

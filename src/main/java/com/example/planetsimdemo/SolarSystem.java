@@ -1,6 +1,8 @@
 package com.example.planetsimdemo;
 
 import static com.example.planetsimdemo.Conversions.kmToPixel;
+
+import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -12,9 +14,130 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SolarSystem {
+    private final Group root = new Group();
+    private final List<Body> bodies = new ArrayList<>();
 
-    private static final double YOffset = -6;
+    public SolarSystem() {
+        createBodies();
+    }
+
+
+    private void createBodies() {
+        //creates the sun :)
+        Sphere sunView = new Sphere(25);
+        sunView.setMaterial(new PhongMaterial(Color.YELLOW));
+
+        Body sun = new Body(
+                "Sun",
+                Conversions.massOfSun,
+                sunView,
+                0, 0, 0,
+                0, 0, 0
+        );
+
+        double earthDistance = Conversions.AU_IN_METERS;
+        double earthSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / earthDistance);
+
+        Sphere earthView = new Sphere(6);
+        earthView.setMaterial(new PhongMaterial(Color.DODGERBLUE));
+
+       //EARTH!!!!
+        Body earth = new Body(
+                "Earth",
+                Conversions.EARTH_MASS,
+                earthView,
+                earthDistance, 0, 0,
+                0, 0, earthSpeed
+        );
+
+        //add all bodies:Sun, 8 planets, a number of moons
+        bodies.add(sun);
+        bodies.add(earth);
+
+        root.getChildren().add(sunView);
+        root.getChildren().add(earthView);
+
+        renderBodies();
+    }
+    private void renderBodies() {
+        for (Body body : bodies) {
+            body.getView().setTranslateX(Conversions.metersToScene(body.getX()));
+            body.getView().setTranslateY(Conversions.metersToScene(body.getY()));
+            body.getView().setTranslateZ(Conversions.metersToScene(body.getZ()));
+        }
+    }
+    public void updatePhysics(double dt) {
+        for (Body body : bodies) {
+            body.resetAcceleration();
+        }
+
+        for (int i = 0; i < bodies.size(); i++) {
+            for (int j = i + 1; j < bodies.size(); j++) {
+                applyGravity(bodies.get(i), bodies.get(j));
+            }
+        }
+
+        for (Body body : bodies) {
+            body.integrate(dt);
+        }
+
+        renderBodies();
+    }
+    private void applyGravity(Body a, Body b) {
+        double dx = b.getX() - a.getX();
+        double dy = b.getY() - a.getY();
+        double dz = b.getZ() - a.getZ();
+
+        double distSq = dx * dx + dy * dy + dz * dz;
+        double dist = Math.sqrt(distSq);
+
+        if (dist < 1.0) {
+            return;
+        }
+
+        double accelA = Conversions.G * b.getMass() / distSq;
+        double accelB = Conversions.G * a.getMass() / distSq;
+
+        double nx = dx / dist;
+        double ny = dy / dist;
+        double nz = dz / dist;
+
+        a.addAcceleration(accelA * nx, accelA * ny, accelA * nz);
+        b.addAcceleration(-accelB * nx, -accelB * ny, -accelB * nz);
+    }
+    public Group getRoot() {
+        return root;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*public class SolarSystem {
+
+
     private final List<Planet> planets = new ArrayList<>();
+
     private final Group root = new Group();
 
     public SolarSystem() {
@@ -35,8 +158,8 @@ public class SolarSystem {
 
 
     private void createPlanets() {
-/*size = diameter in KM
-* Orbit radius = distance from sun in au*/
+//size = diameter in KM
+//Orbit radius = distance from sun in au
         Planet mercury = new Planet(4879,.39, Color.SADDLEBROWN);
         Planet venus = new Planet(12104, .72, Color.TAN);
         Planet earth = new Planet(12756, 1,  Color.BLUE);
@@ -46,7 +169,7 @@ public class SolarSystem {
         Planet uranus = new Planet(51118, 19.2,  Color.TURQUOISE);
         Planet neptune = new Planet(49528, 30.06,  Color.DARKBLUE);
 
-       /*takes size in km and radius in km*/
+       //takes size in km and radius in km
         Moon moon = new Moon(earth, 3480, 384000,  Color.LIGHTGRAY);
 
         Moon io =new Moon(jupiter,1821.6,422000, Color.YELLOWGREEN);
@@ -169,3 +292,4 @@ public class SolarSystem {
         return root;
     }
 }
+  */
