@@ -7,6 +7,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.Cylinder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,9 @@ import static com.example.planetsimdemo.Conversions.*;
 public class SolarSystem {
     private final Group root = new Group();
     private final List<Body> bodies = new ArrayList<>();
+    private   Body saturnBody;
+    private Cylinder ring;
+    private Rotate ringSpin = new Rotate(0, Rotate.Y_AXIS);
 
     public SolarSystem() {
         createBodies();
@@ -39,7 +43,6 @@ public class SolarSystem {
         //creates the sun :)
         Sphere sunView = new Sphere(sunRadius);
         sunView.setMaterial(new PhongMaterial(Color.YELLOW));
-
         Body sun = new Body(
                 "Sun",
                 Conversions.massOfSun,
@@ -50,11 +53,9 @@ public class SolarSystem {
 
         double earthDistance = Conversions.AU_IN_METERS;
         double earthSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / earthDistance);
-
         //enter earth scale
         Sphere earthView = new Sphere(earthRadius);
         earthView.setMaterial(new PhongMaterial(Color.DODGERBLUE));
-
        //EARTH!!!!
         Body earth = new Body(
                 "Earth",
@@ -69,7 +70,6 @@ public class SolarSystem {
         double mercurySpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / mercuryDistance);
         Sphere mercuryView = new Sphere(mercuryRadius);
         mercuryView.setMaterial(new PhongMaterial(Color.MISTYROSE));
-
         Body mercury = new Body(
                 "Mercury",
                     Conversions.Mercury_Mass,
@@ -81,7 +81,6 @@ public class SolarSystem {
         double venusSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / venusDistance);
         Sphere venusView = new Sphere(venusRadius);
         venusView.setMaterial(new PhongMaterial(Color.BURLYWOOD));
-
         Body venus = new Body(
                 "Venus",
                 Conversions.Venus_Mass,
@@ -93,7 +92,6 @@ public class SolarSystem {
         double marsSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / marsDistance);
         Sphere marsView = new Sphere(marsRadius);
         marsView.setMaterial(new PhongMaterial(Color.ORANGERED));
-
         Body  mars = new Body(
                 "Mars",
                 Conversions.Mars_Mass,
@@ -106,7 +104,6 @@ public class SolarSystem {
         double jupiterSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / jupiterDistance);
         Sphere jupiterView = new Sphere(jupiterRadius);
         jupiterView.setMaterial(new PhongMaterial(Color.CORAL));
-
         Body jupiter = new Body(
                 "Jupiter",
                 Conversions.Jupiter_Mass,
@@ -118,7 +115,6 @@ public class SolarSystem {
         double saturnSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / saturnDistance);
         Sphere saturnView = new Sphere(saturnRadius);
         saturnView.setMaterial(new PhongMaterial(Color.DARKSALMON));
-
         Body saturn = new Body(
                 "Saturn",
                 Conversions.Saturn_Mass,
@@ -130,7 +126,6 @@ public class SolarSystem {
         double uranusSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / uranusDistance);
         Sphere uranusView = new Sphere(uranusRadius);
         uranusView.setMaterial(new PhongMaterial(Color.DARKTURQUOISE));
-
         Body uranus = new Body(
                 "Uranus",
                 Conversions.Uranus_Mass,
@@ -142,7 +137,6 @@ public class SolarSystem {
         double neptuneSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / neptuneDistance);
         Sphere neptuneView = new Sphere(neptuneRadius);
         neptuneView.setMaterial(new PhongMaterial(Color.MIDNIGHTBLUE));
-
         Body neptune = new Body(
                 "Neptune",
                 Conversions.Neptune_Mass,
@@ -151,9 +145,8 @@ public class SolarSystem {
         );
 
         //add moons
-        double moonDistance=  384400000.0;
+        double moonDistance=  0.0025695*AU_IN_METERS;
         double moonSpeed =  Math.sqrt(Conversions.G * Conversions.EARTH_MASS / moonDistance);
-
         Sphere moonView = new Sphere(moonRadius);
         moonView.setMaterial(new PhongMaterial(Color.LIGHTGRAY));
         Body moon = new Body(
@@ -161,6 +154,19 @@ public class SolarSystem {
                 Moon_Mass,
                 moonView,
                 (earthDistance+moonDistance), 0, 0, 0, 0, earthSpeed+moonSpeed
+        );
+
+         saturnBody = saturn;
+        double aWidth = kmToPixel(480000+saturnRadius);
+        double aThickness=kmToPixel(30);
+        ring = new Cylinder(saturnRadius+aWidth,aThickness);
+        ring.setMaterial(new PhongMaterial(Color.BISQUE));
+        ring.setRotationAxis(Rotate.X_AXIS);
+        ring.setRotate(90);
+
+        ring.getTransforms().addAll(
+        new Rotate(90,Rotate.X_AXIS),
+        new Rotate(27,Rotate.Z_AXIS), ringSpin
         );
 
 
@@ -189,18 +195,25 @@ public class SolarSystem {
         //moons
         root.getChildren().add(moonView);
 
+        //saturns rings
+        root.getChildren().add(ring);
         renderBodies();
     }
+
+
     //places the body in the proper x, y and z coordinates
-
-
-
     private void renderBodies() {
         for (Body body : bodies) {
             body.getView().setTranslateX(Conversions.metersToScene(body.getX()));
             body.getView().setTranslateY(Conversions.metersToScene(body.getY()));
             body.getView().setTranslateZ(Conversions.metersToScene(body.getZ()));
         }
+        if (saturnBody != null && ring != null) {
+            ring.setTranslateX(Conversions.metersToScene(saturnBody.getX()));
+            ring.setTranslateY(Conversions.metersToScene(saturnBody.getY()));
+            ring.setTranslateZ(Conversions.metersToScene(saturnBody.getZ()));
+        }
+        ringSpin.setAngle(ringSpin.getAngle() + 1);
     }
 
 
