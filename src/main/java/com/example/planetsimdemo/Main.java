@@ -127,6 +127,12 @@ public class Main extends Application {
                case W -> camera.setTranslateY(camera.getTranslateY() - 20);
                case S -> camera.setTranslateY(camera.getTranslateY() + 20);
 
+                case J -> camera.setTranslateX(camera.getTranslateX() - 5);
+                case L -> camera.setTranslateX(camera.getTranslateX() + 5);
+                case I -> camera.setTranslateY(camera.getTranslateY() - 5);
+                case K -> camera.setTranslateY(camera.getTranslateY() + 5);
+
+
                 // Rotate LEFT / RIGHT (Y axis)
                 //case LEFT -> spin.setAngle(spin.getAngle() - 5);
                 //case RIGHT -> spin.setAngle(spin.getAngle() + 5);
