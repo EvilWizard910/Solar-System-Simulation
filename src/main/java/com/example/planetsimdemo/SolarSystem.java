@@ -1,7 +1,5 @@
 package com.example.planetsimdemo;
 
-import static com.example.planetsimdemo.Conversions.kmToPixel;
-
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -12,6 +10,8 @@ import javafx.scene.shape.Box;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.planetsimdemo.Conversions.*;
 
 public class SolarSystem {
     private final Group root = new Group();
@@ -32,6 +32,8 @@ public class SolarSystem {
     double saturnRadius=58232*scale;
     double uranusRadius=25362*scale;
     double neptuneRadius=24622*scale;
+//moons
+    double moonRadius = 1737.4*scale;
 
     private void createBodies() {
         //creates the sun :)
@@ -137,7 +139,7 @@ public class SolarSystem {
         );
 
         double neptuneDistance = Conversions.AU_IN_METERS*30.02;
-        double Speed = Math.sqrt(Conversions.G * Conversions.massOfSun / neptuneDistance);
+        double neptuneSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / neptuneDistance);
         Sphere neptuneView = new Sphere(neptuneRadius);
         neptuneView.setMaterial(new PhongMaterial(Color.MIDNIGHTBLUE));
 
@@ -145,7 +147,20 @@ public class SolarSystem {
                 "Neptune",
                 Conversions.Neptune_Mass,
                 neptuneView,
-                neptuneDistance, 0, 0, 0, 0, Speed
+                neptuneDistance, 0, 0, 0, 0, neptuneSpeed
+        );
+
+        //add moons
+        double moonDistance=  384400000.0;
+        double moonSpeed =  Math.sqrt(Conversions.G * Conversions.EARTH_MASS / moonDistance);
+
+        Sphere moonView = new Sphere(moonRadius);
+        moonView.setMaterial(new PhongMaterial(Color.LIGHTGRAY));
+        Body moon = new Body(
+                "Moon",
+                Moon_Mass,
+                moonView,
+                (earthDistance+moonDistance), 0, 0, 0, 0, earthSpeed+moonSpeed
         );
 
 
@@ -159,6 +174,8 @@ public class SolarSystem {
         bodies.add(saturn);
         bodies.add(uranus);
         bodies.add(neptune);
+        //moons
+        bodies.add(moon);
 
         root.getChildren().add(sunView);
         root.getChildren().add(earthView);
@@ -169,9 +186,15 @@ public class SolarSystem {
         root.getChildren().add(saturnView);
         root.getChildren().add(uranusView);
         root.getChildren().add(neptuneView);
+        //moons
+        root.getChildren().add(moonView);
+
         renderBodies();
     }
     //places the body in the proper x, y and z coordinates
+
+
+
     private void renderBodies() {
         for (Body body : bodies) {
             body.getView().setTranslateX(Conversions.metersToScene(body.getX()));
@@ -196,7 +219,6 @@ public class SolarSystem {
         for (Body body : bodies) {
             body.integrate(dt);
         }
-
         renderBodies();
     }
 

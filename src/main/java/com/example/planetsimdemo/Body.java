@@ -66,4 +66,18 @@ public class Body {
     public double getX() { return x; }
     public double getY() { return y; }
     public double getZ() { return z; }
+
+    //more setters
+    public void setPosition(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public void setVelocity(double vx, double vy, double vz) {
+        this.vx = vx;
+        this.vy = vy;
+        this.vz = vz;
+    }
 }
+
