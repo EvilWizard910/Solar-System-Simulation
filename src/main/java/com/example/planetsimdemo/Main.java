@@ -53,7 +53,8 @@ public class Main extends Application {
         boolean enableRotation = true;
 
         long[] lastTime = {0};
-        double simulationSpeed = 86400; // 1 real second = 1 simulated day
+        double simulationSpeed = 1; // 86400 = 1 real second = 1 simulated day
+
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -83,6 +84,7 @@ public class Main extends Application {
 
         timer.start();
 
+
         BorderPane root = new BorderPane();
 
         // put the 3D scene in the center
@@ -92,6 +94,7 @@ public class Main extends Application {
         VBox controlsBox = new VBox(10);
 
         Button startStopButton = new Button("⏹️");
+        Button scaleButton = new Button("Realistic Scale");
 
         final boolean[] isRunning = {true};
 
@@ -107,7 +110,9 @@ public class Main extends Application {
             }
         });
 
-        controlsBox.getChildren().add(startStopButton);
+        scaleButton.setOnAction(_ -> {solarSystem.multiplyScaleByTen();});
+        controlsBox.getChildren().addAll(startStopButton, scaleButton);
+
 
         // place controls on the right side
         root.setRight(controlsBox);
@@ -118,8 +123,8 @@ public class Main extends Application {
             switch (event.getCode()) {
 
                 // Zoom
-                case UP -> camera.setTranslateZ(camera.getTranslateZ() + 20);
-                case DOWN -> camera.setTranslateZ(camera.getTranslateZ() - 20);
+                case UP -> camera.setTranslateZ(camera.getTranslateZ() + 5);
+                case DOWN -> camera.setTranslateZ(camera.getTranslateZ() - 5);
 
 //                // Pan
                case A -> camera.setTranslateX(camera.getTranslateX() - 20);
@@ -138,8 +143,8 @@ public class Main extends Application {
                 //case RIGHT -> spin.setAngle(spin.getAngle() + 5);
 
                 // Rotate UP / DOWN (X axis)
-                case  LEFT-> pitch.setAngle(pitch.getAngle() - 5);
-                case RIGHT -> pitch.setAngle(pitch.getAngle() + 5);
+              //  case  LEFT-> pitch.setAngle(pitch.getAngle() - 5);
+               // case RIGHT -> pitch.setAngle(pitch.getAngle() + 5);
             }
         });
 
