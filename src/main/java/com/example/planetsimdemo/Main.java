@@ -95,6 +95,7 @@ public class Main extends Application {
 
         Button startStopButton = new Button("⏹️");
         Button scaleButton = new Button("Realistic Scale");
+        Button viewScaleButton = new Button("Convenient Scale ");
 
         final boolean[] isRunning = {true};
 
@@ -109,9 +110,9 @@ public class Main extends Application {
                 isRunning[0] = true;
             }
         });
-
-        scaleButton.setOnAction(_ -> {solarSystem.multiplyScaleByTen();});
-        controlsBox.getChildren().addAll(startStopButton, scaleButton);
+        viewScaleButton.setOnAction(_ -> {solarSystem.viewScale();});
+        scaleButton.setOnAction(_ -> {solarSystem.realisticScale();});
+        controlsBox.getChildren().addAll(startStopButton, scaleButton,viewScaleButton);
 
 
         // place controls on the right side

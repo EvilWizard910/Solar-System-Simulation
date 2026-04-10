@@ -21,14 +21,10 @@ public class SolarSystem {
     private Cylinder ring;
     private Rotate ringSpin = new Rotate(0, Rotate.Y_AXIS);
     private double scale=0.00001;
-    private double solarScale=0.00001;
-
-    public SolarSystem() {
-        createBodies();
-    }
+    double newScale = 0.0000005/scale;
     // 0.0000005 for realistic, 0.00001
     //Radii for spheres in km
-    double sunRadius = 700000*solarScale;
+    double sunRadius = 700000*scale;
     double mercuryRadius= 2439.7*scale;
     double venusRadius=6051.8*scale;
     double earthRadius = 6371*scale;
@@ -37,8 +33,16 @@ public class SolarSystem {
     double saturnRadius=58232*scale;
     double uranusRadius=25362*scale;
     double neptuneRadius=24622*scale;
-//moons
+    //moons
     double moonRadius = 1737.4*scale;
+
+
+
+
+    public SolarSystem() {
+        createBodies();
+    }
+
 
     private void createBodies() {
         //creates the sun :)
@@ -264,14 +268,29 @@ public class SolarSystem {
         return root;
     }
 
-    public void multiplyScaleByTen() {
-        double newScale = 0.0000005/scale;
-        ring.setHeight(ring.getHeight()*newScale);
-        ring.setRadius(ring.getRadius()*newScale);
+    public void realisticScale() {
+        if (newScale == (0.0000005/scale)) {
+            ring.setHeight(ring.getHeight() * newScale);
+            ring.setRadius(ring.getRadius() * newScale);
 
-        for (Body body : bodies) {
-        body.getView().setRadius(body.getView().getRadius()*newScale);
+            for (Body body : bodies) {
+                body.getView().setRadius(body.getView().getRadius() * newScale);
             }
+            newScale = scale/0.0000005;
+        }
+    }
+
+    public void viewScale() {
+            if (newScale  == (scale/0.0000005)) {
+                ring.setHeight(ring.getHeight() * newScale);
+                ring.setRadius(ring.getRadius() * newScale);
+
+                for (Body body : bodies) {
+                    body.getView().setRadius(body.getView().getRadius() * newScale);
+                }
+                newScale = 0.0000005/scale;
+            }
+
     }
 
 }
