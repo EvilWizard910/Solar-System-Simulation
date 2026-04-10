@@ -20,13 +20,14 @@ public class SolarSystem {
     private   Body saturnBody;
     private Cylinder ring;
     private Rotate ringSpin = new Rotate(0, Rotate.Y_AXIS);
+    private double scale=0.00001;
+    private double solarScale=0.00001;
 
     public SolarSystem() {
         createBodies();
     }
+    // 0.0000005 for realistic, 0.00001
     //Radii for spheres in km
-    double scale = 0.00001;
-    double solarScale = 0.00001;
     double sunRadius = 700000*solarScale;
     double mercuryRadius= 2439.7*scale;
     double venusRadius=6051.8*scale;
@@ -153,12 +154,12 @@ public class SolarSystem {
                 "Moon",
                 Moon_Mass,
                 moonView,
-                (earthDistance+moonDistance), 0, 0, 0, 0, earthSpeed+moonSpeed
+                (earthDistance+moonDistance+earthRadius+moonRadius), 0, 0, 0, 0, earthSpeed+moonSpeed
         );
 
          saturnBody = saturn;
-        double aWidth = kmToPixel(480000+saturnRadius);
-        double aThickness=kmToPixel(30);
+        double aWidth = 480000*scale+(saturnRadius);
+        double aThickness=30*scale;
         ring = new Cylinder(saturnRadius+aWidth,aThickness);
         ring.setMaterial(new PhongMaterial(Color.BISQUE));
         ring.setRotationAxis(Rotate.X_AXIS);
@@ -202,6 +203,7 @@ public class SolarSystem {
 
 
     //places the body in the proper x, y and z coordinates
+    //also keeps the ring aligned w/ Saturn and keeps it faced towards the sun
     private void renderBodies() {
         for (Body body : bodies) {
             body.getView().setTranslateX(Conversions.metersToScene(body.getX()));
@@ -261,6 +263,17 @@ public class SolarSystem {
     public Group getRoot() {
         return root;
     }
+
+    public void multiplyScaleByTen() {
+        double newScale = 0.0000005/scale;
+        ring.setHeight(ring.getHeight()*newScale);
+        ring.setRadius(ring.getRadius()*newScale);
+
+        for (Body body : bodies) {
+        body.getView().setRadius(body.getView().getRadius()*newScale);
+            }
+    }
+
 }
 
 
