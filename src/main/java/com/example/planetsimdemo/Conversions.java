@@ -14,6 +14,7 @@ public class Conversions {
     public static final double Uranus_Mass = 86810300000000000000000000.0;
     public static final double Neptune_Mass = 102410000000000000000000000.0;
     public static final double Moon_Mass = 73000000000000000000000.0;
+    public static final double Io_Mass = 89319379731108900000000.0;
 
     //using meters as pixels
     public static double metersToScene(double meters) {
