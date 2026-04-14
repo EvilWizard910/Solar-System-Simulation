@@ -8,6 +8,8 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,21 +22,28 @@ public class SolarSystem {
     private   Body saturnBody;
     private Cylinder ring;
     private Rotate ringSpin = new Rotate(0, Rotate.Y_AXIS);
-    private double scale=0.00001;
+    private double scale=0.00001 ;
     double newScale = 0.0000005/scale;
+    private static final double niceScale = 0.00003;
+    private static final double realScale = 0.0000005;
     // 0.0000005 for realistic, 0.00001
     //Radii for spheres in km
-    double sunRadius = 700000*scale;
-    double mercuryRadius= 2439.7*scale;
-    double venusRadius=6051.8*scale;
-    double earthRadius = 6371*scale;
-    double marsRadius=3389.5*scale;
-    double jupiterRadius=69911*scale;
-    double saturnRadius=58232*scale;
-    double uranusRadius=25362*scale;
-    double neptuneRadius=24622*scale;
+    double sunRadius = 700000;
+    double mercuryRadius= 2439.7;
+    double venusRadius=6051.8;
+    double earthRadius = 6371;
+    double marsRadius=3389.5;
+    double jupiterRadius=69911;
+    double saturnRadius=58232;
+    double uranusRadius=25362;
+    double neptuneRadius=24622;
     //moons
-    double moonRadius = 1737.4*scale;
+    double moonRadius = 1737.4;
+    double ioRadius = 1821.6;
+
+    private final Map<Body, Double> baseBodyRadii = new HashMap<>();
+    private double baseRingRadius;
+    private double baseRingHeight;
 
 
 
@@ -158,7 +167,18 @@ public class SolarSystem {
                 "Moon",
                 Moon_Mass,
                 moonView,
-                (earthDistance+moonDistance+earthRadius+moonRadius), 0, 0, 0, 0, earthSpeed+moonSpeed
+                (earthDistance+moonDistance+earthRadius), 0, 0, 0, 0, earthSpeed+moonSpeed
+        );
+
+        double ioDistance=  421800000.0;
+        double ioSpeed =  Math.sqrt(Conversions.G * Jupiter_Mass / ioDistance);
+        Sphere ioView = new Sphere(ioRadius);
+        ioView.setMaterial(new PhongMaterial(Color.LIMEGREEN));
+        Body io = new Body(
+                "Io",
+                Io_Mass,
+                ioView,
+                (jupiterDistance+ioDistance+ioRadius+jupiterRadius), 0, 0, 0, 0, jupiterSpeed+ioSpeed
         );
 
          saturnBody = saturn;
@@ -187,6 +207,7 @@ public class SolarSystem {
         bodies.add(neptune);
         //moons
         bodies.add(moon);
+        bodies.add(io);
 
         root.getChildren().add(sunView);
         root.getChildren().add(earthView);
@@ -199,9 +220,12 @@ public class SolarSystem {
         root.getChildren().add(neptuneView);
         //moons
         root.getChildren().add(moonView);
+        root.getChildren().add(ioView);
 
         //saturns rings
         root.getChildren().add(ring);
+
+        cacheBaseSizes();
         renderBodies();
     }
 
@@ -268,32 +292,35 @@ public class SolarSystem {
         return root;
     }
 
-    public void realisticScale() {
-        if (newScale == (0.0000005/scale)) {
-            ring.setHeight(ring.getHeight() * newScale);
-            ring.setRadius(ring.getRadius() * newScale);
 
-            for (Body body : bodies) {
-                body.getView().setRadius(body.getView().getRadius() * newScale);
-            }
-            newScale = scale/0.0000005;
+     //stores original size of bodies
+    private void cacheBaseSizes() {
+        for (Body body : bodies) {
+            baseBodyRadii.put(body, body.getView().getRadius());
+        }
+        baseRingRadius = ring.getRadius();
+        baseRingHeight = ring.getHeight();
+    }
+
+    //multiplies the size of the bodies, not the distance in between them
+    public void setViewScale(double sliderValue){
+        double clampedValue = Math.max(0.0, Math.min(1.0,sliderValue));
+        double currentScale = realScale * clampedValue;
+
+        double multiplier = realScale
+                + (niceScale - realScale) * clampedValue;
+
+        ring.setRadius(baseRingRadius * multiplier);
+        ring.setHeight(baseRingHeight * multiplier);
+
+        for (Body body : bodies) {
+            double baseRadius = baseBodyRadii.get(body);
+            body.getView().setRadius(baseRadius * multiplier);
         }
     }
+ }
 
-    public void viewScale() {
-            if (newScale  == (scale/0.0000005)) {
-                ring.setHeight(ring.getHeight() * newScale);
-                ring.setRadius(ring.getRadius() * newScale);
 
-                for (Body body : bodies) {
-                    body.getView().setRadius(body.getView().getRadius() * newScale);
-                }
-                newScale = 0.0000005/scale;
-            }
-
-    }
-
-}
 
 
 

@@ -9,6 +9,8 @@ import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 
 public class Main extends Application {
 
@@ -53,7 +55,7 @@ public class Main extends Application {
         boolean enableRotation = true;
 
         long[] lastTime = {0};
-        double simulationSpeed = 1; // 86400 = 1 real second = 1 simulated day
+        double simulationSpeed = 86400; // 86400 = 1 real second = 1 simulated day
 
 
         AnimationTimer timer = new AnimationTimer() {
@@ -94,8 +96,18 @@ public class Main extends Application {
         VBox controlsBox = new VBox(10);
 
         Button startStopButton = new Button("⏹️");
-        Button scaleButton = new Button("Realistic Scale");
-        Button viewScaleButton = new Button("Convenient Scale ");
+
+      //  Button scaleButton = new Button("Realistic Scale");
+       // Button viewScaleButton = new Button("Convenient Scale ");
+
+        Label scaleLabel = new Label("Body Scale");
+        Slider scaleSlider = new Slider(0, 1, 0); // 0 = realistic, 1 = convenient
+        solarSystem.setViewScale(0);
+
+        scaleSlider.setShowTickLabels(true);
+        scaleSlider.setShowTickMarks(true);
+        scaleSlider.setMajorTickUnit(0.5);
+        scaleSlider.setBlockIncrement(0.1);
 
         final boolean[] isRunning = {true};
 
@@ -110,9 +122,14 @@ public class Main extends Application {
                 isRunning[0] = true;
             }
         });
-        viewScaleButton.setOnAction(_ -> {solarSystem.viewScale();});
-        scaleButton.setOnAction(_ -> {solarSystem.realisticScale();});
-        controlsBox.getChildren().addAll(startStopButton, scaleButton,viewScaleButton);
+        scaleSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            solarSystem.setViewScale(newValue.doubleValue());
+        });
+
+       // viewScaleButton.setOnAction(_ -> {solarSystem.viewScale();});
+       // scaleButton.setOnAction(_ -> {solarSystem.realisticScale();});
+
+        controlsBox.getChildren().addAll(startStopButton,scaleLabel, scaleSlider);
 
 
         // place controls on the right side
