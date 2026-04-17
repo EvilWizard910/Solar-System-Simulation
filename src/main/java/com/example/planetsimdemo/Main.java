@@ -80,6 +80,9 @@ public class Main extends Application {
 
 
         AnimationTimer timer = new AnimationTimer() {
+            private static final double MAX_PHYSICS_STEP = 120.0; // 5 minutes
+            private static final double MAX_FRAME_DT = 0.25;      // avoid giant jumps after lag
+
             @Override
             public void handle(long now) {
                 if (lastTime[0] == 0) {
@@ -87,10 +90,18 @@ public class Main extends Application {
                     return;
                 }
 
-                double dt = (now - lastTime[0]) / 1_000_000_000.0;
+                double frameDt = (now - lastTime[0]) / 1_000_000_000.0;
                 lastTime[0] = now;
 
-                solarSystem.updatePhysics(dt * simulationSpeed[0]);
+                frameDt = Math.min(frameDt, MAX_FRAME_DT);
+
+                double simulatedDt = frameDt * simulationSpeed[0];
+
+                while (simulatedDt > 0) {
+                    double step = Math.min(simulatedDt, MAX_PHYSICS_STEP);
+                    solarSystem.updatePhysics(step);
+                    simulatedDt -= step;
+                }
             }
         };
 

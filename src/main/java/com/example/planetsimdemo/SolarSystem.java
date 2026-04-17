@@ -47,7 +47,6 @@ public class SolarSystem {
 
 
 
-
     public SolarSystem() {
         createBodies();
     }
@@ -65,18 +64,39 @@ public class SolarSystem {
                 0, 0, 0
         );
 
+
         double earthDistance = Conversions.AU_IN_METERS;
         double earthSpeed = Math.sqrt(Conversions.G * Conversions.massOfSun / earthDistance);
         //enter earth scale
         Sphere earthView = new Sphere(earthRadius);
         earthView.setMaterial(new PhongMaterial(Color.DODGERBLUE));
        //EARTH!!!!
+      /*
         Body earth = new Body(
                 "Earth",
                 Conversions.EARTH_MASS,
                 earthView,
                 earthDistance, 0, 0,
                 0, 0, earthSpeed
+        );
+        */
+        OrbitalState earthState = stateFromOrbitalElements(
+                Conversions.massOfSun,
+                Conversions.EARTH_MASS,
+                Conversions.AU_IN_METERS, // semi-major axis
+                0.0167,                   // eccentricity
+                0.00005,                  // inclination
+                -11.26064,                // longitude of ascending node
+                114.20783,                // argument of periapsis
+                100.0                     // true anomaly = starting phase
+        );
+
+        Body earth = new Body(
+                "Earth",
+                Conversions.EARTH_MASS,
+                earthView,
+                earthState.x(), earthState.y(), earthState.z(),
+                earthState.vx(), earthState.vy(), earthState.vz()
         );
 
         //added mercury
@@ -393,5 +413,76 @@ public class SolarSystem {
                 body.getView().setRadius(baseRadius * planetMultiplier);
             }
         }
+    }
+
+    private record OrbitalState(
+            double x, double y, double z,
+            double vx, double vy, double vz
+    ) {}
+
+
+    /*semi majnor axis is the average size of orbit
+    eccentricity changes the orbital shape
+    nu will change the starting position and it is the angle from periapsis, or angle of the body from the it's center of orbit
+    r is the distance of a body from its center of orbiy
+    mu is the force of gravity between two bodies
+    h is the angular momentum magnitude, it controls orbital speed
+    omega small is used as an argument of periapsis and rotates the ellipse
+    Inclination tilts the orbital plane
+    omega big rotates the tilted orbital plane
+    */
+    private OrbitalState stateFromOrbitalElements(
+            double centralMass,
+            double bodyMass,
+            double semiMajorAxis,
+            double eccentricity,
+            double inclinationDeg,
+            double ascendingNodeDeg,
+            double argumentOfPeriapsisDeg,
+            double trueAnomalyDeg
+    ) {
+        double i = Math.toRadians(inclinationDeg);
+        double omegaBig = Math.toRadians(ascendingNodeDeg);
+        double omegaSmall = Math.toRadians(argumentOfPeriapsisDeg);
+        double nu = Math.toRadians(trueAnomalyDeg);
+        double mu = Conversions.G*(centralMass+bodyMass);
+        double r = semiMajorAxis*(1-eccentricity*eccentricity)/(1+eccentricity*Math.cos(nu));
+        double xOrb = r*Math.cos(nu);
+        double yOrb = r*Math.sin(nu);
+        double h = Math.sqrt(mu*semiMajorAxis*(1-eccentricity*eccentricity));
+        double vxOrb = -mu/h*Math.sin(nu);
+        double vyOrb = mu/h*(eccentricity + Math.cos(nu));
+
+        double[] pos = rotateToWorld(xOrb,yOrb,0,omegaBig,i,omegaSmall);
+        double[] vel = rotateToWorld(vxOrb, vyOrb, 0, omegaBig, i, omegaSmall);
+
+        return new OrbitalState(
+                pos[0], pos[1], pos[2], vel[0],vel[1],vel[2]
+        );
+    }
+
+    private double[] rotateToWorld(
+            double x, double y, double z,
+            double ascendingNode,
+            double inclination,
+            double argumentOfPeriapsis
+    ){
+        double cos0=Math.cos(ascendingNode);
+        double sin0=Math.sin(ascendingNode);
+        double cos1=Math.cos(inclination);
+        double sin1=Math.sin(inclination);
+        double cosW=Math.cos(argumentOfPeriapsis);
+        double sinW=Math.sin(argumentOfPeriapsis);
+
+        double x1 =cosW*x-sinW*y;
+        double y1 =sinW*x+cosW*y;
+        double z1=z;
+        double x2=x1;
+        double y2=cos1*y1-sin1*z1;
+        double z2=sin1*y1+cos1*z1;
+        double x3=cos0*x2-sin0*y2;
+        double y3=sin0*x2+cos0*y2;
+        double z3=z2;
+        return new double[]{x3,y3,z3};
     }
  }
