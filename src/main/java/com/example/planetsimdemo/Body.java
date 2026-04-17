@@ -48,9 +48,6 @@ public class Body {
         az += daz;
     }
 
-  //calculate instantaneous velocity and position
-
-
     //getters
     public String getName() { return name; }
     public double getMass() { return mass; }
@@ -75,6 +72,7 @@ public class Body {
         this.vz = vz;
     }
 
+    //part of Verlet integration
     public void updatePosition(double dt) {
        x += vx*dt+.5*ax*dt*dt;
        y += vy*dt+.5*ay*dt*dt;
