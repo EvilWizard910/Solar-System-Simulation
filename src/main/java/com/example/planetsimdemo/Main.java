@@ -1,6 +1,7 @@
 package com.example.planetsimdemo;
 
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.animation.AnimationTimer;
@@ -37,15 +38,18 @@ public class Main extends Application {
 
         SubScene subScene = new SubScene(
                 root3D,
-                1920, 1080,
+                800, 600,
                 true,
                 SceneAntialiasing.BALANCED
         );
 
         subScene.setFill(Color.BLACK);
+        StackPane viewport = new StackPane(subScene);
+        subScene.widthProperty().bind(viewport.widthProperty());
+        subScene.heightProperty().bind(viewport.heightProperty());
 
         PerspectiveCamera camera = new PerspectiveCamera(true);
-        camera.setTranslateZ(-600);
+        camera.setTranslateZ(-100);
         camera.setNearClip(1);
         camera.setFarClip(20000);
         subScene.setCamera(camera);
@@ -97,10 +101,13 @@ public class Main extends Application {
         BorderPane root = new BorderPane();
 
         // put the 3D scene in the center
-        root.setCenter(subScene);
+        root.setCenter(viewport);
 
         // create controls
         VBox controlsBox = new VBox(10);
+        controlsBox.setPrefWidth(260);
+        controlsBox.setMinWidth(220);
+
 
         Button startStopButton = new Button("⏹️");
 
@@ -128,6 +135,14 @@ public class Main extends Application {
             dtLabel.setText("Simulation Speed: "+formatSimulationSpeed(speed));
         });
 
+        //reset camera
+        Button resetCameraButton = new Button("Reset Camera");
+        Runnable resetCamera = () -> {
+            camera.setTranslateX(0);
+            camera.setTranslateY(0);
+            camera.setTranslateZ(-100);
+        };
+        resetCameraButton.setOnAction(_ -> resetCamera.run());
 
         final boolean[] isRunning = {true};
 
@@ -153,13 +168,14 @@ public class Main extends Application {
                 scaleLabel,
                 scaleSlider,
                 dtLabel,
-                dtSlider);
+                dtSlider,
+                resetCameraButton);
 
 
         // place controls on the right side
         root.setRight(controlsBox);
 
-        Scene scene = new Scene(root, 3200, 3200, true);
+        Scene scene = new Scene(root, 1400, 900, true);
 
         scene.setOnKeyPressed(event -> {
             switch (event.getCode()) {
