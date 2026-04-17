@@ -249,20 +249,45 @@ public class SolarSystem {
 
     //resets acceleration and recalculates it every time signature
     public void updatePhysics(double dt) {
-        for (Body body : bodies) {
-            body.resetAcceleration();
+       resetAllAcceleration();
+       applyAllGravity();
+
+       double[] axOld = new double[bodies.size()];
+       double[] ayOld = new double[bodies.size()];
+       double[] azOld = new double[bodies.size()];
+
+      for (int i =0; i<bodies.size(); i++) {
+          Body body = bodies.get(i);
+          axOld[i] = body.getAx();
+          ayOld[i] = body.getAy();
+          azOld[i] = body.getAz();
+      }
+
+       for (Body body : bodies) {
+            body.updatePosition(dt);
         }
+       resetAllAcceleration();
+       applyAllGravity();
 
         for (int i = 0; i < bodies.size(); i++) {
-            for (int j = i + 1; j < bodies.size(); j++) {
+          Body body = bodies.get(i);
+          body.updateVelocity(dt, axOld[i], ayOld[i], azOld[i]);
+        }
+        renderBodies();
+    }
+
+    private void resetAllAcceleration() {
+        for(Body body : bodies){
+            body.resetAcceleration();
+        }
+    }
+
+    private void applyAllGravity() {
+        for (int i = 0; i<bodies.size(); i++) {
+            for (int j = 0; j < bodies.size(); j++) {
                 applyGravity(bodies.get(i), bodies.get(j));
             }
         }
-
-        for (Body body : bodies) {
-            body.integrate(dt);
-        }
-        renderBodies();
     }
 
     //Uses Newtonian physics to calculate gravity
