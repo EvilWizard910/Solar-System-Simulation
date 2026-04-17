@@ -6,17 +6,9 @@ public class Body {
     private final double mass;
     private final Sphere view;
 
-    private double x;
-    private double y;
-    private double z;
-
-    private double vx;
-    private double vy;
-    private double vz;
-
-    private double ax;
-    private double ay;
-    private double az;
+    private double x, y, z;
+    private double vx, vy, vz;
+    private double ax, ay, az;
 
    //Creates a body with mass, position x,y,z with velocity and acceleration on all 3 dimensions
     public Body(String name, double mass, Sphere view,
@@ -55,9 +47,13 @@ public class Body {
     public double getX() { return x; }
     public double getY() { return y; }
     public double getZ() { return z; }
+    public double getVx() { return vx; }
+    public double getVy() { return vy; }
+    public double getVz() { return vz; }
     public double getAx() { return ax; }
     public double getAy() { return ay; }
     public double getAz() { return az; }
+
 
     //more setters
     public void setPosition(double x, double y, double z) {

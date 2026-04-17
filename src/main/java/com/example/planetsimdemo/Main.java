@@ -1,21 +1,18 @@
 package com.example.planetsimdemo;
 
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.Button;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
+
 import java.util.Locale;
 
 public class Main extends Application {
-
 
     private static String formatSimulationSpeed(double secondsPerSecond) {
         if (secondsPerSecond < 60) {
@@ -30,9 +27,54 @@ public class Main extends Application {
         return String.format(Locale.US, "%.2f days/sec", secondsPerSecond / 86400.0);
     }
 
+    private static void disableKeyboardFocus(Control... controls) {
+        for (Control control : controls) {
+            control.setFocusTraversable(false);
+        }
+    }
+
+    private static double autoDistanceForRadius(double sceneRadius) {
+        return Math.max(0.02, Math.min(20.0, sceneRadius * 20.0 + 0.05));
+    }
+
+    private static String formatNumber(double value) {
+        return Double.toString(value);
+    }
+
+    private static void updateTypeState(
+            ComboBox<String> typeBox,
+            ComboBox<String> parentBox,
+            TextField distanceAuField,
+            TextField angleField
+    ) {
+        String type = typeBox.getValue();
+        boolean isMoon = "Moon".equals(type);
+        boolean isStar = "Star".equals(type);
+
+        parentBox.setDisable(!isMoon);
+        if (!isMoon) {
+            parentBox.setValue(null);
+        }
+
+        distanceAuField.setDisable(isStar);
+        angleField.setDisable(isStar);
+
+        if (isStar) {
+            distanceAuField.setText("0.0");
+            angleField.setText("0.0");
+        }
+    }
+
+    private static void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invalid Operation");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     @Override
     public void start(Stage stage) {
-
         SolarSystem solarSystem = new SolarSystem();
         Group root3D = solarSystem.getRoot();
 
@@ -45,41 +87,356 @@ public class Main extends Application {
 
         subScene.setFill(Color.BLACK);
         StackPane viewport = new StackPane(subScene);
+        viewport.setFocusTraversable(true);
         subScene.widthProperty().bind(viewport.widthProperty());
         subScene.heightProperty().bind(viewport.heightProperty());
 
         PerspectiveCamera camera = new PerspectiveCamera(true);
-        camera.setTranslateZ(-100);
-        camera.setNearClip(1);
-        camera.setFarClip(20000);
+        camera.setNearClip(0.0001);
+        camera.setFarClip(100_000);
+
+        javafx.scene.transform.Rotate cameraYawRotate =
+                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.Y_AXIS);
+        javafx.scene.transform.Rotate cameraPitchRotate =
+                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.X_AXIS);
+        camera.getTransforms().addAll(cameraYawRotate, cameraPitchRotate);
+
         subScene.setCamera(camera);
 
-        // Light positioned at the sun (center)
         PointLight light = new PointLight(Color.WHITE);
         light.setTranslateX(0);
         light.setTranslateY(0);
         light.setTranslateZ(0);
         root3D.getChildren().add(light);
 
-        // Optional ambient light to soften shadows slightly
         AmbientLight ambient = new AmbientLight(Color.color(0.2, 0.2, 0.2));
         root3D.getChildren().add(ambient);
 
-        // View angle
-        Rotate tilt = new Rotate(90, Rotate.X_AXIS);
-        Rotate spin = new Rotate(0, Rotate.Y_AXIS);
-        Rotate pitch = new Rotate(0, Rotate.X_AXIS);
+        javafx.scene.transform.Rotate tilt =
+                new javafx.scene.transform.Rotate(90, javafx.scene.transform.Rotate.X_AXIS);
+        javafx.scene.transform.Rotate spin =
+                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.Y_AXIS);
+        javafx.scene.transform.Rotate pitch =
+                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.X_AXIS);
         root3D.getTransforms().addAll(tilt, spin, pitch);
 
-        boolean enableRotation = true;
-
         long[] lastTime = {0};
-        final double minSimulationSpeed = 1.0;       // real time
-        final double maxSimulationSpeed = 604800.0;  // 1 week / second
+        final double minSimulationSpeed = 1.0;
+        final double maxSimulationSpeed = 604800.0;
         final double[] simulationSpeed = {1.0};
 
+        Body[] currentFocus = {solarSystem.getBody("Sun")};
+        double[] orbitYaw = {35.0};
+        double[] orbitPitch = {25.0};
+        double[] orbitDistance = {7.0};
 
-        AnimationTimer timer = new AnimationTimer() {
+        solarSystem.setViewScale(0.0);
+
+        BorderPane root = new BorderPane();
+        root.setCenter(viewport);
+
+        VBox controlsBox = new VBox(10);
+        controlsBox.setPrefWidth(360);
+        controlsBox.setMinWidth(320);
+
+        Button startStopButton = new Button("⏹️");
+
+        Label scaleLabel = new Label("Body Scale");
+        Slider scaleSlider = new Slider(0, 1, 0.0);
+        scaleSlider.setShowTickLabels(true);
+        scaleSlider.setShowTickMarks(true);
+        scaleSlider.setMajorTickUnit(0.5);
+        scaleSlider.setBlockIncrement(0.1);
+        scaleSlider.valueProperty().addListener((obs, oldValue, newValue) ->
+                solarSystem.setViewScale(newValue.doubleValue()));
+
+        Label dtLabel = new Label("Simulation Speed");
+        Slider dtSlider = new Slider(0, 1, 0);
+        dtSlider.setShowTickLabels(true);
+        dtSlider.setShowTickMarks(true);
+        dtSlider.setMajorTickUnit(0.25);
+        dtSlider.setBlockIncrement(0.05);
+        dtSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            double t = newValue.doubleValue();
+            double speed = minSimulationSpeed * Math.pow(maxSimulationSpeed / minSimulationSpeed, t);
+            simulationSpeed[0] = speed;
+            dtLabel.setText("Simulation Speed: " + formatSimulationSpeed(speed));
+        });
+
+        Label focusLabel = new Label("Focus Body");
+        ComboBox<String> focusBox = new ComboBox<>();
+        focusBox.getItems().setAll(solarSystem.getBodyNames());
+        focusBox.setValue("Sun");
+
+        Label yawLabel = new Label("Camera Yaw");
+        Slider yawSlider = new Slider(-180, 180, orbitYaw[0]);
+        yawSlider.setShowTickLabels(true);
+        yawSlider.setShowTickMarks(true);
+        yawSlider.setMajorTickUnit(90);
+        yawSlider.setBlockIncrement(5);
+        yawSlider.valueProperty().addListener((obs, oldValue, newValue) ->
+                orbitYaw[0] = newValue.doubleValue());
+
+        Label pitchLabel = new Label("Camera Pitch");
+        Slider pitchSlider = new Slider(-80, 80, orbitPitch[0]);
+        pitchSlider.setShowTickLabels(true);
+        pitchSlider.setShowTickMarks(true);
+        pitchSlider.setMajorTickUnit(20);
+        pitchSlider.setBlockIncrement(2);
+        pitchSlider.valueProperty().addListener((obs, oldValue, newValue) ->
+                orbitPitch[0] = newValue.doubleValue());
+
+        Label distanceLabel = new Label("Camera Distance");
+        Slider distanceSlider = new Slider(0.01, 20.0, orbitDistance[0]);
+        distanceSlider.setShowTickLabels(true);
+        distanceSlider.setShowTickMarks(true);
+        distanceSlider.setMajorTickUnit(5);
+        distanceSlider.setBlockIncrement(0.1);
+        distanceSlider.valueProperty().addListener((obs, oldValue, newValue) ->
+                orbitDistance[0] = newValue.doubleValue());
+
+        ComboBox<String> bodyBox = new ComboBox<>();
+        bodyBox.getItems().setAll(solarSystem.getBodyNames());
+
+        ComboBox<String> typeBox = new ComboBox<>();
+        typeBox.getItems().setAll("Star", "Planet", "Moon");
+        typeBox.setValue("Planet");
+
+        ComboBox<String> parentBox = new ComboBox<>();
+        parentBox.getItems().setAll(solarSystem.getPlanetNames());
+        parentBox.setDisable(true);
+
+        Button refreshBodiesButton = new Button("Refresh Bodies");
+        Runnable refreshLists = () -> {
+            String selectedBody = bodyBox.getValue();
+            String selectedFocus = focusBox.getValue();
+            String selectedParent = parentBox.getValue();
+
+            bodyBox.getItems().setAll(solarSystem.getBodyNames());
+            focusBox.getItems().setAll(solarSystem.getBodyNames());
+            parentBox.getItems().setAll(solarSystem.getPlanetNames());
+
+            if (selectedBody != null && solarSystem.getBody(selectedBody) != null) {
+                bodyBox.setValue(selectedBody);
+            }
+            if (selectedFocus != null && solarSystem.getBody(selectedFocus) != null) {
+                focusBox.setValue(selectedFocus);
+            } else {
+                focusBox.setValue("Sun");
+            }
+            if (selectedParent != null && solarSystem.getPlanetNames().contains(selectedParent)) {
+                parentBox.setValue(selectedParent);
+            }
+        };
+        refreshBodiesButton.setOnAction(e -> refreshLists.run());
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Name");
+
+        TextField massField = new TextField();
+        massField.setPromptText("Mass");
+
+        TextField radiusField = new TextField();
+        radiusField.setPromptText("Radius (km)");
+
+        TextField distanceAuField = new TextField();
+        distanceAuField.setPromptText("Distance (AU)");
+
+        TextField angleField = new TextField();
+        angleField.setPromptText("Angle (deg)");
+
+        ColorPicker colorPicker = new ColorPicker(Color.WHITE);
+
+        Runnable clearBodySelection = () -> {
+            bodyBox.setValue(null);
+            nameField.clear();
+            massField.clear();
+            radiusField.clear();
+            distanceAuField.clear();
+            angleField.clear();
+            colorPicker.setValue(Color.WHITE);
+            typeBox.setValue("Planet");
+            parentBox.setValue(null);
+            updateTypeState(typeBox, parentBox, distanceAuField, angleField);
+        };
+
+        Button clearSelectionButton = new Button("Clear Selection");
+        clearSelectionButton.setOnAction(e -> clearBodySelection.run());
+
+        typeBox.valueProperty().addListener((obs, oldValue, newValue) ->
+                updateTypeState(typeBox, parentBox, distanceAuField, angleField));
+
+        bodyBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
+            }
+
+            Body selected = solarSystem.getBody(newValue);
+            if (selected == null) {
+                return;
+            }
+
+            nameField.setText(selected.getName());
+            massField.setText(formatNumber(selected.getMass()));
+            radiusField.setText(formatNumber(solarSystem.getBodyRadiusKm(newValue)));
+            distanceAuField.setText(formatNumber(solarSystem.getBodyDistanceAu(newValue)));
+            angleField.setText(formatNumber(solarSystem.getBodyAngleDeg(newValue)));
+            colorPicker.setValue(solarSystem.getBodyColor(newValue));
+
+            String bodyType = solarSystem.getBodyType(newValue);
+            typeBox.setValue(bodyType);
+
+            String parent = solarSystem.getOrbitParent(newValue);
+            parentBox.getItems().setAll(solarSystem.getPlanetNames());
+            parentBox.setValue(parent);
+
+            updateTypeState(typeBox, parentBox, distanceAuField, angleField);
+        });
+
+        Button addButton = new Button("Add");
+        Button editButton = new Button("Edit");
+        Button removeButton = new Button("Remove");
+
+        addButton.setOnAction(e -> {
+            try {
+                String name = nameField.getText().trim();
+                if (name.isEmpty()) {
+                    showError("Name is required.");
+                    return;
+                }
+
+                String type = typeBox.getValue();
+                String parent = "Moon".equals(type) ? parentBox.getValue() : null;
+                if ("Moon".equals(type) && (parent == null || parent.isBlank())) {
+                    showError("Moons must have a parent planet.");
+                    return;
+                }
+
+                double mass = Double.parseDouble(massField.getText().trim());
+                double radiusKm = Double.parseDouble(radiusField.getText().trim());
+                double distanceAu = "Star".equals(type) ? 0.0 : Double.parseDouble(distanceAuField.getText().trim());
+                double angleDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(angleField.getText().trim());
+                Color color = colorPicker.getValue();
+
+                boolean added = solarSystem.addNewBody(name, type, parent, mass, radiusKm, distanceAu, angleDeg, color);
+                if (!added) {
+                    showError("Could not add body. Check for duplicate names or invalid moon parent.");
+                    return;
+                }
+
+                refreshLists.run();
+                bodyBox.setValue(name);
+                focusBox.setValue(name);
+            } catch (Exception ex) {
+                showError("Please enter valid numeric values.");
+            }
+        });
+
+        editButton.setOnAction(e -> {
+            String selected = bodyBox.getValue();
+            if (selected == null) {
+                showError("Select a body to edit.");
+                return;
+            }
+
+            try {
+                String newName = nameField.getText().trim();
+                if (newName.isEmpty()) {
+                    showError("Name is required.");
+                    return;
+                }
+
+                String type = typeBox.getValue();
+                String parent = "Moon".equals(type) ? parentBox.getValue() : null;
+                if ("Moon".equals(type) && (parent == null || parent.isBlank())) {
+                    showError("Moons must have a parent planet.");
+                    return;
+                }
+
+                double mass = Double.parseDouble(massField.getText().trim());
+                double radiusKm = Double.parseDouble(radiusField.getText().trim());
+                double distanceAu = "Star".equals(type) ? 0.0 : Double.parseDouble(distanceAuField.getText().trim());
+                double angleDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(angleField.getText().trim());
+                Color color = colorPicker.getValue();
+
+                boolean wasFocused = currentFocus[0] != null && selected.equals(currentFocus[0].getName());
+
+                boolean updated = solarSystem.updateBody(selected, newName, type, parent, mass, radiusKm, distanceAu, angleDeg, color);
+                if (!updated) {
+                    showError("Could not edit body. Names must be unique, moons need a planet parent, and parents with moons cannot stop being planets.");
+                    return;
+                }
+
+                refreshLists.run();
+                bodyBox.setValue(newName);
+
+                if (wasFocused) {
+                    currentFocus[0] = solarSystem.getBody(newName);
+                    focusBox.setValue(newName);
+                }
+            } catch (Exception ex) {
+                showError("Please enter valid numeric values.");
+            }
+        });
+
+        removeButton.setOnAction(e -> {
+            String selected = bodyBox.getValue();
+            if (selected == null) {
+                showError("Select a body to remove.");
+                return;
+            }
+
+            boolean wasFocused = currentFocus[0] != null && selected.equals(currentFocus[0].getName());
+
+            boolean removed = solarSystem.removeBody(selected);
+            if (!removed) {
+                showError("Remove moons orbiting this body first.");
+                return;
+            }
+
+            refreshLists.run();
+
+            if (wasFocused) {
+                currentFocus[0] = solarSystem.getBody("Sun");
+                focusBox.setValue("Sun");
+            }
+
+            clearBodySelection.run();
+        });
+
+        Runnable resetCamera = () -> {
+            currentFocus[0] = solarSystem.getBody("Sun");
+            focusBox.setValue("Sun");
+
+            orbitYaw[0] = 35.0;
+            orbitPitch[0] = 25.0;
+
+            Body sun = solarSystem.getBody("Sun");
+            orbitDistance[0] = sun == null ? 7.0 : autoDistanceForRadius(sun.getView().getRadius());
+
+            yawSlider.setValue(orbitYaw[0]);
+            pitchSlider.setValue(orbitPitch[0]);
+            distanceSlider.setValue(orbitDistance[0]);
+        };
+
+        Button resetCameraButton = new Button("Reset Camera");
+        resetCameraButton.setOnAction(e -> resetCamera.run());
+
+        focusBox.setOnAction(e -> {
+            String selected = focusBox.getValue();
+            if (selected == null) return;
+
+            Body focused = solarSystem.getBody(selected);
+            if (focused == null) return;
+
+            currentFocus[0] = focused;
+            orbitDistance[0] = autoDistanceForRadius(focused.getView().getRadius());
+            distanceSlider.setValue(orbitDistance[0]);
+        });
+
+        final boolean[] isRunning = {true};
+
+        final AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (lastTime[0] == 0) {
@@ -91,62 +448,39 @@ public class Main extends Application {
                 lastTime[0] = now;
 
                 solarSystem.updatePhysics(dt * simulationSpeed[0]);
+
+                if (currentFocus[0] != null) {
+                    double targetX = Conversions.metersToScene(currentFocus[0].getX());
+                    double targetY = -Conversions.metersToScene(currentFocus[0].getZ());
+                    double targetZ = Conversions.metersToScene(currentFocus[0].getY());
+
+                    double yawRad = Math.toRadians(orbitYaw[0]);
+                    double pitchRad = Math.toRadians(orbitPitch[0]);
+
+                    double horizontal = orbitDistance[0] * Math.cos(pitchRad);
+
+                    double camX = targetX + Math.sin(yawRad) * horizontal;
+                    double camY = targetY - Math.sin(pitchRad) * orbitDistance[0];
+                    double camZ = targetZ - Math.cos(yawRad) * horizontal;
+
+                    camera.setTranslateX(camX);
+                    camera.setTranslateY(camY);
+                    camera.setTranslateZ(camZ);
+
+                    double dx = targetX - camX;
+                    double dy = targetY - camY;
+                    double dz = targetZ - camZ;
+
+                    double lookYaw = Math.toDegrees(Math.atan2(dx, dz));
+                    double lookPitch = -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+
+                    cameraYawRotate.setAngle(lookYaw);
+                    cameraPitchRotate.setAngle(lookPitch);
+                }
             }
         };
 
-
-        timer.start();
-
-
-        BorderPane root = new BorderPane();
-
-        // put the 3D scene in the center
-        root.setCenter(viewport);
-
-        // create controls
-        VBox controlsBox = new VBox(10);
-        controlsBox.setPrefWidth(260);
-        controlsBox.setMinWidth(220);
-
-
-        Button startStopButton = new Button("⏹️");
-
-        //scale slider
-        Label scaleLabel = new Label("Body Scale");
-        Slider scaleSlider = new Slider(0, 1, 0); // 0 = realistic, 1 = convenient
-        solarSystem.setViewScale(0);
-        scaleSlider.setShowTickLabels(true);
-        scaleSlider.setShowTickMarks(true);
-        scaleSlider.setMajorTickUnit(0.5);
-        scaleSlider.setBlockIncrement(0.1);
-
-        //dt slider
-        Label dtLabel = new Label("Simulation Speed");
-        Slider dtSlider = new Slider(0, 1, 0);
-        dtSlider.setShowTickLabels(true);
-        dtSlider.setShowTickMarks(true);
-        dtSlider.setMajorTickUnit(0.25);
-        dtSlider.setBlockIncrement(0.05);
-
-        dtSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-            double t = newValue.doubleValue();
-            double speed = minSimulationSpeed*Math.pow(maxSimulationSpeed/minSimulationSpeed, t);
-            simulationSpeed[0] = speed;
-            dtLabel.setText("Simulation Speed: "+formatSimulationSpeed(speed));
-        });
-
-        //reset camera
-        Button resetCameraButton = new Button("Reset Camera");
-        Runnable resetCamera = () -> {
-            camera.setTranslateX(0);
-            camera.setTranslateY(0);
-            camera.setTranslateZ(-100);
-        };
-        resetCameraButton.setOnAction(_ -> resetCamera.run());
-
-        final boolean[] isRunning = {true};
-
-        startStopButton.setOnAction(_ -> {
+        startStopButton.setOnAction(e -> {
             if (isRunning[0]) {
                 timer.stop();
                 startStopButton.setText("▶️");
@@ -158,10 +492,29 @@ public class Main extends Application {
                 isRunning[0] = true;
             }
         });
-        scaleSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-            solarSystem.setViewScale(newValue.doubleValue());
-        });
 
+        disableKeyboardFocus(
+                startStopButton,
+                scaleSlider,
+                dtSlider,
+                focusBox,
+                yawSlider,
+                pitchSlider,
+                distanceSlider,
+                bodyBox,
+                typeBox,
+                parentBox,
+                colorPicker,
+                refreshBodiesButton,
+                clearSelectionButton,
+                addButton,
+                editButton,
+                removeButton,
+                resetCameraButton
+        );
+
+        resetCamera.run();
+        timer.start();
 
         controlsBox.getChildren().addAll(
                 startStopButton,
@@ -169,49 +522,81 @@ public class Main extends Application {
                 scaleSlider,
                 dtLabel,
                 dtSlider,
-                resetCameraButton);
+                new Separator(),
+                focusLabel,
+                focusBox,
+                yawLabel,
+                yawSlider,
+                pitchLabel,
+                pitchSlider,
+                distanceLabel,
+                distanceSlider,
+                new Separator(),
+                new Label("Bodies"),
+                bodyBox,
+                new HBox(5, refreshBodiesButton, clearSelectionButton),
+                nameField,
+                massField,
+                radiusField,
+                distanceAuField,
+                angleField,
+                new Label("Type"),
+                typeBox,
+                new Label("Parent Planet"),
+                parentBox,
+                new Label("Color"),
+                colorPicker,
+                new HBox(5, addButton, editButton, removeButton),
+                resetCameraButton
+        );
 
-
-        // place controls on the right side
         root.setRight(controlsBox);
 
         Scene scene = new Scene(root, 1400, 900, true);
 
-        scene.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (scene.getFocusOwner() instanceof TextInputControl) {
+                return;
+            }
 
-                // Zoom
-                case UP -> camera.setTranslateZ(camera.getTranslateZ() + 5);
-                case DOWN -> camera.setTranslateZ(camera.getTranslateZ() - 5);
-                case RIGHT -> camera.setTranslateZ(camera.getTranslateZ() + .1);
-                case LEFT -> camera.setTranslateZ(camera.getTranslateZ() - .1);
+            boolean handled = true;
+            KeyCode code = event.getCode();
 
-//                // Pan
-               case A -> camera.setTranslateX(camera.getTranslateX() - 20);
-               case D -> camera.setTranslateX(camera.getTranslateX() + 20);
-               case W -> camera.setTranslateY(camera.getTranslateY() - 20);
-               case S -> camera.setTranslateY(camera.getTranslateY() + 20);
+            switch (code) {
+                case UP -> distanceSlider.setValue(Math.max(distanceSlider.getMin(), distanceSlider.getValue() - 0.1));
+                case DOWN -> distanceSlider.setValue(Math.min(distanceSlider.getMax(), distanceSlider.getValue() + 0.1));
 
-                case J -> camera.setTranslateX(camera.getTranslateX() - .5);
-                case L -> camera.setTranslateX(camera.getTranslateX() + .5);
-                case I -> camera.setTranslateY(camera.getTranslateY() - .5);
-                case K -> camera.setTranslateY(camera.getTranslateY() + .5);
+                case LEFT -> yawSlider.setValue(yawSlider.getValue() - 5);
+                case RIGHT -> yawSlider.setValue(yawSlider.getValue() + 5);
 
+                case W -> pitchSlider.setValue(Math.min(pitchSlider.getMax(), pitchSlider.getValue() + 3));
+                case S -> pitchSlider.setValue(Math.max(pitchSlider.getMin(), pitchSlider.getValue() - 3));
 
-                // Rotate LEFT / RIGHT (Y axis)
-                //case LEFT -> spin.setAngle(spin.getAngle() - 5);
-                //case RIGHT -> spin.setAngle(spin.getAngle() + 5);
+                case A -> yawSlider.setValue(yawSlider.getValue() - 1);
+                case D -> yawSlider.setValue(yawSlider.getValue() + 1);
 
-                // Rotate UP / DOWN (X axis)
-              //  case  LEFT-> pitch.setAngle(pitch.getAngle() - 5);
-               // case RIGHT -> pitch.setAngle(pitch.getAngle() + 5);
+                case I -> distanceSlider.setValue(Math.max(distanceSlider.getMin(), distanceSlider.getValue() - 0.01));
+                case K -> distanceSlider.setValue(Math.min(distanceSlider.getMax(), distanceSlider.getValue() + 0.01));
+
+                case J -> pitchSlider.setValue(Math.min(pitchSlider.getMax(), pitchSlider.getValue() + 1));
+                case L -> pitchSlider.setValue(Math.max(pitchSlider.getMin(), pitchSlider.getValue() - 1));
+
+                default -> handled = false;
+            }
+
+            if (handled) {
+                event.consume();
             }
         });
+
+        viewport.setOnMouseClicked(e -> viewport.requestFocus());
 
         stage.setTitle("Planetary Simulation");
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
+
+        viewport.requestFocus();
     }
 
     public static void main(String[] args) {
