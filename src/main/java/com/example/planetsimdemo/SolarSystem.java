@@ -217,7 +217,7 @@ public class SolarSystem {
         double aWidth = 480000+(saturnRadius);
         double aThickness=30;
         ring = new Cylinder(saturnRadius+aWidth,aThickness);
-        ring.setMaterial(new PhongMaterial(Color.BISQUE));
+        ring.setMaterial(new PhongMaterial(Color.rgb(255, 228, 196,0.1)));
         ring.setRotationAxis(Rotate.X_AXIS);
         ring.setRotate(90);
 
@@ -288,6 +288,9 @@ public class SolarSystem {
 
     //resets acceleration and recalculates it every time signature using verlet integration
     public void updatePhysics(double dt) {
+        if (Double.isNaN(dt) || Double.isInfinite(dt) || dt <= 0) {
+            System.out.println("Bad dt: " + dt);
+        }
        resetAllAcceleration();
        applyAllGravity();
 
@@ -324,7 +327,7 @@ public class SolarSystem {
     // calculates gravitation pull of each body on one another
     private void applyAllGravity() {
         for (int i = 0; i<bodies.size(); i++) {
-            for (int j = 0; j < bodies.size(); j++) {
+            for (int j = i+1; j < bodies.size(); j++) {
                 applyGravity(bodies.get(i), bodies.get(j));
             }
         }
