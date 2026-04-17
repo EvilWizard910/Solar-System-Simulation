@@ -49,23 +49,18 @@ public class Body {
     }
 
   //calculate instantaneous velocity and position
-    public void integrate(double dt) {
-        vx += ax * dt;
-        vy += ay * dt;
-        vz += az * dt;
-        x += vx * dt;
-        y += vy * dt;
-        z += vz * dt;
-    }
+
 
     //getters
     public String getName() { return name; }
     public double getMass() { return mass; }
     public Sphere getView() { return view; }
-
     public double getX() { return x; }
     public double getY() { return y; }
     public double getZ() { return z; }
+    public double getAx() { return ax; }
+    public double getAy() { return ay; }
+    public double getAz() { return az; }
 
     //more setters
     public void setPosition(double x, double y, double z) {
@@ -78,6 +73,17 @@ public class Body {
         this.vx = vx;
         this.vy = vy;
         this.vz = vz;
+    }
+
+    public void updatePosition(double dt) {
+       x += vx*dt+.5*ax*dt*dt;
+       y += vy*dt+.5*ay*dt*dt;
+       z += vz*dt+.5*az*dt*dt;
+    }
+    public void updateVelocity(double dt, double axOld, double ayOld, double azOld) {
+        vx += 0.5 * (axOld + ax) * dt;
+        vy += 0.5 * (ayOld + ay) * dt;
+        vz += 0.5 * (azOld + az) * dt;
     }
 }
 
