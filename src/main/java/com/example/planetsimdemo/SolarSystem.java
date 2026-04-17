@@ -37,6 +37,9 @@ public class SolarSystem {
     //moons
     double moonRadius = 1737.4;
     double ioRadius = 1821.6;
+    double europaRadius = 1560.8;
+    double ganymedeRadius =2631.2;
+    double callistoRadius=2410.3;
 
     private final Map<Body, Double> baseBodyRadii = new HashMap<>();
     private double baseRingRadius;
@@ -164,7 +167,7 @@ public class SolarSystem {
                 "Moon",
                 Moon_Mass,
                 moonView,
-                (earthDistance+moonDistance+earthRadius), 0, 0, 0, 0, earthSpeed+moonSpeed
+                (earthDistance+moonDistance), 0, 0, 0, 0, earthSpeed+moonSpeed
         );
 
         double ioDistance=  421800000.0;
@@ -175,8 +178,40 @@ public class SolarSystem {
                 "Io",
                 Io_Mass,
                 ioView,
-                (jupiterDistance+ioDistance+ioRadius+jupiterRadius), 0, 0, 0, 0, jupiterSpeed+ioSpeed
+                (jupiterDistance+ioDistance), 0, 0, 0, 0, jupiterSpeed+ioSpeed
         );
+
+        double europaDistance=  671100000.0;
+        double europaSpeed =  Math.sqrt(Conversions.G * Jupiter_Mass / europaDistance);
+        Sphere europaView = new Sphere(europaRadius);
+        europaView.setMaterial(new PhongMaterial(Color.WHITE));
+        Body europa = new Body(
+                "Europa",
+                Europa_mass,
+                europaView,
+                (jupiterDistance+europaDistance), 0, 0, 0, 0, jupiterSpeed+europaSpeed
+        );
+        double ganymedeDistance=  1070400000.0;
+        double ganymedeSpeed =  Math.sqrt(Conversions.G * Jupiter_Mass / ganymedeDistance);
+        Sphere ganymedeView = new Sphere(ganymedeRadius);
+        europaView.setMaterial(new PhongMaterial(Color.GRAY));
+        Body ganymede = new Body(
+                "Ganymede",
+                Ganymede_mass,
+                ganymedeView,
+                (jupiterDistance+ganymedeDistance), 0, 0, 0, 0, jupiterSpeed+ganymedeSpeed
+        );
+        double callistoDistance=  1882700000.0;
+        double callistoSpeed =  Math.sqrt(Conversions.G * Jupiter_Mass / callistoDistance);
+        Sphere callistoView = new Sphere(europaRadius);
+        callistoView.setMaterial(new PhongMaterial(Color.DARKGRAY));
+        Body callisto = new Body(
+                "Callisto",
+                Callisto_mass,
+                callistoView,
+                (jupiterDistance+callistoDistance), 0, 0, 0, 0, jupiterSpeed+callistoSpeed
+        );
+
 
          saturnBody = saturn;
         double aWidth = 480000+(saturnRadius);
@@ -205,6 +240,9 @@ public class SolarSystem {
         //moons
         bodies.add(moon);
         bodies.add(io);
+        bodies.add(europa);
+        bodies.add(callisto);
+        bodies.add(ganymede);
 
         root.getChildren().add(sunView);
         root.getChildren().add(earthView);
@@ -218,6 +256,10 @@ public class SolarSystem {
         //moons
         root.getChildren().add(moonView);
         root.getChildren().add(ioView);
+        root.getChildren().add(europaView);
+        root.getChildren().add(callistoView);
+        root.getChildren().add(ganymedeView);
+
 
         //saturns rings
         root.getChildren().add(ring);
