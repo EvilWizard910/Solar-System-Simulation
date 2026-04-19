@@ -44,8 +44,12 @@ public class Main extends Application {
     private static void updateTypeState(
             ComboBox<String> typeBox,
             ComboBox<String> parentBox,
-            TextField distanceAuField,
-            TextField angleField
+            TextField semiMajorAxisField,
+            TextField eccentricityField,
+            TextField inclinationField,
+            TextField ascendingNodeField,
+            TextField argumentOfPeriapsisField,
+            TextField trueAnomalyField
     ) {
         String type = typeBox.getValue();
         boolean isMoon = "Moon".equals(type);
@@ -56,12 +60,20 @@ public class Main extends Application {
             parentBox.setValue(null);
         }
 
-        distanceAuField.setDisable(isStar);
-        angleField.setDisable(isStar);
+        semiMajorAxisField.setDisable(isStar);
+        eccentricityField.setDisable(isStar);
+        inclinationField.setDisable(isStar);
+        ascendingNodeField.setDisable(isStar);
+        argumentOfPeriapsisField.setDisable(isStar);
+        trueAnomalyField.setDisable(isStar);
 
         if (isStar) {
-            distanceAuField.setText("0.0");
-            angleField.setText("0.0");
+            semiMajorAxisField.setText("0.0");
+            eccentricityField.setText("0.0");
+            inclinationField.setText("0.0");
+            ascendingNodeField.setText("0.0");
+            argumentOfPeriapsisField.setText("0.0");
+            trueAnomalyField.setText("0.0");
         }
     }
 
@@ -187,7 +199,7 @@ public class Main extends Application {
                 orbitPitch[0] = newValue.doubleValue());
 
         Label distanceLabel = new Label("Camera Distance");
-        Slider distanceSlider = new Slider(0.01, 20.0, orbitDistance[0]);
+        Slider distanceSlider = new Slider(0.1, 500.0, orbitDistance[0]);
         distanceSlider.setShowTickLabels(true);
         distanceSlider.setShowTickMarks(true);
         distanceSlider.setMajorTickUnit(5);
@@ -203,7 +215,7 @@ public class Main extends Application {
         typeBox.setValue("Planet");
 
         ComboBox<String> parentBox = new ComboBox<>();
-        parentBox.getItems().setAll(solarSystem.getPlanetNames());
+        parentBox.getItems().setAll(solarSystem.getBodyNames());
         parentBox.setDisable(true);
 
         Button refreshBodiesButton = new Button("Refresh Bodies");
@@ -214,7 +226,7 @@ public class Main extends Application {
 
             bodyBox.getItems().setAll(solarSystem.getBodyNames());
             focusBox.getItems().setAll(solarSystem.getBodyNames());
-            parentBox.getItems().setAll(solarSystem.getPlanetNames());
+            parentBox.getItems().setAll(solarSystem.getBodyNames());
 
             if (selectedBody != null && solarSystem.getBody(selectedBody) != null) {
                 bodyBox.setValue(selectedBody);
@@ -224,7 +236,7 @@ public class Main extends Application {
             } else {
                 focusBox.setValue("Sun");
             }
-            if (selectedParent != null && solarSystem.getPlanetNames().contains(selectedParent)) {
+            if (selectedParent != null && solarSystem.getBodyNames().contains(selectedParent)) {
                 parentBox.setValue(selectedParent);
             }
         };
@@ -239,11 +251,24 @@ public class Main extends Application {
         TextField radiusField = new TextField();
         radiusField.setPromptText("Radius (km)");
 
-        TextField distanceAuField = new TextField();
-        distanceAuField.setPromptText("Distance (AU)");
+        TextField semiMajorAxisField = new TextField();
+        semiMajorAxisField.setPromptText("Semi-major axis (AU)");
 
-        TextField angleField = new TextField();
-        angleField.setPromptText("Angle (deg)");
+        TextField eccentricityField = new TextField();
+        eccentricityField.setPromptText("Eccentricity");
+
+        TextField inclinationField = new TextField();
+        inclinationField.setPromptText("Inclination (deg)");
+
+        TextField ascendingNodeField = new TextField();
+        ascendingNodeField.setPromptText("Ascending node (deg)");
+
+        TextField argumentOfPeriapsisField = new TextField();
+        argumentOfPeriapsisField.setPromptText("Argument of periapsis (deg)");
+
+        TextField trueAnomalyField = new TextField();
+        trueAnomalyField.setPromptText("True anomaly (deg)");
+
 
         ColorPicker colorPicker = new ColorPicker(Color.WHITE);
 
@@ -252,19 +277,25 @@ public class Main extends Application {
             nameField.clear();
             massField.clear();
             radiusField.clear();
-            distanceAuField.clear();
-            angleField.clear();
+            semiMajorAxisField.clear();
+            eccentricityField.clear();
+            inclinationField.clear();
+            ascendingNodeField.clear();
+            argumentOfPeriapsisField.clear();
+            trueAnomalyField.clear();
             colorPicker.setValue(Color.WHITE);
             typeBox.setValue("Planet");
             parentBox.setValue(null);
-            updateTypeState(typeBox, parentBox, distanceAuField, angleField);
+            updateTypeState(typeBox, parentBox, semiMajorAxisField, eccentricityField, inclinationField,
+                    ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField);
         };
 
         Button clearSelectionButton = new Button("Clear Selection");
         clearSelectionButton.setOnAction(e -> clearBodySelection.run());
 
         typeBox.valueProperty().addListener((obs, oldValue, newValue) ->
-                updateTypeState(typeBox, parentBox, distanceAuField, angleField));
+                updateTypeState(typeBox, parentBox, semiMajorAxisField, eccentricityField, inclinationField,
+                        ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField));
 
         bodyBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue == null) {
@@ -275,22 +306,43 @@ public class Main extends Application {
             if (selected == null) {
                 return;
             }
-
+            SolarSystem.OrbitElements orbit = solarSystem.getOrbitElements(newValue);
             nameField.setText(selected.getName());
             massField.setText(formatNumber(selected.getMass()));
             radiusField.setText(formatNumber(solarSystem.getBodyRadiusKm(newValue)));
-            distanceAuField.setText(formatNumber(solarSystem.getBodyDistanceAu(newValue)));
-            angleField.setText(formatNumber(solarSystem.getBodyAngleDeg(newValue)));
             colorPicker.setValue(solarSystem.getBodyColor(newValue));
+            typeBox.setValue(solarSystem.getBodyType(newValue));
+            parentBox.getItems().setAll(solarSystem.getBodyNames());
+            parentBox.setValue(solarSystem.getOrbitParent(newValue));
 
-            String bodyType = solarSystem.getBodyType(newValue);
+            if (orbit != null) {
+                semiMajorAxisField.setText(formatNumber(orbit.semiMajorAxisAu()));
+                eccentricityField.setText(formatNumber(orbit.eccentricity()));
+                inclinationField.setText(formatNumber(orbit.inclinationDeg()));
+                ascendingNodeField.setText(formatNumber(orbit.ascendingNodeDeg()));
+                argumentOfPeriapsisField.setText(formatNumber(orbit.argumentOfPeriapsisDeg()));
+                trueAnomalyField.setText(formatNumber(orbit.trueAnomalyDeg()));
+            } else {
+                semiMajorAxisField.setText("0.0");
+                eccentricityField.setText("0.0");
+                inclinationField.setText("0.0");
+                ascendingNodeField.setText("0.0");
+                argumentOfPeriapsisField.setText("0.0");
+                trueAnomalyField.setText("0.0");
+            }
+            updateTypeState(
+                    typeBox, parentBox,
+                    semiMajorAxisField, eccentricityField, inclinationField,
+                    ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField
+            );
+            /*String bodyType = solarSystem.getBodyType(newValue);
             typeBox.setValue(bodyType);
 
-            String parent = solarSystem.getOrbitParent(newValue);
-            parentBox.getItems().setAll(solarSystem.getPlanetNames());
+            String parent = solarSystem.getParent(newValue);
+            parentBox.getItems().setAll(solarSystem.getBodyNames());
             parentBox.setValue(parent);
 
-            updateTypeState(typeBox, parentBox, distanceAuField, angleField);
+            updateTypeState(typeBox, parentBox, distanceAuField, eccentricityField);*/
         });
 
         Button addButton = new Button("Add");
@@ -314,11 +366,25 @@ public class Main extends Application {
 
                 double mass = Double.parseDouble(massField.getText().trim());
                 double radiusKm = Double.parseDouble(radiusField.getText().trim());
-                double distanceAu = "Star".equals(type) ? 0.0 : Double.parseDouble(distanceAuField.getText().trim());
+                double semiMajorAxisAu = "Star".equals(type) ? 0.0 : Double.parseDouble(semiMajorAxisField.getText().trim());
+                double eccentricity = "Star".equals(type) ? 0.0 : Double.parseDouble(eccentricityField.getText().trim());
+                double inclinationDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(inclinationField.getText().trim());
+                double ascendingNodeDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(ascendingNodeField.getText().trim());
+                double argumentOfPeriapsisDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(argumentOfPeriapsisField.getText().trim());
+                double trueAnomalyDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(trueAnomalyField.getText().trim());
+
+                boolean added=solarSystem.addNewBody(
+                        name, type, parent, mass, radiusKm,
+                        semiMajorAxisAu, eccentricity, inclinationDeg,
+                        ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg,
+                        colorPicker.getValue()
+                );
+
+                /*double distanceAu = "Star".equals(type) ? 0.0 : Double.parseDouble(distanceAuField.getText().trim());
                 double angleDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(angleField.getText().trim());
                 Color color = colorPicker.getValue();
 
-                boolean added = solarSystem.addNewBody(name, type, parent, mass, radiusKm, distanceAu, angleDeg, color);
+                boolean added = solarSystem.addNewBody(name, type, parent, mass, radiusKm, distanceAu, angleDeg, color);*/
                 if (!added) {
                     showError("Could not add body. Check for duplicate names or invalid moon parent.");
                     return;
@@ -355,13 +421,19 @@ public class Main extends Application {
 
                 double mass = Double.parseDouble(massField.getText().trim());
                 double radiusKm = Double.parseDouble(radiusField.getText().trim());
-                double distanceAu = "Star".equals(type) ? 0.0 : Double.parseDouble(distanceAuField.getText().trim());
-                double angleDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(angleField.getText().trim());
+                double semiMajorAxisAu = "Star".equals(type) ? 0.0 : Double.parseDouble(semiMajorAxisField.getText().trim());
+                double eccentricity = "Star".equals(type) ? 0.0 : Double.parseDouble(eccentricityField.getText().trim());
+                double inclinationDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(inclinationField.getText().trim());
+                double ascendingNodeDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(ascendingNodeField.getText().trim());
+                double argumentOfPeriapsisDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(argumentOfPeriapsisField.getText().trim());
+                double trueAnomalyDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(trueAnomalyField.getText().trim());
+
                 Color color = colorPicker.getValue();
 
                 boolean wasFocused = currentFocus[0] != null && selected.equals(currentFocus[0].getName());
 
-                boolean updated = solarSystem.updateBody(selected, newName, type, parent, mass, radiusKm, distanceAu, angleDeg, color);
+                boolean updated = solarSystem.updateBody(selected, newName, type, parent, mass, radiusKm, semiMajorAxisAu, eccentricity, inclinationDeg,
+                        ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg, color);
                 if (!updated) {
                     showError("Could not edit body. Names must be unique, moons need a planet parent, and parents with moons cannot stop being planets.");
                     return;
@@ -437,6 +509,9 @@ public class Main extends Application {
         final boolean[] isRunning = {true};
 
         final AnimationTimer timer = new AnimationTimer() {
+            private static final double MAX_PHYSICS_STEP = 120.0; // 5 minutes
+            private static final double MAX_FRAME_DT = 0.25;      // avoid giant jumps after lag
+
             @Override
             public void handle(long now) {
                 if (lastTime[0] == 0) {
@@ -446,8 +521,15 @@ public class Main extends Application {
 
                 double dt = (now - lastTime[0]) / 1_000_000_000.0;
                 lastTime[0] = now;
+                dt = Math.min(dt, MAX_FRAME_DT);
 
-                solarSystem.updatePhysics(dt * simulationSpeed[0]);
+                double simulatedDt = dt * simulationSpeed[0];
+
+                while (simulatedDt > 0) {
+                    double step = Math.min(simulatedDt, MAX_PHYSICS_STEP);
+                    solarSystem.updatePhysics(step);
+                    simulatedDt -= step;
+                }
 
                 if (currentFocus[0] != null) {
                     double targetX = Conversions.metersToScene(currentFocus[0].getX());
@@ -538,8 +620,12 @@ public class Main extends Application {
                 nameField,
                 massField,
                 radiusField,
-                distanceAuField,
-                angleField,
+                semiMajorAxisField,
+                eccentricityField,
+                inclinationField,
+                ascendingNodeField,
+                argumentOfPeriapsisField,
+                trueAnomalyField,
                 new Label("Type"),
                 typeBox,
                 new Label("Parent Planet"),
