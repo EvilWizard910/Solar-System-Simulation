@@ -75,6 +75,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        FirebaseService.initialize();
+
         SolarSystem solarSystem = new SolarSystem();
         Group root3D = solarSystem.getRoot();
 
@@ -597,6 +599,28 @@ public class Main extends Application {
         stage.show();
 
         viewport.requestFocus();
+    }
+    private static BodyRecord buildRecord(
+            String name,
+            String type,
+            String parentId,
+            double mass,
+            double radiusKm,
+            double distanceAu,
+            double angleDeg,
+            Color color
+    ) {
+        BodyRecord record = new BodyRecord();
+        record.id = name.toLowerCase();
+        record.name = name;
+        record.type = type;
+        record.parentId = parentId;
+        record.mass = mass;
+        record.radiusKm = radiusKm;
+        record.distanceAu = distanceAu;
+        record.angleDeg = angleDeg;
+        record.color = color.toString();
+        return record;
     }
 
     public static void main(String[] args) {

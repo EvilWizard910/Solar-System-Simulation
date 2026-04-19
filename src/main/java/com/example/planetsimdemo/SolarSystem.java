@@ -70,6 +70,7 @@ public class SolarSystem {
     }
 
     private String normalizeType(String type) {
+        if (type == null) return TYPE_PLANET;
         if (TYPE_STAR.equalsIgnoreCase(type)) return TYPE_STAR;
         if (TYPE_MOON.equalsIgnoreCase(type)) return TYPE_MOON;
         return TYPE_PLANET;
@@ -95,6 +96,28 @@ public class SolarSystem {
             if (c != null) return c;
         }
         return Color.WHITE;
+    }
+
+    private Color parseColor(String colorName) {
+        if (colorName == null) return Color.WHITE;
+
+        return switch (colorName.toUpperCase()) {
+            case "YELLOW" -> Color.YELLOW;
+            case "MISTYROSE" -> Color.MISTYROSE;
+            case "BURLYWOOD" -> Color.BURLYWOOD;
+            case "DODGERBLUE" -> Color.DODGERBLUE;
+            case "ORANGERED" -> Color.ORANGERED;
+            case "CORAL" -> Color.CORAL;
+            case "DARKSALMON" -> Color.DARKSALMON;
+            case "DARKTURQUOISE" -> Color.DARKTURQUOISE;
+            case "MIDNIGHTBLUE" -> Color.MIDNIGHTBLUE;
+            case "LIGHTGRAY" -> Color.LIGHTGRAY;
+            case "LIMEGREEN" -> Color.LIMEGREEN;
+            case "WHITE" -> Color.WHITE;
+            case "GRAY" -> Color.GRAY;
+            case "DARKGRAY" -> Color.DARKGRAY;
+            default -> Color.WHITE;
+        };
     }
 
     private void registerBody(Body body, double radiusKm, double distanceAu,
@@ -133,6 +156,7 @@ public class SolarSystem {
 
     private List<BodyState> getChildStates(String parentName) {
         List<BodyState> children = new ArrayList<>();
+
         for (String name : map.keySet()) {
             if (parentName.equals(orbitParents.get(name))) {
                 Body body = map.get(name);
@@ -148,6 +172,7 @@ public class SolarSystem {
                 ));
             }
         }
+
         return children;
     }
 
@@ -225,22 +250,33 @@ public class SolarSystem {
     }
 
     private void init() {
-        make("Sun", TYPE_STAR, null, massOfSun, 700000, 0.0, 0.0, Color.YELLOW);
+        List<BodyRecord> records = FirebaseService.loadBodies("defaultSystem");
 
-        make("Mercury", TYPE_PLANET, null, Mercury_Mass, 2439.7, 0.39, 0.0, Color.MISTYROSE);
-        make("Venus", TYPE_PLANET, null, Venus_Mass, 6051.8, 0.72, 25.0, Color.BURLYWOOD);
-        make("Earth", TYPE_PLANET, null, EARTH_MASS, 6371, 1.0, 50.0, Color.DODGERBLUE);
-        make("Mars", TYPE_PLANET, null, Mars_Mass, 3389.5, 1.52, 75.0, Color.ORANGERED);
-        make("Jupiter", TYPE_PLANET, null, Jupiter_Mass, 69911, 5.2, 120.0, Color.CORAL);
-        make("Saturn", TYPE_PLANET, null, Saturn_Mass, 58232, 9.54, 160.0, Color.DARKSALMON);
-        make("Uranus", TYPE_PLANET, null, Uranus_Mass, 25362, 19.2, 210.0, Color.DARKTURQUOISE);
-        make("Neptune", TYPE_PLANET, null, Neptune_Mass, 24622, 30.02, 260.0, Color.MIDNIGHTBLUE);
+        records.sort((a, b) -> {
+            String typeA = normalizeType(a.type);
+            String typeB = normalizeType(b.type);
 
-        make("Moon", TYPE_MOON, "Earth", Moon_Mass, 1737.4, 0.0025695, 0.0, Color.LIGHTGRAY);
-        make("Io", TYPE_MOON, "Jupiter", Io_Mass, 1821.6, 421800000.0 / AU_IN_METERS, 0.0, Color.LIMEGREEN);
-        make("Europa", TYPE_MOON, "Jupiter", Europa_mass, 1560.8, 671100000.0 / AU_IN_METERS, 45.0, Color.WHITE);
-        make("Ganymede", TYPE_MOON, "Jupiter", Ganymede_mass, 2631.2, 1070400000.0 / AU_IN_METERS, 90.0, Color.GRAY);
-        make("Callisto", TYPE_MOON, "Jupiter", Callisto_mass, 2410.3, 1882700000.0 / AU_IN_METERS, 135.0, Color.DARKGRAY);
+            if (TYPE_STAR.equals(typeA) && !TYPE_STAR.equals(typeB)) return -1;
+            if (!TYPE_STAR.equals(typeA) && TYPE_STAR.equals(typeB)) return 1;
+
+            if (TYPE_PLANET.equals(typeA) && TYPE_MOON.equals(typeB)) return -1;
+            if (TYPE_MOON.equals(typeA) && TYPE_PLANET.equals(typeB)) return 1;
+
+            return a.name.compareToIgnoreCase(b.name);
+        });
+
+        for (BodyRecord record : records) {
+            make(
+                    record.name,
+                    record.type,
+                    record.parentId,
+                    record.mass,
+                    record.radiusKm,
+                    record.distanceAu,
+                    record.angleDeg,
+                    parseColor(record.color)
+            );
+        }
     }
 
     public boolean addNewBody(String name, String type, String parentName,
@@ -269,13 +305,6 @@ public class SolarSystem {
         if (existing == null || newName == null || newName.isBlank()) {
             return false;
         }
-
-        String originalType = bodyTypes.get(originalName);
-        String originalParent = orbitParents.get(originalName);
-        Double originalRadius = logicalRadiiKm.get(originalName);
-        Double originalDistance = logicalDistancesAu.get(originalName);
-        Double originalAngle = orbitalAnglesDeg.get(originalName);
-        Color originalColor = bodyColors.getOrDefault(originalName, extractColor(existing));
 
         String normalizedType = normalizeType(type);
 
@@ -330,30 +359,6 @@ public class SolarSystem {
 
         removeBodyInternal(name);
         return true;
-    }
-
-    public void addBody(Body body) {
-        bodies.add(body);
-        map.put(body.getName(), body);
-        root.getChildren().add(body.getView());
-
-        double baseSceneRadius = body.getView().getRadius() / bodyScaleMultiplier();
-        baseRadii.put(body, baseSceneRadius);
-        logicalRadiiKm.put(body.getName(), sceneRadiusToKm(baseSceneRadius));
-
-        double distanceAu = Math.sqrt(
-                body.getX() * body.getX() +
-                        body.getY() * body.getY() +
-                        body.getZ() * body.getZ()
-        ) / AU_IN_METERS;
-
-        logicalDistancesAu.put(body.getName(), distanceAu);
-        orbitalAnglesDeg.put(body.getName(), normalizeAngle(Math.toDegrees(Math.atan2(body.getZ(), body.getX()))));
-        bodyTypes.put(body.getName(), TYPE_PLANET);
-        orbitParents.put(body.getName(), null);
-        bodyColors.put(body.getName(), extractColor(body));
-
-        applyScaleToBody(body);
     }
 
     public Body getBody(String name) {
