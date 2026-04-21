@@ -50,6 +50,15 @@ public class SolarSystem {
             this.orbit = orbit;
         }
     }
+
+    /*
+    The semi major axis is the maxiumum distance an orbiting body will be from it's center of orbit
+    * eccentricity defines how circular or how much an oval the orbit is, 0 is a circle, higher eccentricity makes an oval
+    * inclination refers to the tilt of an objects orbit using Earths orbit as 0 degrees, so 90 or 270 degress would be a perpendicular orbit to earth
+    * ascending node is the degree in an orbit where an inclined orbit heads above Earths orbit(the reference frame for this scenario)
+    * argument of periapsis is the angle between the ascending node and the point where the orbiting body is closest to its center relative to its center
+    * true anomaly is a degree used to tell where a body is in its orbit
+    */
     public record OrbitElements(
             double semiMajorAxisAu,
             double eccentricity,
@@ -317,19 +326,26 @@ public class SolarSystem {
        Body sun = createStar("Sun",massOfSun,700000,Color.YELLOW);
        registerBody(sun,700000, TYPE_STAR, null, Color.YELLOW, null);
 
-        OrbitElements earthOrbit = new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0);
+        OrbitElements mercuryOrbit = new OrbitElements(0.3870993,0.20564,7.005,48.3, 29.13, 193);
+        Body mercury = createOrbitingBody("Mercury",Mercury_Mass,2439.7, Color.MISTYROSE,massOfSun,mercuryOrbit );
+        registerBody(mercury,2439.7, TYPE_PLANET,null, Color.MISTYROSE, mercuryOrbit);
+
+        OrbitElements venusOrbit = new OrbitElements(0.7233336,0.00678,3.3947,76.7,54.9,125);
+        Body venus = createOrbitingBody("Venus", Venus_Mass, 6051.8, Color.BURLYWOOD, massOfSun,venusOrbit);
+        registerBody(venus,6051.8, TYPE_PLANET,null, Color.BURLYWOOD, venusOrbit);
+
+       OrbitElements earthOrbit = new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0);
         Body earth = createOrbitingBody("Earth", EARTH_MASS, 6371, Color.DODGERBLUE, massOfSun, earthOrbit);
         registerBody(earth, 6371, TYPE_PLANET, null, Color.DODGERBLUE, earthOrbit);
-        /* make("Sun", TYPE_STAR, null, massOfSun, 700000, 0.0, 0.0, Color.YELLOW);
 
-        make("Mercury", TYPE_PLANET, null, Mercury_Mass, 2439.7, 0.39, 0.0, Color.MISTYROSE);
-        make("Venus", TYPE_PLANET, null, Venus_Mass, 6051.8, 0.72, 25.0, Color.BURLYWOOD);
-        Body earth = createBodyFromOrbitalElements(
-                "Earth",
-                EARTH_MASS, 6371,
-                Color.DODGERBLUE, 1.0, 0.0167, 0.00005, -11.26064, 114.20783, 100.0
-        );
-        registerBody(earth, 6371, 1.0, 100.0, TYPE_PLANET, null, Color.DODGERBLUE);
+        //OrbitElements marsOrbit = new OrbitElements();
+        //OrbitElements jupiterOrbit = new OrbitElements();
+        //OrbitElements saturnOrbit = new OrbitElements();
+        //OrbitElements uranusOrbit = new OrbitElements();
+        //OrbitElements neptuneOrbit = new OrbitElements();
+
+
+     /*
         make("Mars", TYPE_PLANET, null, Mars_Mass, 3389.5, 1.52, 75.0, Color.ORANGERED);
         make("Jupiter", TYPE_PLANET, null, Jupiter_Mass, 69911, 5.2, 120.0, Color.CORAL);
         make("Saturn", TYPE_PLANET, null, Saturn_Mass, 58232, 9.54, 160.0, Color.DARKSALMON);
@@ -642,7 +658,7 @@ public class SolarSystem {
 
 
 
-    /*semi majnor axis is the average size of orbit
+    /*semi major axis is the farthest distance between the center or orbit and the body orbiting
     eccentricity changes the orbital shape
     nu will change the starting position and it is the angle from periapsis, or angle of the body from the it's center of orbit
     r is the distance of a body from its center of orbiy
