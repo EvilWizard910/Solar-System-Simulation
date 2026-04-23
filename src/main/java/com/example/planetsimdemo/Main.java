@@ -676,7 +676,6 @@ public class Main extends Application {
                 new HBox(5, addButton, editButton, removeButton),
                 resetCameraButton,
                 resetSimulationButton
-
         );
 
         // Scroll feature
