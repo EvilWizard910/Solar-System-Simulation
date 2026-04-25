@@ -338,17 +338,26 @@ public class SolarSystem {
         Body earth = createOrbitingBody("Earth", EARTH_MASS, 6371, Color.DODGERBLUE, massOfSun, earthOrbit);
         registerBody(earth, 6371, TYPE_PLANET, null, Color.DODGERBLUE, earthOrbit);
 
-        //OrbitElements marsOrbit = new OrbitElements();
-        //OrbitElements jupiterOrbit = new OrbitElements();
-        //OrbitElements saturnOrbit = new OrbitElements();
-        //OrbitElements uranusOrbit = new OrbitElements();
-        //OrbitElements neptuneOrbit = new OrbitElements();
+        OrbitElements marsOrbit = new OrbitElements(1.52371, 0.09339, 1.85,49.6,286.5,355);
+        Body mars = createOrbitingBody("Mars", Mars_Mass,3389.5, Color.ORANGERED, massOfSun,marsOrbit);
+        registerBody(mars,3389.5, TYPE_PLANET, null, Color.ORANGERED, marsOrbit);
 
+        OrbitElements jupiterOrbit = new OrbitElements(5.2029, 0.0484, 1.304, 100.4,274.3,185);
+        Body jupiter = createOrbitingBody("Jupiter", Jupiter_Mass, 669911.0,Color.CORAL,massOfSun,jupiterOrbit);
+        registerBody(jupiter, 669911.0, TYPE_PLANET, null, Color.CORAL,jupiterOrbit);
 
+        OrbitElements saturnOrbit = new OrbitElements(9.537,0.0539,2.486,113.7,338.9,317);
+        Body saturn = createOrbitingBody("Saturn",Saturn_Mass,58232,Color.DARKGRAY,massOfSun,saturnOrbit);
+        registerBody(saturn,58232, TYPE_PLANET, null, Color.DARKGRAY, saturnOrbit);
+
+        OrbitElements uranusOrbit = new OrbitElements(19.189,0.04726,0.773,74.02,96.9,142);
+        Body uranus = createOrbitingBody("Uranus",Uranus_Mass,25362,Color.DARKTURQUOISE,massOfSun,uranusOrbit);
+        registerBody(uranus,25362,TYPE_PLANET, null, Color.DARKTURQUOISE,uranusOrbit);
+
+        OrbitElements neptuneOrbit = new OrbitElements(30.0699,0.00859,1.77,131.784,273.2,260.5);
+        Body neptune = createOrbitingBody("Neptune", Neptune_Mass,24622,Color.MIDNIGHTBLUE,massOfSun,neptuneOrbit);
+        registerBody(neptune,24622,TYPE_PLANET, null, Color.MIDNIGHTBLUE,neptuneOrbit);
      /*
-        make("Mars", TYPE_PLANET, null, Mars_Mass, 3389.5, 1.52, 75.0, Color.ORANGERED);
-        make("Jupiter", TYPE_PLANET, null, Jupiter_Mass, 69911, 5.2, 120.0, Color.CORAL);
-        make("Saturn", TYPE_PLANET, null, Saturn_Mass, 58232, 9.54, 160.0, Color.DARKSALMON);
         make("Uranus", TYPE_PLANET, null, Uranus_Mass, 25362, 19.2, 210.0, Color.DARKTURQUOISE);
         make("Neptune", TYPE_PLANET, null, Neptune_Mass, 24622, 30.02, 260.0, Color.MIDNIGHTBLUE);
 
