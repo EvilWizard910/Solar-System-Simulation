@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
 import java.util.Locale;
@@ -87,8 +88,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        SolarSystem solarSystem = new SolarSystem();
-        Group root3D = solarSystem.getRoot();
+        final SolarSystem[] solarSystemRef =  { new SolarSystem() };
+        Group root3D = solarSystemRef[0].getRoot();
 
         SubScene subScene = new SubScene(
                 root3D,
@@ -107,10 +108,10 @@ public class Main extends Application {
         camera.setNearClip(0.0001);
         camera.setFarClip(100_000);
 
-        javafx.scene.transform.Rotate cameraYawRotate =
-                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.Y_AXIS);
-        javafx.scene.transform.Rotate cameraPitchRotate =
-                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.X_AXIS);
+        Rotate cameraYawRotate =
+                new Rotate(0, Rotate.Y_AXIS);
+        Rotate cameraPitchRotate =
+                new Rotate(0, Rotate.X_AXIS);
         camera.getTransforms().addAll(cameraYawRotate, cameraPitchRotate);
 
         subScene.setCamera(camera);
@@ -124,12 +125,12 @@ public class Main extends Application {
         AmbientLight ambient = new AmbientLight(Color.color(0.2, 0.2, 0.2));
         root3D.getChildren().add(ambient);
 
-        javafx.scene.transform.Rotate tilt =
-                new javafx.scene.transform.Rotate(90, javafx.scene.transform.Rotate.X_AXIS);
-        javafx.scene.transform.Rotate spin =
-                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.Y_AXIS);
-        javafx.scene.transform.Rotate pitch =
-                new javafx.scene.transform.Rotate(0, javafx.scene.transform.Rotate.X_AXIS);
+        Rotate tilt =
+                new Rotate(90, Rotate.X_AXIS);
+        Rotate spin =
+                new Rotate(0, Rotate.Y_AXIS);
+        Rotate pitch =
+                new Rotate(0, Rotate.X_AXIS);
         root3D.getTransforms().addAll(tilt, spin, pitch);
 
         long[] lastTime = {0};
@@ -137,21 +138,22 @@ public class Main extends Application {
         final double maxSimulationSpeed = 604800.0;
         final double[] simulationSpeed = {1.0};
 
-        Body[] currentFocus = {solarSystem.getBody("Sun")};
+        Body[] currentFocus = {solarSystemRef[0].getBody("Sun")};
         double[] orbitYaw = {35.0};
         double[] orbitPitch = {25.0};
         double[] orbitDistance = {7.0};
 
-        solarSystem.setViewScale(0.0);
+        solarSystemRef[0].setViewScale(0.0);
 
         BorderPane root = new BorderPane();
         root.setCenter(viewport);
 
         VBox controlsBox = new VBox(10);
+        controlsBox.setStyle("-fx-padding: 10;");
         controlsBox.setPrefWidth(360);
         controlsBox.setMinWidth(320);
 
-        Button startStopButton = new Button("⏹️");
+        Button startStopButton = new Button("Start Simulation");
 
         Label scaleLabel = new Label("Body Scale");
         Slider scaleSlider = new Slider(0, 1, 0.0);
@@ -160,7 +162,7 @@ public class Main extends Application {
         scaleSlider.setMajorTickUnit(0.5);
         scaleSlider.setBlockIncrement(0.1);
         scaleSlider.valueProperty().addListener((obs, oldValue, newValue) ->
-                solarSystem.setViewScale(newValue.doubleValue()));
+                solarSystemRef[0].setViewScale(newValue.doubleValue()));
 
         Label dtLabel = new Label("Simulation Speed");
         Slider dtSlider = new Slider(0, 1, 0);
@@ -177,7 +179,7 @@ public class Main extends Application {
 
         Label focusLabel = new Label("Focus Body");
         ComboBox<String> focusBox = new ComboBox<>();
-        focusBox.getItems().setAll(solarSystem.getBodyNames());
+        focusBox.getItems().setAll(solarSystemRef[0].getBodyNames());
         focusBox.setValue("Sun");
 
         Label yawLabel = new Label("Camera Yaw");
@@ -208,14 +210,14 @@ public class Main extends Application {
                 orbitDistance[0] = newValue.doubleValue());
 
         ComboBox<String> bodyBox = new ComboBox<>();
-        bodyBox.getItems().setAll(solarSystem.getBodyNames());
+        bodyBox.getItems().setAll(solarSystemRef[0].getBodyNames());
 
         ComboBox<String> typeBox = new ComboBox<>();
         typeBox.getItems().setAll("Star", "Planet", "Moon");
         typeBox.setValue("Planet");
 
         ComboBox<String> parentBox = new ComboBox<>();
-        parentBox.getItems().setAll(solarSystem.getBodyNames());
+        parentBox.getItems().setAll(solarSystemRef[0].getBodyNames());
         parentBox.setDisable(true);
 
         Button refreshBodiesButton = new Button("Refresh Bodies");
@@ -224,19 +226,19 @@ public class Main extends Application {
             String selectedFocus = focusBox.getValue();
             String selectedParent = parentBox.getValue();
 
-            bodyBox.getItems().setAll(solarSystem.getBodyNames());
-            focusBox.getItems().setAll(solarSystem.getBodyNames());
-            parentBox.getItems().setAll(solarSystem.getBodyNames());
+            bodyBox.getItems().setAll(solarSystemRef[0].getBodyNames());
+            focusBox.getItems().setAll(solarSystemRef[0].getBodyNames());
+            parentBox.getItems().setAll(solarSystemRef[0].getBodyNames());
 
-            if (selectedBody != null && solarSystem.getBody(selectedBody) != null) {
+            if (selectedBody != null && solarSystemRef[0].getBody(selectedBody) != null) {
                 bodyBox.setValue(selectedBody);
             }
-            if (selectedFocus != null && solarSystem.getBody(selectedFocus) != null) {
+            if (selectedFocus != null && solarSystemRef[0].getBody(selectedFocus) != null) {
                 focusBox.setValue(selectedFocus);
             } else {
                 focusBox.setValue("Sun");
             }
-            if (selectedParent != null && solarSystem.getBodyNames().contains(selectedParent)) {
+            if (selectedParent != null && solarSystemRef[0].getBodyNames().contains(selectedParent)) {
                 parentBox.setValue(selectedParent);
             }
         };
@@ -302,18 +304,18 @@ public class Main extends Application {
                 return;
             }
 
-            Body selected = solarSystem.getBody(newValue);
+            Body selected = solarSystemRef[0].getBody(newValue);
             if (selected == null) {
                 return;
             }
-            SolarSystem.OrbitElements orbit = solarSystem.getOrbitElements(newValue);
+            SolarSystem.OrbitElements orbit = solarSystemRef[0].getOrbitElements(newValue);
             nameField.setText(selected.getName());
             massField.setText(formatNumber(selected.getMass()));
-            radiusField.setText(formatNumber(solarSystem.getBodyRadiusKm(newValue)));
-            colorPicker.setValue(solarSystem.getBodyColor(newValue));
-            typeBox.setValue(solarSystem.getBodyType(newValue));
-            parentBox.getItems().setAll(solarSystem.getBodyNames());
-            parentBox.setValue(solarSystem.getOrbitParent(newValue));
+            radiusField.setText(formatNumber(solarSystemRef[0].getBodyRadiusKm(newValue)));
+            colorPicker.setValue(solarSystemRef[0].getBodyColor(newValue));
+            typeBox.setValue(solarSystemRef[0].getBodyType(newValue));
+            parentBox.getItems().setAll(solarSystemRef[0].getBodyNames());
+            parentBox.setValue(solarSystemRef[0].getOrbitParent(newValue));
 
             if (orbit != null) {
                 semiMajorAxisField.setText(formatNumber(orbit.semiMajorAxisAu()));
@@ -349,6 +351,44 @@ public class Main extends Application {
         Button editButton = new Button("Edit");
         Button removeButton = new Button("Remove");
 
+        // Reset Simulation Button
+        Button resetSimulationButton = new Button("Reset Simulation");
+
+        resetSimulationButton.setOnAction(e -> {
+            SolarSystem newSystem = new SolarSystem();
+
+            subScene.setRoot(newSystem.getRoot());
+
+            currentFocus[0] = newSystem.getBody("Sun");
+
+            focusBox.getItems().setAll(newSystem.getBodyNames());
+            focusBox.setValue("Sun");
+
+            focusBox.getItems().setAll(newSystem.getBodyNames());
+            focusBox.setValue(null);
+
+            parentBox.getItems().setAll(newSystem.getBodyNames());
+            parentBox.setValue(null);
+
+            clearBodySelection.run();
+
+            orbitYaw[0] = 35.0;
+            orbitPitch[0] = 25.0;
+
+            Body sun = newSystem.getBody("Sun");
+            orbitDistance[0] = sun == null ? 7.0 : autoDistanceForRadius(sun.getView().getRadius());
+
+            yawSlider.setValue(orbitYaw[0]);
+            pitchSlider.setValue(orbitPitch[0]);
+            distanceSlider.setValue(orbitDistance[0]);
+
+            scaleSlider.setValue(0.0);
+            dtSlider.setValue(0.0);
+
+            // replace old reference contents
+            solarSystemRef[0].getRoot().getChildren().clear();
+        });
+
         addButton.setOnAction(e -> {
             try {
                 String name = nameField.getText().trim();
@@ -373,7 +413,7 @@ public class Main extends Application {
                 double argumentOfPeriapsisDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(argumentOfPeriapsisField.getText().trim());
                 double trueAnomalyDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(trueAnomalyField.getText().trim());
 
-                boolean added=solarSystem.addNewBody(
+                boolean added=solarSystemRef[0].addNewBody(
                         name, type, parent, mass, radiusKm,
                         semiMajorAxisAu, eccentricity, inclinationDeg,
                         ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg,
@@ -432,7 +472,7 @@ public class Main extends Application {
 
                 boolean wasFocused = currentFocus[0] != null && selected.equals(currentFocus[0].getName());
 
-                boolean updated = solarSystem.updateBody(selected, newName, type, parent, mass, radiusKm, semiMajorAxisAu, eccentricity, inclinationDeg,
+                boolean updated = solarSystemRef[0].updateBody(selected, newName, type, parent, mass, radiusKm, semiMajorAxisAu, eccentricity, inclinationDeg,
                         ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg, color);
                 if (!updated) {
                     showError("Could not edit body. Names must be unique, moons need a planet parent, and parents with moons cannot stop being planets.");
@@ -443,7 +483,7 @@ public class Main extends Application {
                 bodyBox.setValue(newName);
 
                 if (wasFocused) {
-                    currentFocus[0] = solarSystem.getBody(newName);
+                    currentFocus[0] = solarSystemRef[0].getBody(newName);
                     focusBox.setValue(newName);
                 }
             } catch (Exception ex) {
@@ -460,7 +500,7 @@ public class Main extends Application {
 
             boolean wasFocused = currentFocus[0] != null && selected.equals(currentFocus[0].getName());
 
-            boolean removed = solarSystem.removeBody(selected);
+            boolean removed = solarSystemRef[0].removeBody(selected);
             if (!removed) {
                 showError("Remove moons orbiting this body first.");
                 return;
@@ -469,7 +509,7 @@ public class Main extends Application {
             refreshLists.run();
 
             if (wasFocused) {
-                currentFocus[0] = solarSystem.getBody("Sun");
+                currentFocus[0] = solarSystemRef[0].getBody("Sun");
                 focusBox.setValue("Sun");
             }
 
@@ -477,13 +517,13 @@ public class Main extends Application {
         });
 
         Runnable resetCamera = () -> {
-            currentFocus[0] = solarSystem.getBody("Sun");
+            currentFocus[0] = solarSystemRef[0].getBody("Sun");
             focusBox.setValue("Sun");
 
             orbitYaw[0] = 35.0;
             orbitPitch[0] = 25.0;
 
-            Body sun = solarSystem.getBody("Sun");
+            Body sun = solarSystemRef[0].getBody("Sun");
             orbitDistance[0] = sun == null ? 7.0 : autoDistanceForRadius(sun.getView().getRadius());
 
             yawSlider.setValue(orbitYaw[0]);
@@ -498,7 +538,7 @@ public class Main extends Application {
             String selected = focusBox.getValue();
             if (selected == null) return;
 
-            Body focused = solarSystem.getBody(selected);
+            Body focused = solarSystemRef[0].getBody(selected);
             if (focused == null) return;
 
             currentFocus[0] = focused;
@@ -527,7 +567,7 @@ public class Main extends Application {
 
                 while (simulatedDt > 0) {
                     double step = Math.min(simulatedDt, MAX_PHYSICS_STEP);
-                    solarSystem.updatePhysics(step);
+                    solarSystemRef[0].updatePhysics(step);
                     simulatedDt -= step;
                 }
 
@@ -565,17 +605,18 @@ public class Main extends Application {
         startStopButton.setOnAction(e -> {
             if (isRunning[0]) {
                 timer.stop();
-                startStopButton.setText("▶️");
+                startStopButton.setText("▶");
                 isRunning[0] = false;
             } else {
                 lastTime[0] = 0;
                 timer.start();
-                startStopButton.setText("⏹️");
+                startStopButton.setText("⏹");
                 isRunning[0] = true;
             }
         });
 
         disableKeyboardFocus(
+                resetSimulationButton,
                 startStopButton,
                 scaleSlider,
                 dtSlider,
@@ -633,10 +674,19 @@ public class Main extends Application {
                 new Label("Color"),
                 colorPicker,
                 new HBox(5, addButton, editButton, removeButton),
-                resetCameraButton
+                resetCameraButton,
+                resetSimulationButton
         );
 
-        root.setRight(controlsBox);
+        // Scroll feature
+        ScrollPane controlsScrollPane = new ScrollPane(controlsBox);
+        controlsScrollPane.setFitToWidth(true);
+        controlsScrollPane.setPannable(true);
+        controlsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        controlsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        controlsScrollPane.setPrefWidth(380);
+
+        root.setRight(controlsScrollPane);
 
         Scene scene = new Scene(root, 1400, 900, true);
 
