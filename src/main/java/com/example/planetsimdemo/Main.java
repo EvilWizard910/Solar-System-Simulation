@@ -675,7 +675,63 @@ public class Main extends Application {
             }
         });
 
-        viewport.setOnMouseClicked(e -> viewport.requestFocus());
+        final double[] lastMouseX = {0};
+        final double[] lastMouseY = {0};
+
+        viewport.setOnMouseClicked(event -> {
+            viewport.requestFocus();
+            event.consume();
+        });
+
+        viewport.setOnMousePressed(event -> {
+            viewport.requestFocus();
+
+            lastMouseX[0] = event.getSceneX();
+            lastMouseY[0] = event.getSceneY();
+
+            event.consume();
+        });
+
+        viewport.setOnMouseDragged(event -> {
+            double mouseX = event.getSceneX();
+            double mouseY = event.getSceneY();
+
+            double deltaX = mouseX - lastMouseX[0];
+            double deltaY = mouseY - lastMouseY[0];
+
+            if (event.isPrimaryButtonDown()) {
+                double rotateSensitivity = 0.25;
+
+                double newYaw = yawSlider.getValue() + deltaX * rotateSensitivity;
+                double newPitch = pitchSlider.getValue() - deltaY * rotateSensitivity;
+
+                yawSlider.setValue(
+                        Math.max(yawSlider.getMin(), Math.min(yawSlider.getMax(), newYaw))
+                );
+
+                pitchSlider.setValue(
+                        Math.max(pitchSlider.getMin(), Math.min(pitchSlider.getMax(), newPitch))
+                );
+            }
+
+            if (event.isSecondaryButtonDown()) {
+                double zoomSensitivity = 0.01;
+                double zoomFactor = Math.pow(1.0 + zoomSensitivity, deltaY);
+
+                double newDistance = distanceSlider.getValue() * zoomFactor;
+
+                distanceSlider.setValue(
+                        Math.max(distanceSlider.getMin(), Math.min(distanceSlider.getMax(), newDistance))
+                );
+            }
+
+            lastMouseX[0] = mouseX;
+            lastMouseY[0] = mouseY;
+
+            event.consume();
+        });
+
+        viewport.setOnContextMenuRequested(event -> event.consume());
 
         stage.setTitle("Planetary Simulation");
         stage.setScene(scene);
