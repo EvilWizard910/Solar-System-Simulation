@@ -135,6 +135,7 @@ public class SolarSystem {
         bodyTypes.put(body.getName(), type);
         orbitParents.put(body.getName(), parentName);
         bodyColors.put(body.getName(), color);
+        body.getView().setMaterial(new PhongMaterial(color));
 
         if (orbit != null) {
             orbitElements.put(body.getName(), orbit);
@@ -183,15 +184,15 @@ public class SolarSystem {
         }
         return children;
     }
-    private Body createStar(String name, double mass, double radiusKm, Color color) {
+    private Body createStar(String name, double mass, double radiusKm ) {
         Sphere sphere = new Sphere(toSceneRadiusFromKm(name,radiusKm));
-        sphere.setMaterial(new PhongMaterial(color));
+        //sphere.setMaterial(new PhongMaterial(color));
         return new Body(name,mass,sphere,0,0,0,0,0,0);
     }
 
-    private Body createOrbitingBody(String name, double mass, double radiusKm, Color color, double centralMass, OrbitElements orbit) {
+    private Body createOrbitingBody(String name, double mass, double radiusKm, double centralMass, OrbitElements orbit) {
         Sphere sphere = new Sphere(toSceneRadiusFromKm(name,radiusKm));
-        sphere.setMaterial(new PhongMaterial(color));
+        //sphere.setMaterial(new PhongMaterial(color));
         OrbitalState state = stateFromOrbitalElements(
                 centralMass,
                 mass,
@@ -210,7 +211,7 @@ public class SolarSystem {
         if (parent ==null){
             return null;
         }
-        Body moon = createOrbitingBody(name,mass,radiusKm,color,parent.getMass(),orbit);
+        Body moon = createOrbitingBody(name,mass,radiusKm,parent.getMass(),orbit);
         moon.setPosition(parent.getX()+moon.getX(),parent.getY()+moon.getY(),parent.getZ()+moon.getZ());
         moon.setVelocity(parent.getVx()+moon.getVx(),parent.getVy()+moon.getVy(),parent.getVz()+moon.getVz());
         return moon;
@@ -218,39 +219,39 @@ public class SolarSystem {
 
 
     private void init() {
-       Body sun = createStar("Sun",massOfSun,700000,Color.YELLOW);
+       Body sun = createStar("Sun",massOfSun,700000);
        registerBody(sun, TYPE_STAR, null, Color.YELLOW, null);
 
         OrbitElements mercuryOrbit = new OrbitElements(0.3870993,0.20564,7.005,48.3, 29.13, 193);
-        Body mercury = createOrbitingBody("Mercury",Mercury_Mass,2439.7, Color.MISTYROSE,massOfSun,mercuryOrbit );
+        Body mercury = createOrbitingBody("Mercury",Mercury_Mass,2439.7, massOfSun,mercuryOrbit );
         registerBody(mercury, TYPE_PLANET,null, Color.MISTYROSE, mercuryOrbit);
 
         OrbitElements venusOrbit = new OrbitElements(0.7233336,0.00678,3.3947,76.7,54.9,125);
-        Body venus = createOrbitingBody("Venus", Venus_Mass, 6051.8, Color.BURLYWOOD, massOfSun,venusOrbit);
+        Body venus = createOrbitingBody("Venus", Venus_Mass, 6051.8, massOfSun,venusOrbit);
         registerBody(venus, TYPE_PLANET,null, Color.BURLYWOOD, venusOrbit);
 
        OrbitElements earthOrbit = new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0);
-        Body earth = createOrbitingBody("Earth", EARTH_MASS, 6371, Color.DODGERBLUE, massOfSun, earthOrbit);
+        Body earth = createOrbitingBody("Earth", EARTH_MASS, 6371, massOfSun, earthOrbit);
         registerBody(earth, TYPE_PLANET, null, Color.DODGERBLUE, earthOrbit);
 
         OrbitElements marsOrbit = new OrbitElements(1.52371, 0.09339, 1.85,49.6,286.5,355);
-        Body mars = createOrbitingBody("Mars", Mars_Mass,3389.5, Color.ORANGERED, massOfSun,marsOrbit);
+        Body mars = createOrbitingBody("Mars", Mars_Mass,3389.5, massOfSun,marsOrbit);
         registerBody(mars, TYPE_PLANET, null, Color.ORANGERED, marsOrbit);
 
         OrbitElements jupiterOrbit = new OrbitElements(5.2029, 0.0484, 1.304, 100.4,274.3,185);
-        Body jupiter = createOrbitingBody("Jupiter", Jupiter_Mass, 69911.0,Color.CORAL,massOfSun,jupiterOrbit);
+        Body jupiter = createOrbitingBody("Jupiter", Jupiter_Mass, 69911.0,massOfSun,jupiterOrbit);
         registerBody(jupiter, TYPE_PLANET, null, Color.CORAL,jupiterOrbit);
 
         OrbitElements saturnOrbit = new OrbitElements(9.537,0.0539,2.486,113.7,338.9,317);
-        Body saturn = createOrbitingBody("Saturn",Saturn_Mass,58232,Color.DARKGRAY,massOfSun,saturnOrbit);
+        Body saturn = createOrbitingBody("Saturn",Saturn_Mass,58232,massOfSun,saturnOrbit);
         registerBody(saturn, TYPE_PLANET, null, Color.DARKGRAY, saturnOrbit);
 
         OrbitElements uranusOrbit = new OrbitElements(19.189,0.04726,0.773,74.02,96.9,142);
-        Body uranus = createOrbitingBody("Uranus",Uranus_Mass,25362,Color.DARKTURQUOISE,massOfSun,uranusOrbit);
+        Body uranus = createOrbitingBody("Uranus",Uranus_Mass,25362,massOfSun,uranusOrbit);
         registerBody(uranus,TYPE_PLANET, null, Color.DARKTURQUOISE,uranusOrbit);
 
         OrbitElements neptuneOrbit = new OrbitElements(30.0699,0.00859,1.77,131.784,273.2,260.5);
-        Body neptune = createOrbitingBody("Neptune", Neptune_Mass,24622,Color.MIDNIGHTBLUE,massOfSun,neptuneOrbit);
+        Body neptune = createOrbitingBody("Neptune", Neptune_Mass,24622,massOfSun,neptuneOrbit);
         registerBody(neptune,TYPE_PLANET, null, Color.MIDNIGHTBLUE,neptuneOrbit);
      /*
         make("Moon", TYPE_MOON, "Earth", Moon_Mass, 1737.4, 0.0025695, 0.0, Color.LIGHTGRAY);
@@ -284,7 +285,7 @@ public class SolarSystem {
         OrbitElements orbit = null;
         Body body;
         if (TYPE_STAR.equals(normalizedType)) {
-            body = createStar(name, mass, radiusKm, color);
+            body = createStar(name, mass, radiusKm);
         } else {
             orbit = new OrbitElements(
                     semiMajorAxisAu,
@@ -298,7 +299,7 @@ public class SolarSystem {
             if (TYPE_MOON.equals(normalizedType)) {
                 body = createMoon(name, mass, radiusKm, color, parentName, orbit);
             } else {
-                body = createOrbitingBody(name, mass, radiusKm, color, massOfSun, orbit);
+                body = createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
             }
         }
 
@@ -364,7 +365,7 @@ public class SolarSystem {
          Body updatedBody;
 
          if (TYPE_STAR.equals(normalizedType)) {
-             updatedBody = createStar(newName, mass, radiusKm, color);
+             updatedBody = createStar(newName, mass, radiusKm);
          } else {
              newOrbit = new OrbitElements(semiMajorAxisAu, eccentricity,
                      inclinationDeg, ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg);
@@ -372,7 +373,7 @@ public class SolarSystem {
              if (TYPE_MOON.equals(normalizedType)) {
                  updatedBody = createMoon(newName, mass, radiusKm, color, parentName, newOrbit);
              } else {
-                 updatedBody = createOrbitingBody(newName, mass, radiusKm, color, massOfSun, newOrbit);
+                 updatedBody = createOrbitingBody(newName, mass, radiusKm, massOfSun, newOrbit);
              }
          }
          if (updatedBody == null) {
