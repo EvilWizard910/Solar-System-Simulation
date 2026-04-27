@@ -45,6 +45,7 @@ public class Main extends Application {
     private static void updateTypeState(
             ComboBox<String> typeBox,
             ComboBox<String> parentBox,
+            TextField massField,
             TextField semiMajorAxisField,
             TextField eccentricityField,
             TextField inclinationField,
@@ -60,22 +61,30 @@ public class Main extends Application {
         if (!isMoon) {
             parentBox.setValue(null);
         }
+        massField.setPromptText(isStar ? "Mass (solar masses)" : "Mass (kg)");
 
-        semiMajorAxisField.setDisable(isStar);
-        eccentricityField.setDisable(isStar);
-        inclinationField.setDisable(isStar);
-        ascendingNodeField.setDisable(isStar);
-        argumentOfPeriapsisField.setDisable(isStar);
-        trueAnomalyField.setDisable(isStar);
+        semiMajorAxisField.setDisable(false);
+        eccentricityField.setDisable(false);
+        inclinationField.setDisable(false);
+        ascendingNodeField.setDisable(false);
+        argumentOfPeriapsisField.setDisable(false);
+        trueAnomalyField.setDisable(false);
 
-        if (isStar) {
+        double semiMajorAxisAu = Double.parseDouble(semiMajorAxisField.getText().trim());
+        double eccentricity = Double.parseDouble(eccentricityField.getText().trim());
+        double inclinationDeg =  Double.parseDouble(inclinationField.getText().trim());
+        double ascendingNodeDeg =  Double.parseDouble(ascendingNodeField.getText().trim());
+        double argumentOfPeriapsisDeg =  Double.parseDouble(argumentOfPeriapsisField.getText().trim());
+        double trueAnomalyDeg =  Double.parseDouble(trueAnomalyField.getText().trim());
+
+        /*if (isStar) {
             semiMajorAxisField.setText("0.0");
             eccentricityField.setText("0.0");
             inclinationField.setText("0.0");
             ascendingNodeField.setText("0.0");
             argumentOfPeriapsisField.setText("0.0");
             trueAnomalyField.setText("0.0");
-        }
+        }*/
     }
 
     private static void showError(String message) {
@@ -288,7 +297,7 @@ public class Main extends Application {
             colorPicker.setValue(Color.WHITE);
             typeBox.setValue("Planet");
             parentBox.setValue(null);
-            updateTypeState(typeBox, parentBox, semiMajorAxisField, eccentricityField, inclinationField,
+            updateTypeState(typeBox, parentBox, massField, semiMajorAxisField, eccentricityField, inclinationField,
                     ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField);
         };
 
@@ -296,7 +305,7 @@ public class Main extends Application {
         clearSelectionButton.setOnAction(e -> clearBodySelection.run());
 
         typeBox.valueProperty().addListener((obs, oldValue, newValue) ->
-                updateTypeState(typeBox, parentBox, semiMajorAxisField, eccentricityField, inclinationField,
+                updateTypeState(typeBox, parentBox, massField, semiMajorAxisField, eccentricityField, inclinationField,
                         ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField));
 
         bodyBox.valueProperty().addListener((obs, oldValue, newValue) -> {
@@ -333,7 +342,7 @@ public class Main extends Application {
                 trueAnomalyField.setText("0.0");
             }
             updateTypeState(
-                    typeBox, parentBox,
+                    typeBox, parentBox,massField,
                     semiMajorAxisField, eccentricityField, inclinationField,
                     ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField
             );
@@ -404,14 +413,26 @@ public class Main extends Application {
                     return;
                 }
 
-                double mass = Double.parseDouble(massField.getText().trim());
+                double semiMajorAxisAu= 0;
+                double eccentricity = 0;
+                double inclinationDeg = 0;
+                double ascendingNodeDeg = 0;
+                double argumentOfPeriapsisDeg = 0;
+                double trueAnomalyDeg = 0;
+
+                double enteredMass = Double.parseDouble(massField.getText().trim());
+                double mass = "Star".equals(type)
+                        ? enteredMass * Conversions.massOfSun
+                        : enteredMass;
                 double radiusKm = Double.parseDouble(radiusField.getText().trim());
-                double semiMajorAxisAu = "Star".equals(type) ? 0.0 : Double.parseDouble(semiMajorAxisField.getText().trim());
-                double eccentricity = "Star".equals(type) ? 0.0 : Double.parseDouble(eccentricityField.getText().trim());
-                double inclinationDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(inclinationField.getText().trim());
-                double ascendingNodeDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(ascendingNodeField.getText().trim());
-                double argumentOfPeriapsisDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(argumentOfPeriapsisField.getText().trim());
-                double trueAnomalyDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(trueAnomalyField.getText().trim());
+                 semiMajorAxisAu = Double.parseDouble(semiMajorAxisField.getText().trim());
+                 eccentricity =  Double.parseDouble(eccentricityField.getText().trim());
+                 inclinationDeg =  Double.parseDouble(inclinationField.getText().trim());
+                 ascendingNodeDeg =  Double.parseDouble(ascendingNodeField.getText().trim());
+                 argumentOfPeriapsisDeg =  Double.parseDouble(argumentOfPeriapsisField.getText().trim());
+                 trueAnomalyDeg =  Double.parseDouble(trueAnomalyField.getText().trim());
+
+
 
                 boolean added=solarSystemRef[0].addNewBody(
                         name, type, parent, mass, radiusKm,
@@ -459,14 +480,21 @@ public class Main extends Application {
                     return;
                 }
 
+                double semiMajorAxisAu= 0;
+                double eccentricity = 0;
+                double inclinationDeg = 0;
+                double ascendingNodeDeg = 0;
+                double argumentOfPeriapsisDeg = 0;
+                double trueAnomalyDeg = 0;
+
                 double mass = Double.parseDouble(massField.getText().trim());
                 double radiusKm = Double.parseDouble(radiusField.getText().trim());
-                double semiMajorAxisAu = "Star".equals(type) ? 0.0 : Double.parseDouble(semiMajorAxisField.getText().trim());
-                double eccentricity = "Star".equals(type) ? 0.0 : Double.parseDouble(eccentricityField.getText().trim());
-                double inclinationDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(inclinationField.getText().trim());
-                double ascendingNodeDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(ascendingNodeField.getText().trim());
-                double argumentOfPeriapsisDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(argumentOfPeriapsisField.getText().trim());
-                double trueAnomalyDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(trueAnomalyField.getText().trim());
+                 semiMajorAxisAu = "Star".equals(type) ? 0.0 : Double.parseDouble(semiMajorAxisField.getText().trim());
+                 eccentricity = "Star".equals(type) ? 0.0 : Double.parseDouble(eccentricityField.getText().trim());
+                 inclinationDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(inclinationField.getText().trim());
+                 ascendingNodeDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(ascendingNodeField.getText().trim());
+                 argumentOfPeriapsisDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(argumentOfPeriapsisField.getText().trim());
+                 trueAnomalyDeg = "Star".equals(type) ? 0.0 : Double.parseDouble(trueAnomalyField.getText().trim());
 
                 Color color = colorPicker.getValue();
 

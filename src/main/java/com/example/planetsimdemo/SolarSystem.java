@@ -186,13 +186,17 @@ public class SolarSystem {
     }
     private Body createStar(String name, double mass, double radiusKm ) {
         Sphere sphere = new Sphere(toSceneRadiusFromKm(name,radiusKm));
-        //sphere.setMaterial(new PhongMaterial(color));
         return new Body(name,mass,sphere,0,0,0,0,0,0);
+    }
+    private Body createStar(String name, double mass, double radiusKm, OrbitElements orbit) {
+        if (orbit == null) {
+            return createStar(name, mass, radiusKm);
+        }
+        return createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
     }
 
     private Body createOrbitingBody(String name, double mass, double radiusKm, double centralMass, OrbitElements orbit) {
         Sphere sphere = new Sphere(toSceneRadiusFromKm(name,radiusKm));
-        //sphere.setMaterial(new PhongMaterial(color));
         OrbitalState state = stateFromOrbitalElements(
                 centralMass,
                 mass,
@@ -295,8 +299,9 @@ public class SolarSystem {
                     argumentOfPeriapsisDeg,
                     trueAnomalyDeg
             );
-
-            if (TYPE_MOON.equals(normalizedType)) {
+            if(TYPE_STAR.equals(normalizedType)){
+                body = createStar(name, mass, radiusKm,orbit);
+            }else if (TYPE_MOON.equals(normalizedType)) {
                 body = createMoon(name, mass, radiusKm, color, parentName, orbit);
             } else {
                 body = createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
@@ -363,18 +368,14 @@ public class SolarSystem {
          }
          OrbitElements newOrbit = null;
          Body updatedBody;
-
+         newOrbit = new OrbitElements(semiMajorAxisAu, eccentricity,
+                 inclinationDeg, ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg);
          if (TYPE_STAR.equals(normalizedType)) {
-             updatedBody = createStar(newName, mass, radiusKm);
-         } else {
-             newOrbit = new OrbitElements(semiMajorAxisAu, eccentricity,
-                     inclinationDeg, ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg);
-
-             if (TYPE_MOON.equals(normalizedType)) {
+             updatedBody = createStar(newName, mass, radiusKm, newOrbit);
+         } else if (TYPE_MOON.equals(normalizedType)) {
                  updatedBody = createMoon(newName, mass, radiusKm, color, parentName, newOrbit);
              } else {
                  updatedBody = createOrbitingBody(newName, mass, radiusKm, massOfSun, newOrbit);
-             }
          }
          if (updatedBody == null) {
              return false;
