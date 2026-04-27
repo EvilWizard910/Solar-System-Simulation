@@ -1,6 +1,8 @@
 package com.example.planetsimdemo;
 import javafx.scene.shape.Sphere;
 
+import static com.example.planetsimdemo.Conversions.sceneToKilometers;
+
 public class Body {
     private final String name;
     private final double mass;
@@ -53,6 +55,7 @@ public class Body {
     public double getAx() { return ax; }
     public double getAy() { return ay; }
     public double getAz() { return az; }
+    public double getRadius(){return sceneToKilometers(view.getRadius());}
 
 
     //more setters

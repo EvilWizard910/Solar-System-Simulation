@@ -24,4 +24,5 @@ public class Conversions {
     public static double metersToScene(double meters) {
         return meters / 2.0e9;
     }
+    public static double sceneToKilometers(double scene){return scene*2.0e6;}
 }
