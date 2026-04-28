@@ -286,11 +286,33 @@ public class SolarSystem {
             parentName = null;
         }
         if (radiusKm<=0 || mass <=0){return false;}
+
+        boolean givenOrbit = (semiMajorAxisAu!=0.0
+                ||eccentricity!=0.0
+                || inclinationDeg!=0.0
+                ||ascendingNodeDeg!=0.0
+                ||argumentOfPeriapsisDeg!=0.0
+                ||trueAnomalyDeg!=0.0
+        );
+
         OrbitElements orbit = null;
         Body body;
-        if (TYPE_STAR.equals(normalizedType)) {
-            body = createStar(name, mass, radiusKm);
+        if (TYPE_STAR.equals(normalizedType)){
+            if(givenOrbit) {
+                orbit = new OrbitElements(
+                        semiMajorAxisAu,
+                        eccentricity,
+                        inclinationDeg,
+                        ascendingNodeDeg,
+                        argumentOfPeriapsisDeg,
+                        trueAnomalyDeg);
+            body=createStar(name, mass, radiusKm, orbit);}
+            else{
+            body = createStar(name, mass, radiusKm);}
         } else {
+            if(semiMajorAxisAu <= 0.0){return false;}
+            if(eccentricity <= 0.0 || eccentricity>=1){return false;}
+
             orbit = new OrbitElements(
                     semiMajorAxisAu,
                     eccentricity,
@@ -299,9 +321,8 @@ public class SolarSystem {
                     argumentOfPeriapsisDeg,
                     trueAnomalyDeg
             );
-            if(TYPE_STAR.equals(normalizedType)){
-                body = createStar(name, mass, radiusKm,orbit);
-            }else if (TYPE_MOON.equals(normalizedType)) {
+
+             if (TYPE_MOON.equals(normalizedType)) {
                 body = createMoon(name, mass, radiusKm, color, parentName, orbit);
             } else {
                 body = createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
@@ -368,8 +389,23 @@ public class SolarSystem {
          }
          OrbitElements newOrbit = null;
          Body updatedBody;
+
+         boolean givenOrbit = (semiMajorAxisAu != 0.0
+                 || eccentricity != 0.0
+                 || inclinationDeg != 0.0
+                 || ascendingNodeDeg != 0.0
+                 || argumentOfPeriapsisDeg != 0.0
+                 || trueAnomalyDeg != 0.0);
+         if(TYPE_STAR.equals(normalizedType) && !givenOrbit){
+             updatedBody = createStar(newName, mass, radiusKm);
+         }else {
+             if(semiMajorAxisAu <= 0.0){return false;}
+             if(eccentricity <= 0.0 || eccentricity >= 1){return false;}
+         }
+
          newOrbit = new OrbitElements(semiMajorAxisAu, eccentricity,
                  inclinationDeg, ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg);
+
          if (TYPE_STAR.equals(normalizedType)) {
              updatedBody = createStar(newName, mass, radiusKm, newOrbit);
          } else if (TYPE_MOON.equals(normalizedType)) {
@@ -467,16 +503,6 @@ public class SolarSystem {
         return orbitElements.get(name);
     }
 
-
-  /*  public void updateBodyRadius(String name, double radiusKm) {
-        Body body = map.get(name);
-        if (body == null) return;
-
-        double sceneRadius = toSceneRadiusFromKm(name, radiusKm);
-        baseRadii.put(body, sceneRadius);
-        logicalRadiiKm.put(name, radiusKm);
-        applyScaleToBody(body);
-    }*/
 
     public void setViewScale(double slider) {
         currentViewScale = Math.max(0.0, Math.min(1.0, slider));
