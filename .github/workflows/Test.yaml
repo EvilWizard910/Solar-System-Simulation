@@ -1,0 +1,34 @@
+name: Test User Inputs
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "Name to test"
+        required: true
+        default: "Miku"
+        type: string
+      mode:
+        description: "Test mode"
+        required: true
+        default: "basic"
+        type: choice
+        options:
+          - basic
+          - advanced
+          - debug
+      dry_run:
+        description: "Run without changes"
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  test_inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show inputs
+        run: |
+          echo "Username: ${{ inputs.username }}"
+          echo "Mode: ${{ inputs.mode }}"
+          echo "Dry rub: ${inputs.dry_run }}"
