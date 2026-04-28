@@ -210,7 +210,7 @@ public class SolarSystem {
         return new Body(name,mass,sphere,state.x(),state.y(),state.z(),state.vx(),state.vy(),state.vz());
     }
 
-    private Body createMoon(String name, double mass, double radiusKm, Color color, String parentName, OrbitElements orbit) {
+    private Body createMoon(String name, double mass, double radiusKm, String parentName, OrbitElements orbit) {
         Body parent = map.get(parentName);
         if (parent ==null){
             return null;
@@ -257,8 +257,13 @@ public class SolarSystem {
         OrbitElements neptuneOrbit = new OrbitElements(30.0699,0.00859,1.77,131.784,273.2,260.5);
         Body neptune = createOrbitingBody("Neptune", Neptune_Mass,24622,massOfSun,neptuneOrbit);
         registerBody(neptune,TYPE_PLANET, null, Color.MIDNIGHTBLUE,neptuneOrbit);
+
+        OrbitElements moonOrbit = new OrbitElements(0.00257,0.0549,5.1,0,0,327);
+        Body moon = createMoon("Moon",Moon_Mass,1737.4, "Earth", moonOrbit);
+        registerBody(moon, TYPE_MOON, "Earth", Color.LIGHTGRAY,moonOrbit);
+
+
      /*
-        make("Moon", TYPE_MOON, "Earth", Moon_Mass, 1737.4, 0.0025695, 0.0, Color.LIGHTGRAY);
         make("Io", TYPE_MOON, "Jupiter", Io_Mass, 1821.6, 421800000.0 / AU_IN_METERS, 0.0, Color.LIMEGREEN);
         make("Europa", TYPE_MOON, "Jupiter", Europa_mass, 1560.8, 671100000.0 / AU_IN_METERS, 45.0, Color.WHITE);
         make("Ganymede", TYPE_MOON, "Jupiter", Ganymede_mass, 2631.2, 1070400000.0 / AU_IN_METERS, 90.0, Color.GRAY);
@@ -323,7 +328,7 @@ public class SolarSystem {
             );
 
              if (TYPE_MOON.equals(normalizedType)) {
-                body = createMoon(name, mass, radiusKm, color, parentName, orbit);
+                body = createMoon(name, mass, radiusKm, parentName, orbit);
             } else {
                 body = createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
             }
@@ -409,7 +414,7 @@ public class SolarSystem {
          if (TYPE_STAR.equals(normalizedType)) {
              updatedBody = createStar(newName, mass, radiusKm, newOrbit);
          } else if (TYPE_MOON.equals(normalizedType)) {
-                 updatedBody = createMoon(newName, mass, radiusKm, color, parentName, newOrbit);
+                 updatedBody = createMoon(newName, mass, radiusKm, parentName, newOrbit);
              } else {
                  updatedBody = createOrbitingBody(newName, mass, radiusKm, massOfSun, newOrbit);
          }
@@ -427,7 +432,6 @@ public class SolarSystem {
                      child.name,
                      child.mass,
                      child.radiusKm,
-                     child.color,
                      newName,
                      child.orbit
              );
