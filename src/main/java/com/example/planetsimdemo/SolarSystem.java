@@ -392,7 +392,7 @@ public class SolarSystem {
          if (!children.isEmpty() && !TYPE_PLANET.equals(normalizedType)) {
              return false;
          }
-         OrbitElements newOrbit = null;
+         OrbitElements newOrbit;
          Body updatedBody;
 
          boolean givenOrbit = (semiMajorAxisAu != 0.0
@@ -401,12 +401,9 @@ public class SolarSystem {
                  || ascendingNodeDeg != 0.0
                  || argumentOfPeriapsisDeg != 0.0
                  || trueAnomalyDeg != 0.0);
-         if(TYPE_STAR.equals(normalizedType) && !givenOrbit){
-             updatedBody = createStar(newName, mass, radiusKm);
-         }else {
-             if(semiMajorAxisAu <= 0.0){return false;}
-             if(eccentricity <= 0.0 || eccentricity >= 1){return false;}
-         }
+
+         if(semiMajorAxisAu <= 0.0){return false;}
+         if(eccentricity <= 0.0 || eccentricity >= 1){return false;}
 
          newOrbit = new OrbitElements(semiMajorAxisAu, eccentricity,
                  inclinationDeg, ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg);
