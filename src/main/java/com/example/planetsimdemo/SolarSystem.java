@@ -4,6 +4,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
+import java.util.Comparator;
 
 
 import java.util.*;
@@ -79,8 +80,21 @@ public class SolarSystem {
     ) {
     }
 
-    public SolarSystem() {
-        init();
+    public record InitialCondition(
+            String name,
+            String type,
+            String parent,
+            double mass,
+            double radiusKm,
+            Color color,
+            OrbitElements orbit
+    ){}
+
+
+    public SolarSystem(){this(defaultInitialConditions());}
+
+    public SolarSystem(Collection<InitialCondition> initialConditions){
+        init(initialConditions);
     }
 
     public static double toSceneRadiusFromKm(String bodyName, double radiusKm) {
@@ -222,45 +236,11 @@ public class SolarSystem {
     }
 
 
-    private void init() {
-       Body sun = createStar("Sun",massOfSun,700000);
-       registerBody(sun, TYPE_STAR, null, Color.YELLOW, null);
+    private void init(Collection<InitialCondition> initialConditions) {
+        for (InitialCondition condition : orderInitialConditions(initialConditions)) {
+            addInitialCondition(condition);
+        }
 
-        OrbitElements mercuryOrbit = new OrbitElements(0.3870993,0.20564,7.005,48.3, 29.13, 193);
-        Body mercury = createOrbitingBody("Mercury",Mercury_Mass,2439.7, massOfSun,mercuryOrbit );
-        registerBody(mercury, TYPE_PLANET,null, Color.MISTYROSE, mercuryOrbit);
-
-        OrbitElements venusOrbit = new OrbitElements(0.7233336,0.00678,3.3947,76.7,54.9,125);
-        Body venus = createOrbitingBody("Venus", Venus_Mass, 6051.8, massOfSun,venusOrbit);
-        registerBody(venus, TYPE_PLANET,null, Color.BURLYWOOD, venusOrbit);
-
-       OrbitElements earthOrbit = new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0);
-        Body earth = createOrbitingBody("Earth", EARTH_MASS, 6371, massOfSun, earthOrbit);
-        registerBody(earth, TYPE_PLANET, null, Color.DODGERBLUE, earthOrbit);
-
-        OrbitElements marsOrbit = new OrbitElements(1.52371, 0.09339, 1.85,49.6,286.5,355);
-        Body mars = createOrbitingBody("Mars", Mars_Mass,3389.5, massOfSun,marsOrbit);
-        registerBody(mars, TYPE_PLANET, null, Color.ORANGERED, marsOrbit);
-
-        OrbitElements jupiterOrbit = new OrbitElements(5.2029, 0.0484, 1.304, 100.4,274.3,185);
-        Body jupiter = createOrbitingBody("Jupiter", Jupiter_Mass, 69911.0,massOfSun,jupiterOrbit);
-        registerBody(jupiter, TYPE_PLANET, null, Color.CORAL,jupiterOrbit);
-
-        OrbitElements saturnOrbit = new OrbitElements(9.537,0.0539,2.486,113.7,338.9,317);
-        Body saturn = createOrbitingBody("Saturn",Saturn_Mass,58232,massOfSun,saturnOrbit);
-        registerBody(saturn, TYPE_PLANET, null, Color.DARKGRAY, saturnOrbit);
-
-        OrbitElements uranusOrbit = new OrbitElements(19.189,0.04726,0.773,74.02,96.9,142);
-        Body uranus = createOrbitingBody("Uranus",Uranus_Mass,25362,massOfSun,uranusOrbit);
-        registerBody(uranus,TYPE_PLANET, null, Color.DARKTURQUOISE,uranusOrbit);
-
-        OrbitElements neptuneOrbit = new OrbitElements(30.0699,0.00859,1.77,131.784,273.2,260.5);
-        Body neptune = createOrbitingBody("Neptune", Neptune_Mass,24622,massOfSun,neptuneOrbit);
-        registerBody(neptune,TYPE_PLANET, null, Color.MIDNIGHTBLUE,neptuneOrbit);
-
-        OrbitElements moonOrbit = new OrbitElements(0.00257,0.0549,5.1,0,0,327);
-        Body moon = createMoon("Moon",Moon_Mass,1737.4, "Earth", moonOrbit);
-        registerBody(moon, TYPE_MOON, "Earth", Color.LIGHTGRAY,moonOrbit);
 
 
      /*
@@ -269,6 +249,66 @@ public class SolarSystem {
         make("Ganymede", TYPE_MOON, "Jupiter", Ganymede_mass, 2631.2, 1070400000.0 / AU_IN_METERS, 90.0, Color.GRAY);
         make("Callisto", TYPE_MOON, "Jupiter", Callisto_mass, 2410.3, 1882700000.0 / AU_IN_METERS, 135.0, Color.DARKGRAY);
     */}
+
+    private List<InitialCondition> orderInitialConditions(Collection<InitialCondition> initialConditions){
+        List<InitialCondition> ordered = new ArrayList<>(initialConditions);
+        ordered.sort(Comparator
+                .comparingInt((InitialCondition condition) -> typeOrder(condition.type()))
+                .thenComparing(InitialCondition::name,String.CASE_INSENSITIVE_ORDER));
+        return ordered;
+    }
+
+    //sets an order to add in objects: add stars, planets, then moons
+    private int typeOrder(String type) {
+        String normalizedType = normalizeType(type);
+        if (TYPE_STAR.equals(normalizedType)) return 0;
+        if(TYPE_PLANET.equals(normalizedType)) return 1;
+        return 2;
+    }
+
+    private void addInitialCondition(InitialCondition condition){
+        String normalizedType = normalizeType(condition.type());
+        String parentName = TYPE_MOON.equals(normalizedType) ? condition.parent() : null;
+
+        Body body;
+        if (TYPE_STAR.equals(normalizedType)){
+            body=createStar(condition.name(), condition.mass(), condition.radiusKm(),condition.orbit());
+        }else if (TYPE_MOON.equals(normalizedType)){
+            body = createMoon(condition.name(), condition.mass(), condition.radiusKm(), parentName,condition.orbit());
+        }else {
+            body=createOrbitingBody(condition.name(), condition.mass(),condition.radiusKm(),massOfSun,condition.orbit());
+        }
+        if (body == null) {
+            throw new IllegalArgumentException("Unable to create body: "+condition.name());
+        }
+        registerBody(body,normalizedType,parentName,condition.color() == null ? Color.WHITE : condition.color(), condition.orbit());
+    }
+
+    public static List<InitialCondition> defaultInitialConditions() {
+        List<InitialCondition> defaults = new ArrayList<>();
+
+        defaults.add(new InitialCondition("Sun", "Star", null, massOfSun, 700000, Color.YELLOW, null));
+        defaults.add(new InitialCondition("Mercury", "Planet", null, Mercury_Mass, 2439.7, Color.MISTYROSE,
+                new OrbitElements(0.3870993, 0.20564, 7.005, 48.3, 29.13, 193)));
+        defaults.add(new InitialCondition("Venus", "Planet", null, Venus_Mass, 6051.8, Color.BURLYWOOD,
+                new OrbitElements(0.7233336, 0.00678, 3.3947, 76.7, 54.9, 125)));
+        defaults.add(new InitialCondition("Earth", "Planet", null, EARTH_MASS, 6371, Color.DODGERBLUE,
+                new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0)));
+        defaults.add(new InitialCondition("Mars", "Planet", null, Mars_Mass, 3389.5, Color.ORANGERED,
+                new OrbitElements(1.52371, 0.09339, 1.85, 49.6, 286.5, 355)));
+        defaults.add(new InitialCondition("Jupiter", "Planet", null, Jupiter_Mass, 69911.0, Color.CORAL,
+                new OrbitElements(5.2029, 0.0484, 1.304, 100.4, 274.3, 185)));
+        defaults.add(new InitialCondition("Saturn", "Planet", null, Saturn_Mass, 58232, Color.DARKGRAY,
+                new OrbitElements(9.537, 0.0539, 2.486, 113.7, 338.9, 317)));
+        defaults.add(new InitialCondition("Uranus", "Planet", null, Uranus_Mass, 25362, Color.DARKTURQUOISE,
+                new OrbitElements(19.189, 0.04726, 0.773, 74.02, 96.9, 142)));
+        defaults.add(new InitialCondition("Neptune", "Planet", null, Neptune_Mass, 24622, Color.MIDNIGHTBLUE,
+                new OrbitElements(30.0699, 0.00859, 1.77, 131.784, 273.2, 260.5)));
+        defaults.add(new InitialCondition("Moon", "Moon", "Earth", Moon_Mass, 1737.4, Color.LIGHTGRAY,
+                new OrbitElements(0.00257, 0.0549, 5.1, 0, 0, 327)));
+
+        return defaults;
+    }
 
     public boolean addNewBody(String name, String type, String parentName,
                               double mass, double radiusKm, double semiMajorAxisAu,double eccentricity,

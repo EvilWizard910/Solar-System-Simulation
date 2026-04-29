@@ -120,13 +120,22 @@ public class Main extends Application {
         alert.showAndWait();
     }
 
+    private SolarSystem createFirbaseSolarSystem() {
+        try {
+            InitialConditionsRepository repository = new InitialConditionsRepository(fstore);
+            return new SolarSystem(repository.loadInitialConditions());
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            return new SolarSystem(SolarSystem.defaultInitialConditions());
+        }
+    }
     @Override
     public void start(Stage stage) {
 
         fstore = contxtFirebase.firebase();
         fauth = FirebaseAuth.getInstance();
 
-        final SolarSystem[] solarSystemRef =  { new SolarSystem() };
+        final SolarSystem[] solarSystemRef =  { createFirbaseSolarSystem() };
         Group root3D = solarSystemRef[0].getRoot();
 
         SubScene subScene = new SubScene(
@@ -388,7 +397,7 @@ public class Main extends Application {
         Button resetSimulationButton = new Button("Reset Simulation");
 
         resetSimulationButton.setOnAction(e -> {
-            SolarSystem newSystem = new SolarSystem();
+            SolarSystem newSystem = createFirbaseSolarSystem();
 
             subScene.setRoot(newSystem.getRoot());
 
