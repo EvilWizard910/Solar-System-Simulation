@@ -11,9 +11,28 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.cloud.FirestoreClient;
+
+
+
+
+import com.google.firebase.auth.*;
+import com.google.cloud.firestore.*;
+import com.google.api.core.ApiFuture;
+
+import java.io.FileInputStream;
 import java.util.Locale;
 
 public class Main extends Application {
+
+    public static Firestore fstore;
+    public static FirebaseAuth fauth;
+    private final FirestoreContext contxtFirebase = new FirestoreContext();
 
     private static String formatSimulationSpeed(double secondsPerSecond) {
         if (secondsPerSecond < 60) {
@@ -103,6 +122,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+
+        fstore = contxtFirebase.firebase();
+        fauth = FirebaseAuth.getInstance();
+
         final SolarSystem[] solarSystemRef =  { new SolarSystem() };
         Group root3D = solarSystemRef[0].getRoot();
 
