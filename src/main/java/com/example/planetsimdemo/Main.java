@@ -10,6 +10,11 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
@@ -33,6 +38,21 @@ public class Main extends Application {
     public static Firestore fstore;
     public static FirebaseAuth fauth;
     private final FirestoreContext contxtFirebase = new FirestoreContext();
+
+    private enum SidebarScreen{
+        CONTROLS,SYSTEMS
+    }
+
+    private record SystemOption(String id, String label){
+        @Override public String toString(){
+            return label;
+        }
+    }
+
+    private static void setVisibleManaged(Node node), boolean visible{
+        node.setVisible(visible);
+        node.setManaged(visible);
+    }
 
     private static String formatSimulationSpeed(double secondsPerSecond) {
         if (secondsPerSecond < 60) {
@@ -135,7 +155,9 @@ public class Main extends Application {
         fstore = contxtFirebase.firebase();
         fauth = FirebaseAuth.getInstance();
 
-        final SolarSystem[] solarSystemRef =  { createFirbaseSolarSystem() };
+        final SolarSystem[] solarSystemRef =  {
+                new SolarSystem(SolarSystem.defaultInitialConditions())
+        };
         Group root3D = solarSystemRef[0].getRoot();
 
         SubScene subScene = new SubScene(
@@ -190,6 +212,16 @@ public class Main extends Application {
         double[] orbitPitch = {25.0};
         double[] orbitDistance = {7.0};
 
+        //sidebar to switch between default system and firestore systems
+        SidebarScreen[] currentSidebarScreen = {SidebarScreen.CONTROLS};
+
+        boolean[] signedIn = {false};
+        String[] signedInEmail = {null};
+
+        ObservableList<SystemOption> availibleSystems=FXCollections.observableArrayList(
+                new SystemOption("__default__","Default Solar System")
+        );
+
         solarSystemRef[0].setViewScale(0.0);
 
         BorderPane root = new BorderPane();
@@ -199,6 +231,13 @@ public class Main extends Application {
         controlsBox.setStyle("-fx-padding: 10;");
         controlsBox.setPrefWidth(360);
         controlsBox.setMinWidth(320);
+
+        VBox systemsBox = new VBox(12);
+        systemsBox.setPadding(new Insets(10));
+        systemsBox.setPrefWidth(360);
+        systemsBox.setMinWidth(320);
+
+
 
         Button startStopButton = new Button("Start Simulation");
 
@@ -397,7 +436,8 @@ public class Main extends Application {
         Button resetSimulationButton = new Button("Reset Simulation");
 
         resetSimulationButton.setOnAction(e -> {
-            SolarSystem newSystem = createFirbaseSolarSystem();
+            SolarSystem newSystem = new SolarSystem(SolarSystem.defaultInitialConditions());
+            solarSystemRef[0]=newSystem;
 
             subScene.setRoot(newSystem.getRoot());
 
@@ -427,8 +467,6 @@ public class Main extends Application {
             scaleSlider.setValue(0.0);
             dtSlider.setValue(0.0);
 
-            // replace old reference contents
-            solarSystemRef[0].getRoot().getChildren().clear();
         });
 
         addButton.setOnAction(e -> {
