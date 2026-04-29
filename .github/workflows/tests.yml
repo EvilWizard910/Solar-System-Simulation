@@ -1,0 +1,32 @@
+#This file runs maven test
+name: Tests
+on:
+  push:
+    paths:
+      - "src/**"
+      - "pom.xml"
+      - ".github/workflows/**"
+  pull_request:
+    paths:
+      - "src/**"
+      - "pom.xml"
+      - "qodana.yaml"
+  workflow_dispatch:
+
+jobs:
+ test:
+   runs-on:  ubuntu-latest
+
+   steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 23
+          cache: maven
+
+      - name: Run tests
+        run: ./mvnw test
