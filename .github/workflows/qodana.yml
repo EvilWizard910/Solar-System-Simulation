@@ -23,7 +23,7 @@ on:
 
 jobs:
   qodana:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
