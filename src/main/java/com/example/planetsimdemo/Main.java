@@ -49,7 +49,7 @@ public class Main extends Application {
         }
     }
 
-    private static void setVisibleManaged(Node node), boolean visible{
+    private static void setVisibleManaged(Node node, boolean visible){
         node.setVisible(visible);
         node.setManaged(visible);
     }
@@ -236,6 +236,25 @@ public class Main extends Application {
         systemsBox.setPadding(new Insets(10));
         systemsBox.setPrefWidth(360);
         systemsBox.setMinWidth(320);
+
+        ScrollPane controlsScrollPane = new ScrollPane(controlsBox);
+        controlsScrollPane.setFitToWidth(true);
+        controlsScrollPane.setPannable(true);
+        controlsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        controlsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        controlsScrollPane.setPrefWidth(380);
+
+        ScrollPane systemsScrollPane = new ScrollPane(systemsBox);
+        systemsScrollPane.setFitToWidth(true);
+        systemsScrollPane.setPannable(true);
+        systemsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        systemsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        systemsScrollPane.setPrefWidth(380);
+
+        setVisibleManaged(controlsScrollPane, true);
+        setVisibleManaged(systemsScrollPane, false);
+
+        StackPane sidebarContent = new StackPane(controlsScrollPane, systemsScrollPane);
 
 
 
@@ -715,6 +734,120 @@ public class Main extends Application {
                 startStopButton.setText("⏹");
                 isRunning[0] = true;
             }
+
+        });
+
+        //adding UI buttons to pull and push from firestore and to sign in and out
+        Button systemsButton  = new Button("Systems");
+        systemsButton.setMaxWidth(Double.MAX_VALUE);
+
+        Button signOutButton = new Button("Sign Out");
+        signOutButton.setDisable(true);
+        signOutButton.setMaxWidth(Double.MAX_VALUE);
+
+        HBox signOutRow = new HBox(signOutButton);
+        signOutRow.setAlignment(Pos.CENTER_RIGHT);
+        signOutRow.setPadding(new Insets(10, 10, 0, 10));
+
+        BorderPane sidebarPane = new BorderPane();
+        sidebarPane.setTop(systemsButton);
+        BorderPane.setMargin(systemsButton, new Insets(10, 10, 0, 10));
+        sidebarPane.setCenter(sidebarContent);
+        sidebarPane.setBottom(signOutRow);
+
+        root.setRight(sidebarPane);
+
+        Runnable rebuildSystemsScreen = () ->{
+            systemsBox.getChildren().clear();
+
+            Label title = new Label("Systems");
+            title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+            if(!signedIn[0]){
+                Label prompt = new Label("Sign in to save and load");
+                prompt.setWrapText(true);
+
+                TextField emailField = new TextField();
+                emailField.setPromptText("Email");
+
+                PasswordField passwordField = new PasswordField();
+                passwordField.setPromptText("Password");
+
+                Button signInButton= new Button("Sign in");
+                signInButton.setMaxWidth(Double.MAX_VALUE);
+
+                signInButton.setOnAction(event -> {
+                    String email = emailField.getText() == null ? "" : emailField.getText().trim();
+                    String password = passwordField.getText() == null ? "" : passwordField.getText().trim();
+
+                    if(email.isEmpty() || password.isEmpty()) {
+                        showError("Enter both an email and password");
+                        return;
+                    }
+
+                    signedIn[0] = true;
+                    signedInEmail[0] =email;
+                    signOutButton.setDisable(false);
+                    //rebuildSystemsScreen.run();
+
+                });
+
+                systemsBox.getChildren().addAll(
+                        title,prompt,emailField,passwordField,signInButton
+                );
+            }else{
+                Label signedInLabel = new Label("Account: "+signedInEmail[0]);
+
+                ComboBox<SystemOption> systemSelector = new ComboBox<>(availibleSystems);
+                systemSelector.setMaxWidth(Double.MAX_VALUE);
+                systemSelector.setValue(availibleSystems.get(0));
+
+                Button loadButton = new Button("Load Selected");
+                loadButton.setMaxWidth(Double.MAX_VALUE);
+
+                Label info = new Label("Saved Systems: ");
+                info.setWrapText(true);
+
+                loadButton.setOnAction(event -> {
+                    SystemOption selected = systemSelector.getValue();
+                    if (selected != null) {
+                        return;
+                    }
+                    if("__default__".equals(selected.id())){
+                        SolarSystem newSystem = new SolarSystem(SolarSystem.defaultInitialConditions());
+                        solarSystemRef[0] = newSystem;
+                        subScene.setRoot(newSystem.getRoot());
+                        currentFocus[0]=newSystem.getBody("Sun");
+                        refreshLists.run();
+                        focusBox.setValue("Sun");
+                    }
+                });
+                systemsBox.getChildren().addAll(title,
+                        signedInLabel,
+                        new Label("Available Systems"),
+                        systemSelector,
+                        loadButton,
+                        info);
+            }
+        };
+        systemsButton.setOnAction(event -> {
+            boolean showSystems = currentSidebarScreen[0] == SidebarScreen.CONTROLS;
+            currentSidebarScreen[0] = showSystems ? SidebarScreen.SYSTEMS : SidebarScreen.CONTROLS;
+
+            setVisibleManaged(controlsScrollPane, !showSystems);
+            setVisibleManaged(systemsButton, showSystems);
+
+            systemsButton.setText(showSystems ? "Back to Controls" : "Systems");
+            if(showSystems){
+                rebuildSystemsScreen.run();
+            }
+        });
+
+        signOutButton.setOnAction(event -> {
+            signedIn[0] = false;
+            signedInEmail[0] = null;
+            signOutButton.setDisable(true);
+            rebuildSystemsScreen.run();
         });
 
         disableKeyboardFocus(
@@ -735,7 +868,9 @@ public class Main extends Application {
                 addButton,
                 editButton,
                 removeButton,
-                resetCameraButton
+                resetCameraButton,
+                systemsButton,
+                signOutButton
         );
 
         resetCamera.run();
@@ -780,15 +915,6 @@ public class Main extends Application {
                 resetSimulationButton
         );
 
-        // Scroll feature
-        ScrollPane controlsScrollPane = new ScrollPane(controlsBox);
-        controlsScrollPane.setFitToWidth(true);
-        controlsScrollPane.setPannable(true);
-        controlsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        controlsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        controlsScrollPane.setPrefWidth(380);
-
-        root.setRight(controlsScrollPane);
 
         Scene scene = new Scene(root, 1400, 900, true);
 
@@ -883,6 +1009,7 @@ public class Main extends Application {
             event.consume();
         });
 
+
         viewport.setOnContextMenuRequested(event -> event.consume());
 
         stage.setTitle("Planetary Simulation");
@@ -891,6 +1018,7 @@ public class Main extends Application {
         stage.show();
 
         viewport.requestFocus();
+
     }
 
     public static void main(String[] args) {
