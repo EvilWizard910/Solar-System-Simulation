@@ -7,6 +7,7 @@ module com.example.planetsimdemo {
     requires google.cloud.firestore;
     requires google.cloud.core;
     requires com.google.api.apicommon;
+    requires java.net.http;
 
     exports com.example.planetsimdemo;
 }

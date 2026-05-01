@@ -36,8 +36,11 @@ import java.util.Locale;
 public class Main extends Application {
 
     public static Firestore fstore;
-    public static FirebaseAuth fauth;
-    private final FirestoreContext contxtFirebase = new FirestoreContext();
+    //public static FirebaseAuth fauth;
+    //private final FirestoreContext contxtFirebase = new FirestoreContext();
+
+    private final FirebaseAuthenticationService authService = new FirebaseAuthenticationService();
+    private AuthSession currentSession;
 
     private enum SidebarScreen{
         CONTROLS,SYSTEMS
@@ -152,8 +155,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
 
-        fstore = contxtFirebase.firebase();
-        fauth = FirebaseAuth.getInstance();
+        //fstore = contxtFirebase.firebase();
+        //fauth = FirebaseAuth.getInstance();
 
         final SolarSystem[] solarSystemRef =  {
                 new SolarSystem(SolarSystem.defaultInitialConditions())
@@ -757,7 +760,10 @@ public class Main extends Application {
 
         root.setRight(sidebarPane);
 
-        Runnable rebuildSystemsScreen = () ->{
+        Runnable[] rebuildSystemsScreen = new Runnable[1];
+
+
+        rebuildSystemsScreen[0] = () ->{
             systemsBox.getChildren().clear();
 
             Label title = new Label("Systems");
@@ -785,15 +791,44 @@ public class Main extends Application {
                         return;
                     }
 
-                    signedIn[0] = true;
-                    signedInEmail[0] =email;
-                    signOutButton.setDisable(false);
-                    //rebuildSystemsScreen.run();
+                   try{
+                       currentSession=authService.signIn(email,password);
+                        signedIn[0]=true;
+                        signedInEmail[0]=currentSession.email();
+                        signOutButton.setDisable(false);
+                        rebuildSystemsScreen[0].run();
+                   }catch(Exception ex){
+                       showError("Sign in failed. "+ex.getMessage());
+                   }
 
                 });
 
+                Button signUpButton = new Button("Create Account");
+                signUpButton.setMaxWidth(Double.MAX_VALUE);
+
+                signUpButton.setOnAction(event -> {
+                    String email = emailField.getText()==null ? "" : emailField.getText().trim();
+                    String password = passwordField.getText() ==null ? "" : passwordField.getText().trim();
+
+                    if(email.isEmpty() || password.isEmpty()) {
+                        showError("Enter both an email and password");
+                        return;
+                    }
+                    try{
+                        currentSession = authService.signUp(email,password);
+                        signedIn[0]=true;
+                        signedInEmail[0]=currentSession.email();
+                        signOutButton.setDisable(false);
+                        rebuildSystemsScreen[0].run();}
+                    catch(Exception ex){
+                        showError("Account creation failed. "+ex.getMessage());
+                    }
+
+                });
+
+
                 systemsBox.getChildren().addAll(
-                        title,prompt,emailField,passwordField,signInButton
+                        title,prompt,emailField,passwordField,signInButton,signUpButton
                 );
             }else{
                 Label signedInLabel = new Label("Account: "+signedInEmail[0]);
@@ -810,7 +845,7 @@ public class Main extends Application {
 
                 loadButton.setOnAction(event -> {
                     SystemOption selected = systemSelector.getValue();
-                    if (selected != null) {
+                    if (selected == null) {
                         return;
                     }
                     if("__default__".equals(selected.id())){
@@ -830,25 +865,28 @@ public class Main extends Application {
                         info);
             }
         };
+
         systemsButton.setOnAction(event -> {
             boolean showSystems = currentSidebarScreen[0] == SidebarScreen.CONTROLS;
             currentSidebarScreen[0] = showSystems ? SidebarScreen.SYSTEMS : SidebarScreen.CONTROLS;
 
             setVisibleManaged(controlsScrollPane, !showSystems);
-            setVisibleManaged(systemsButton, showSystems);
+            setVisibleManaged(systemsScrollPane, showSystems);
 
             systemsButton.setText(showSystems ? "Back to Controls" : "Systems");
             if(showSystems){
-                rebuildSystemsScreen.run();
+                rebuildSystemsScreen[0].run();
             }
         });
 
         signOutButton.setOnAction(event -> {
+            currentSession=null;
             signedIn[0] = false;
             signedInEmail[0] = null;
             signOutButton.setDisable(true);
-            rebuildSystemsScreen.run();
+            rebuildSystemsScreen[0].run();
         });
+
 
         disableKeyboardFocus(
                 resetSimulationButton,
