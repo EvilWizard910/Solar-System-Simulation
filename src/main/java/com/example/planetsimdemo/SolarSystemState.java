@@ -1,8 +1,6 @@
 package com.example.planetsimdemo;
 
 import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Sphere;
 
 import java.util.*;
 import java.util.ArrayList;
@@ -22,6 +20,14 @@ public class SolarSystemState {
     private static final String TYPE_PLANET = "Planet";
     private static final String TYPE_MOON = "Moon";
 
+
+    /*The semi major axis is the maximum distance an orbiting body will be from its center of orbit
+  * eccentricity defines how circular or how much an oval the orbit is, 0 is a circle, higher eccentricity makes an oval
+  * inclination refers to the tilt of an objects orbit using Earths orbit as 0 degrees, so 90 or 270 degrees would be a perpendicular orbit to earth
+  * ascending node is the degree in an orbit where an inclined orbit heads above Earths orbit(the reference frame for this scenario)
+  * argument of periapsis is the angle between the ascending node and the point where the orbiting body is closest to its center relative to its center
+  * true anomaly is a degree used to tell where a body is in its orbit
+  */
     public record OrbitElements(
             double semiMajorAxisAu,
             double eccentricity,
@@ -68,7 +74,9 @@ public class SolarSystemState {
         init(initialConditions);
     }
 
-    public List<Body> getBodies() {return bodies;}
+    public List<Body> getBodies() {
+        return Collections.unmodifiableList(bodies);
+    }
     public Body getBody(String name) {return byName.get(name);}
     public Set<String> getBodyNames() {return new TreeSet<>(byName.keySet());}
 
@@ -445,4 +453,6 @@ public class SolarSystemState {
 
         return defaults;
     }
+
+
 }
