@@ -6,19 +6,19 @@ import static com.example.planetsimdemo.Conversions.sceneToKilometers;
 public class Body {
     private final String name;
     private final double mass;
-    private final Sphere view;
+    //private final Sphere view;
 
     private double x, y, z;
     private double vx, vy, vz;
     private double ax, ay, az;
 
    //Creates a body with mass, position x,y,z with velocity and acceleration on all 3 dimensions
-    public Body(String name, double mass, Sphere view,
+    public Body(String name, double mass,
                        double x, double y, double z,
                        double vx, double vy, double vz) {
         this.name = name;
         this.mass = mass;
-        this.view = view;
+        //this.view = view;
         this.x = x;
         this.y = y;
         this.z = z;

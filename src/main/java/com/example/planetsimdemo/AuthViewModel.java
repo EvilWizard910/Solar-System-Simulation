@@ -50,7 +50,7 @@ public class AuthViewModel {
     }
 
     public boolean isSignedOut(){
-       return currentSession.get() != null && currentSession.get().isAuthenticated();
+       return currentSession.get() == null && !currentSession.get().isAuthenticated();
     }
 
     public StringProperty emailProperty(){return email;}

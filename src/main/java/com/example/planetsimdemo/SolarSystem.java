@@ -11,24 +11,15 @@ import java.util.*;
 
 import static com.example.planetsimdemo.Conversions.*;
 
+
 public class SolarSystem {
 
-    private static final String TYPE_STAR = "Star";
+    /*private static final String TYPE_STAR = "Star";
     private static final String TYPE_PLANET = "Planet";
-    private static final String TYPE_MOON = "Moon";
+    private static final String TYPE_MOON = "Moon";*/
 
     private final Group root = new Group();
-    private final List<Body> bodies = new ArrayList<>();
-    private final Map<String, Body> map = new HashMap<>();
-    private final Map<Body, Double> baseRadii = new HashMap<>();
-    private final Map<String, OrbitElements> orbitElements = new HashMap<>();
 
-    private final Map<String, Double> logicalRadiiKm = new HashMap<>();
-    private final Map<String, Double> logicalDistancesAu = new HashMap<>();
-    private final Map<String, Double> orbitalAnglesDeg = new HashMap<>();
-    private final Map<String, String> bodyTypes = new HashMap<>();
-    private final Map<String, String> orbitParents = new HashMap<>();
-    private final Map<String, Color> bodyColors = new HashMap<>();
 
     private double currentViewScale = 0.0;
 
@@ -61,34 +52,9 @@ public class SolarSystem {
     * argument of periapsis is the angle between the ascending node and the point where the orbiting body is closest to its center relative to its center
     * true anomaly is a degree used to tell where a body is in its orbit
     */
-    public record OrbitElements(
-            double semiMajorAxisAu,
-            double eccentricity,
-            double inclinationDeg,
-            double ascendingNodeDeg,
-            double argumentOfPeriapsisDeg,
-            double trueAnomalyDeg
-    ) {}
 
-    private record OrbitalState(
-            double x,
-            double y,
-            double z,
-            double vx,
-            double vy,
-            double vz
-    ) {
-    }
 
-    public record InitialCondition(
-            String name,
-            String type,
-            String parent,
-            double mass,
-            double radiusKm,
-            Color color,
-            OrbitElements orbit
-    ){}
+
 
 
     public SolarSystem(){this(defaultInitialConditions());}
@@ -105,11 +71,7 @@ public class SolarSystem {
         return sceneRadius * 2.0e9 / 1000.0;
     }
 
-    private String normalizeType(String type) {
-        if (TYPE_STAR.equalsIgnoreCase(type)) return TYPE_STAR;
-        if (TYPE_MOON.equalsIgnoreCase(type)) return TYPE_MOON;
-        return TYPE_PLANET;
-    }
+
 
     private double normalizeAngle(double angleDeg) {
         double a = angleDeg % 360.0;
@@ -133,52 +95,8 @@ public class SolarSystem {
         return Color.WHITE;
     }
 
-    private void registerBody(Body body, String type,
-                              String parentName,
-                              Color color,
-                              OrbitElements orbit) {
-        double radiusKm =body.getRadius();
-        bodies.add(body);
-        map.put(body.getName(), body);
-        root.getChildren().add(body.getView());
 
-        double sceneRadius = toSceneRadiusFromKm(body.getName(), radiusKm);
-        baseRadii.put(body, sceneRadius);
 
-        logicalRadiiKm.put(body.getName(), radiusKm);
-        bodyTypes.put(body.getName(), type);
-        orbitParents.put(body.getName(), parentName);
-        bodyColors.put(body.getName(), color);
-        body.getView().setMaterial(new PhongMaterial(color));
-
-        if (orbit != null) {
-            orbitElements.put(body.getName(), orbit);
-            logicalDistancesAu.put(body.getName(), orbit.semiMajorAxisAu());
-            orbitalAnglesDeg.put(body.getName(), orbit.trueAnomalyDeg());
-        } else {
-            orbitElements.remove(body.getName());
-            logicalDistancesAu.put(body.getName(), 0.0);
-            orbitalAnglesDeg.put(body.getName(), 0.0);
-        }
-        applyScaleToBody(body);
-    }
-
-    private void removeBodyInternal(String name) {
-        Body body = map.remove(name);
-        if (body == null) return;
-
-        bodies.remove(body);
-        root.getChildren().remove(body.getView());
-        baseRadii.remove(body);
-
-        orbitElements.remove(name);
-        logicalRadiiKm.remove(name);
-        logicalDistancesAu.remove(name);
-        orbitalAnglesDeg.remove(name);
-        bodyTypes.remove(name);
-        orbitParents.remove(name);
-        bodyColors.remove(name);
-    }
 
     private List<BodyState> getChildStates(String parentName) {
         List<BodyState> children = new ArrayList<>();
@@ -209,37 +127,11 @@ public class SolarSystem {
         return createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
     }
 
-    private Body createOrbitingBody(String name, double mass, double radiusKm, double centralMass, OrbitElements orbit) {
-        Sphere sphere = new Sphere(toSceneRadiusFromKm(name,radiusKm));
-        OrbitalState state = stateFromOrbitalElements(
-                centralMass,
-                mass,
-                orbit.semiMajorAxisAu()*AU_IN_METERS,
-                orbit.eccentricity(),
-                orbit.inclinationDeg(),
-                orbit.ascendingNodeDeg(),
-                orbit.argumentOfPeriapsisDeg(),
-                orbit.trueAnomalyDeg()
-                );
-        return new Body(name,mass,sphere,state.x(),state.y(),state.z(),state.vx(),state.vy(),state.vz());
-    }
-
-    private Body createMoon(String name, double mass, double radiusKm, String parentName, OrbitElements orbit) {
-        Body parent = map.get(parentName);
-        if (parent ==null){
-            return null;
-        }
-        Body moon = createOrbitingBody(name,mass,radiusKm,parent.getMass(),orbit);
-        moon.setPosition(parent.getX()+moon.getX(),parent.getY()+moon.getY(),parent.getZ()+moon.getZ());
-        moon.setVelocity(parent.getVx()+moon.getVx(),parent.getVy()+moon.getVy(),parent.getVz()+moon.getVz());
-        return moon;
-    }
 
 
-    private void init(Collection<InitialCondition> initialConditions) {
-        for (InitialCondition condition : orderInitialConditions(initialConditions)) {
-            addInitialCondition(condition);
-        }
+
+
+
 
 
 
@@ -248,23 +140,9 @@ public class SolarSystem {
         make("Europa", TYPE_MOON, "Jupiter", Europa_mass, 1560.8, 671100000.0 / AU_IN_METERS, 45.0, Color.WHITE);
         make("Ganymede", TYPE_MOON, "Jupiter", Ganymede_mass, 2631.2, 1070400000.0 / AU_IN_METERS, 90.0, Color.GRAY);
         make("Callisto", TYPE_MOON, "Jupiter", Callisto_mass, 2410.3, 1882700000.0 / AU_IN_METERS, 135.0, Color.DARKGRAY);
-    */}
+    */
 
-    private List<InitialCondition> orderInitialConditions(Collection<InitialCondition> initialConditions){
-        List<InitialCondition> ordered = new ArrayList<>(initialConditions);
-        ordered.sort(Comparator
-                .comparingInt((InitialCondition condition) -> typeOrder(condition.type()))
-                .thenComparing(InitialCondition::name,String.CASE_INSENSITIVE_ORDER));
-        return ordered;
-    }
 
-    //sets an order to add in objects: add stars, planets, then moons
-    private int typeOrder(String type) {
-        String normalizedType = normalizeType(type);
-        if (TYPE_STAR.equals(normalizedType)) return 0;
-        if(TYPE_PLANET.equals(normalizedType)) return 1;
-        return 2;
-    }
 
     private void addInitialCondition(InitialCondition condition){
         String normalizedType = normalizeType(condition.type());
@@ -284,7 +162,7 @@ public class SolarSystem {
         registerBody(body,normalizedType,parentName,condition.color() == null ? Color.WHITE : condition.color(), condition.orbit());
     }
 
-    public static List<InitialCondition> defaultInitialConditions() {
+    /*public static List<InitialCondition> defaultInitialConditions() {
         List<InitialCondition> defaults = new ArrayList<>();
 
         defaults.add(new InitialCondition("Sun", "Star", null, massOfSun, 700000, Color.YELLOW, null));
@@ -308,217 +186,18 @@ public class SolarSystem {
                 new OrbitElements(0.00257, 0.0549, 5.1, 0, 0, 327)));
 
         return defaults;
-    }
-
-    public boolean addNewBody(String name, String type, String parentName,
-                              double mass, double radiusKm, double semiMajorAxisAu,double eccentricity,
-                              double inclinationDeg, double ascendingNodeDeg, double argumentOfPeriapsisDeg,
-                              double trueAnomalyDeg, Color color) {
-        if (name == null || name.isBlank() || map.containsKey(name)) {
-            return false;
-        }
-
-        String normalizedType = normalizeType(type);
-        if (TYPE_MOON.equals(normalizedType)) {
-            if (parentName == null || parentName.isBlank()) {
-                return false;
-            }
-            Body parent = map.get(parentName);
-            if (parent == null || !TYPE_PLANET.equals(bodyTypes.get(parentName))) {
-                return false;
-            }
-        } else {
-            parentName = null;
-        }
-        if (radiusKm<=0 || mass <=0){return false;}
-
-        boolean givenOrbit = (semiMajorAxisAu!=0.0
-                ||eccentricity!=0.0
-                || inclinationDeg!=0.0
-                ||ascendingNodeDeg!=0.0
-                ||argumentOfPeriapsisDeg!=0.0
-                ||trueAnomalyDeg!=0.0
-        );
-
-        OrbitElements orbit = null;
-        Body body;
-        if (TYPE_STAR.equals(normalizedType)){
-            if(givenOrbit) {
-                orbit = new OrbitElements(
-                        semiMajorAxisAu,
-                        eccentricity,
-                        inclinationDeg,
-                        ascendingNodeDeg,
-                        argumentOfPeriapsisDeg,
-                        trueAnomalyDeg);
-            body=createStar(name, mass, radiusKm, orbit);}
-            else{
-            body = createStar(name, mass, radiusKm);}
-        } else {
-            if(semiMajorAxisAu <= 0.0){return false;}
-            if(eccentricity <= 0.0 || eccentricity>=1){return false;}
-
-            orbit = new OrbitElements(
-                    semiMajorAxisAu,
-                    eccentricity,
-                    inclinationDeg,
-                    ascendingNodeDeg,
-                    argumentOfPeriapsisDeg,
-                    trueAnomalyDeg
-            );
-
-             if (TYPE_MOON.equals(normalizedType)) {
-                body = createMoon(name, mass, radiusKm, parentName, orbit);
-            } else {
-                body = createOrbitingBody(name, mass, radiusKm, massOfSun, orbit);
-            }
-        }
-
-        if (body == null) {
-            return false;
-        }
-
-        registerBody(body, normalizedType, parentName, color, orbit);
-        return true;
-    }
+    }*/
 
 
 
 
-     public boolean updateBody(String originalName, String newName, String type, String parentName,
-                              double mass, double radiusKm, double semiMajorAxisAu,
-                               double eccentricity,
-                               double inclinationDeg,
-                               double ascendingNodeDeg,
-                               double argumentOfPeriapsisDeg,
-                               double trueAnomalyDeg, Color color) {
-         Body existing = map.get(originalName);
-         if (existing == null || newName == null || newName.isBlank()) {
-             return false;
-         }
-
-         String normalizedType = normalizeType(type);
-
-         if (!originalName.equals(newName) && map.containsKey(newName)) {
-             return false;
-         }
-
-         if (mass <= 0 || radiusKm <= 0) {
-             return false;
-         }
-
-         if (TYPE_MOON.equals(normalizedType)) {
-             if (parentName == null || parentName.isBlank()) {
-                 return false;
-             }
-
-             if (originalName.equals(parentName)) {
-                 return false;
-             }
-
-             if (!map.containsKey(parentName)) {
-                 return false;
-             }
-
-             if (!TYPE_PLANET.equals(bodyTypes.get(parentName))) {
-                 return false;
-             }
-         }else {
-             parentName = null;
-         }
-
-         List<BodyState> children = getChildStates(originalName);
-
-         if (!children.isEmpty() && !TYPE_PLANET.equals(normalizedType)) {
-             return false;
-         }
-         OrbitElements newOrbit;
-         Body updatedBody;
-
-         boolean givenOrbit = (semiMajorAxisAu != 0.0
-                 || eccentricity != 0.0
-                 || inclinationDeg != 0.0
-                 || ascendingNodeDeg != 0.0
-                 || argumentOfPeriapsisDeg != 0.0
-                 || trueAnomalyDeg != 0.0);
-
-         if(semiMajorAxisAu <= 0.0){return false;}
-         if(eccentricity <= 0.0 || eccentricity >= 1){return false;}
-
-         newOrbit = new OrbitElements(semiMajorAxisAu, eccentricity,
-                 inclinationDeg, ascendingNodeDeg, argumentOfPeriapsisDeg, trueAnomalyDeg);
-
-         if (TYPE_STAR.equals(normalizedType)) {
-             updatedBody = createStar(newName, mass, radiusKm, newOrbit);
-         } else if (TYPE_MOON.equals(normalizedType)) {
-                 updatedBody = createMoon(newName, mass, radiusKm, parentName, newOrbit);
-             } else {
-                 updatedBody = createOrbitingBody(newName, mass, radiusKm, massOfSun, newOrbit);
-         }
-         if (updatedBody == null) {
-             return false;
-         }
-
-         removeBodyInternal(originalName);
-         registerBody(updatedBody, normalizedType, parentName, color, newOrbit);
-
-         for (BodyState child : children) {
-             removeBodyInternal(child.name);
-
-             Body rebuiltChild = createMoon(
-                     child.name,
-                     child.mass,
-                     child.radiusKm,
-                     newName,
-                     child.orbit
-             );
-
-             if (rebuiltChild != null) {
-                 registerBody(
-                         rebuiltChild,
-                         child.type,
-                         newName,
-                         child.color,
-                         child.orbit
-                     );
-                 }
-             }
-
-         return true;
-
-     }
-
-    public boolean removeBody(String name) {
-        if (!getChildStates(name).isEmpty()) {
-            return false;
-        }
-
-        removeBodyInternal(name);
-        return true;
-    }
 
 
-    public Body getBody(String name) {
-        return map.get(name);
-    }
 
-    public Set<String> getBodyNames() {
-        return new TreeSet<>(map.keySet());
-    }
 
-    public Set<String> getPlanetNames() {
-        TreeSet<String> names = new TreeSet<>();
-        for (String name : map.keySet()) {
-            if (TYPE_PLANET.equals(bodyTypes.get(name))) {
-                names.add(name);
-            }
-        }
-        return names;
-    }
 
-    public double getBodyRadiusKm(String name) {
-        return logicalRadiiKm.getOrDefault(name, 0.0);
-    }
+
+
 
     public double getBodyDistanceAu(String name) {
         return logicalDistancesAu.getOrDefault(name, 0.0);
@@ -528,21 +207,8 @@ public class SolarSystem {
         return orbitalAnglesDeg.getOrDefault(name, 0.0);
     }
 
-    public String getBodyType(String name) {
-        return bodyTypes.getOrDefault(name, TYPE_PLANET);
-    }
 
-    public String getOrbitParent(String name) {
-        return orbitParents.get(name);
-    }
 
-    public Color getBodyColor(String name) {
-        return bodyColors.getOrDefault(name, Color.WHITE);
-    }
-
-    public OrbitElements getOrbitElements(String name) {
-        return orbitElements.get(name);
-    }
 
 
     public void setViewScale(double slider) {
@@ -552,7 +218,7 @@ public class SolarSystem {
         }
     }
 
-    public void updatePhysics(double dt) {
+    /*public void updatePhysics(double dt) {
         for (Body body : bodies) {
             body.resetAcceleration();
         }
@@ -597,7 +263,7 @@ public class SolarSystem {
             body.getView().setTranslateY(Conversions.metersToScene(body.getY()));
             body.getView().setTranslateZ(Conversions.metersToScene(body.getZ()));
         }
-    }
+    }*/
 
     private void applyGravity(Body a, Body b) {
         double dx = b.getX() - a.getX();
@@ -627,69 +293,8 @@ public class SolarSystem {
 
 
 
-    /*semi major axis is the farthest distance between the center or orbit and the body orbiting
-    eccentricity changes the orbital shape
-    nu will change the starting position and it is the angle from periapsis, or angle of the body from the it's center of orbit
-    r is the distance of a body from its center of orbiy
-    mu is the force of gravity between two bodies
-    h is the angular momentum magnitude, it controls orbital speed
-    omega small is used as an argument of periapsis and rotates the ellipse
-    Inclination tilts the orbital plane
-    omega big rotates the tilted orbital plane
-    */
-    private OrbitalState stateFromOrbitalElements(
-            double centralMass,
-            double bodyMass,
-            double semiMajorAxis,
-            double eccentricity,
-            double inclinationDeg,
-            double ascendingNodeDeg,
-            double argumentOfPeriapsisDeg,
-            double trueAnomalyDeg
-    ) {
-        double i = Math.toRadians(inclinationDeg);
-        double omegaBig = Math.toRadians(ascendingNodeDeg);
-        double omegaSmall = Math.toRadians(argumentOfPeriapsisDeg);
-        double nu = Math.toRadians(trueAnomalyDeg);
-        double mu = Conversions.G*(centralMass+bodyMass);
-        double r = semiMajorAxis*(1-eccentricity*eccentricity)/(1+eccentricity*Math.cos(nu));
-        double xOrb = r*Math.cos(nu);
-        double yOrb = r*Math.sin(nu);
-        double h = Math.sqrt(mu*semiMajorAxis*(1-eccentricity*eccentricity));
-        double vxOrb = -mu/h*Math.sin(nu);
-        double vyOrb = mu/h*(eccentricity + Math.cos(nu));
 
-        double[] pos = rotateToWorld(xOrb,yOrb,0.0,omegaBig,i,omegaSmall);
-        double[] vel = rotateToWorld(vxOrb, vyOrb, 0.0, omegaBig, i, omegaSmall);
 
-        return new OrbitalState(
-                pos[0], pos[1], pos[2], vel[0],vel[1],vel[2]
-        );
-    }
 
-    private double[] rotateToWorld(
-            double x, double y, double z,
-            double ascendingNode,
-            double inclination,
-            double argumentOfPeriapsis
-    ){
-        double cos0=Math.cos(ascendingNode);
-        double sin0=Math.sin(ascendingNode);
-        double cosI=Math.cos(inclination);
-        double sinI=Math.sin(inclination);
-        double cosW=Math.cos(argumentOfPeriapsis);
-        double sinW=Math.sin(argumentOfPeriapsis);
-
-        double x1 =cosW*x-sinW*y;
-        double y1 =sinW*x+cosW*y;
-        double z1=z;
-        double x2=x1;
-        double y2=cosI*y1-sinI*z1;
-        double z2=sinI*y1+cosI*z1;
-        double x3=cos0*x2-sin0*y2;
-        double y3=sin0*x2+cos0*y2;
-        double z3=z2;
-        return new double[]{x3,y3,z3};
-    }
 }
 
