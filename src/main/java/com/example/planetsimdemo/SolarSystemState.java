@@ -21,6 +21,7 @@ public class SolarSystemState {
     private static final String TYPE_MOON = "Moon";
 
 
+
     /*The semi major axis is the maximum distance an orbiting body will be from its center of orbit
   * eccentricity defines how circular or how much an oval the orbit is, 0 is a circle, higher eccentricity makes an oval
   * inclination refers to the tilt of an objects orbit using Earths orbit as 0 degrees, so 90 or 270 degrees would be a perpendicular orbit to earth
@@ -96,31 +97,31 @@ public class SolarSystemState {
 
     public String getOrbitParent(String name) {
       BodyMetaData metadata = metadataByName.get(name);
-      return metadata == null ? null: metadata.parent;
+      return metadata == null ? null: metadata.parent();
     }
 
     public double getBodyRadiusKm(String name) {
         BodyMetaData metadata = metadataByName.get(name);
-        return metadata == null ? 0.0: metadata.radiusKm;
+        return metadata == null ? 0.0: metadata.radiusKm();
     }
 
     public Color getBodyColor(String name) {
         BodyMetaData metadata = metadataByName.get(name);
-        return metadata == null ? Color.WHITE : metadata.color;
+        return metadata == null ? Color.WHITE : metadata.color();
     }
 
     public OrbitElements getOrbitElements(String name) {
         BodyMetaData metadata = metadataByName.get(name);
-        return metadata == null ? null : metadata.orbit;
+        return metadata == null ? null : metadata.orbit();
     }
 
     public List<InitialCondition> toInitialConditions() {
         List<InitialCondition> conditions = new ArrayList<>();
-        for(String name : getBodyNames()){
+        for(String name : getBodyNames()) {
             Body body = byName.get(name);
             BodyMetaData metadata = metadataByName.get(name);
 
-            conditions.add(new InitialConditon(
+            conditions.add(new InitialCondition(
                     name,
                     metadata.type(),
                     metadata.parent(),
@@ -156,12 +157,13 @@ public class SolarSystemState {
         }
 
         OrbitElements orbit = null;
-        if (TYPE_STAR.equals(normalizedType)||hasOrbitInput(semiMajorAxisAu,eccentricity,inclinationDeg,ascendingNodeDeg,
-                argumentOfPeriapsisDeg,trueAnomalyDeg)) {
+        if (!TYPE_STAR.equals(normalizedType)||hasOrbitInput(
+                semiMajorAxisAu,eccentricity,inclinationDeg,
+                ascendingNodeDeg, argumentOfPeriapsisDeg,trueAnomalyDeg)) {
             if (semiMajorAxisAu <= 0.0) {
                 return false;
             }
-            if (eccentricity <= 0.0 || eccentricity >= 1) {
+            if (eccentricity < 0.0 || eccentricity >= 1) {
                 return false;
             }
 
@@ -359,7 +361,9 @@ public class SolarSystemState {
             BodyMetaData metadata = metadataByName.get(name);
             if(metadata!=null && parentName.equals(metadata.parent())) {
                 Body body = byName.get(name);
-                children.add(new InitialCondition(name, metadata.type(), metadata.parent(), body.getMass(), metadata.radiusKm(), metadata.color, metadata.orbit()));
+                children.add(new InitialCondition(
+                        name, metadata.type(), metadata.parent(), body.getMass(),
+                        metadata.radiusKm(), metadata.color(), metadata.orbit()));
             }
         }
         return children;
@@ -379,7 +383,7 @@ public class SolarSystemState {
     omega big rotates the tilted orbital plane
     */
     private OrbitalState stateFromOrbitalElements(double centralMass, double bodyMass, OrbitElements orbit) {
-        double i = Math.toRadians(orbit.inclinationDeg);
+        double i = Math.toRadians(orbit.inclinationDeg());
         double omegaBig = Math.toRadians(orbit.ascendingNodeDeg());
         double omegaSmall = Math.toRadians(orbit.argumentOfPeriapsisDeg());
         double nu = Math.toRadians(orbit.trueAnomalyDeg());
@@ -426,6 +430,89 @@ public class SolarSystemState {
         double y3=sin0*x2+cos0*y2;
         double z3=z2;
         return new double[]{x3,y3,z3};
+    }
+
+    public record BodySnapshot(
+            String name,
+            String type,
+            String parent,
+            double mass,
+            double radiusKm,
+            Color color,
+            double x,
+            double y,
+            double z,
+            double vx,
+            double vy,
+            double vz,
+            double ax,
+            double ay,
+            double az,
+            OrbitElements orbit
+    ) {}
+
+    public List<BodySnapshot> toSnapshots() {
+        List<BodySnapshot> snapshots = new ArrayList<>();
+
+        for (String name : getBodyNames()) {
+            Body body = byName.get(name);
+            BodyMetaData metadata = metadataByName.get(name);
+
+            snapshots.add(new BodySnapshot(
+                    name,
+                    metadata.type(),
+                    metadata.parent(),
+                    body.getMass(),
+                    metadata.radiusKm(),
+                    metadata.color(),
+                    body.getX(),
+                    body.getY(),
+                    body.getZ(),
+                    body.getVx(),
+                    body.getVy(),
+                    body.getVz(),
+                    body.getAx(),
+                    body.getAy(),
+                    body.getAz(),
+                    metadata.orbit()
+            ));
+        }
+
+        return snapshots;
+    }
+
+    public static SolarSystemState fromSnapshots(List<BodySnapshot> snapshots) {
+        SolarSystemState state = new SolarSystemState();
+        state.bodies.clear();
+        state.byName.clear();
+        state.metadataByName.clear();
+
+        for (BodySnapshot snapshot : snapshots) {
+            Body body = new Body(
+                    snapshot.name(),
+                    snapshot.mass(),
+                    snapshot.x(),
+                    snapshot.y(),
+                    snapshot.z(),
+                    snapshot.vx(),
+                    snapshot.vy(),
+                    snapshot.vz()
+            );
+            body.setAcceleration(snapshot.ax(), snapshot.ay(), snapshot.az());
+
+            state.bodies.add(body);
+            state.byName.put(snapshot.name(), body);
+            state.metadataByName.put(snapshot.name(),
+                    new BodyMetaData(
+                            snapshot.type(),
+                            snapshot.parent(),
+                            snapshot.radiusKm(),
+                            snapshot.color(),
+                            snapshot.orbit()
+                    ));
+        }
+
+        return state;
     }
 
     public static List<InitialCondition> defaultInitialConditions() {

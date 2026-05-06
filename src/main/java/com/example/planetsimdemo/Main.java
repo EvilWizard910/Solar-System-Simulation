@@ -16,15 +16,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.cloud.FirestoreClient;
-
-
-
 
 import com.google.firebase.auth.*;
 import com.google.cloud.firestore.*;
@@ -34,6 +26,10 @@ import java.io.FileInputStream;
 import java.util.Locale;
 
 public class Main extends Application {
+
+    Firestore firestore = new FirestoreContext().firestore();
+    InitialConditionsRepository repository = new InitialConditionsRepository(firestore);
+    FirebaseAuthenticationService authService = new FirebaseAuthenticationService();
 
     public static Firestore fstore;
     //public static FirebaseAuth fauth;
@@ -211,9 +207,7 @@ public class Main extends Application {
         final double[] simulationSpeed = {1.0};
 
         Body[] currentFocus = {solarSystemRef[0].getBody("Sun")};
-        double[] orbitYaw = {35.0};
-        double[] orbitPitch = {25.0};
-        double[] orbitDistance = {7.0};
+
 
         //sidebar to switch between default system and firestore systems
         SidebarScreen[] currentSidebarScreen = {SidebarScreen.CONTROLS};
@@ -382,23 +376,7 @@ public class Main extends Application {
 
         ColorPicker colorPicker = new ColorPicker(Color.WHITE);
 
-        Runnable clearBodySelection = () -> {
-            bodyBox.setValue(null);
-            nameField.clear();
-            massField.clear();
-            radiusField.clear();
-            semiMajorAxisField.clear();
-            eccentricityField.clear();
-            inclinationField.clear();
-            ascendingNodeField.clear();
-            argumentOfPeriapsisField.clear();
-            trueAnomalyField.clear();
-            colorPicker.setValue(Color.WHITE);
-            typeBox.setValue("Planet");
-            parentBox.setValue(null);
-            updateTypeState(typeBox, parentBox, massField, semiMajorAxisField, eccentricityField, inclinationField,
-                    ascendingNodeField, argumentOfPeriapsisField, trueAnomalyField);
-        };
+
 
         Button clearSelectionButton = new Button("Clear Selection");
         clearSelectionButton.setOnAction(e -> clearBodySelection.run());
@@ -480,7 +458,7 @@ public class Main extends Application {
             orbitPitch[0] = 25.0;
 
             Body sun = newSystem.getBody("Sun");
-            orbitDistance[0] = sun == null ? 7.0 : autoDistanceForRadius(sun.getView().getRadius());
+
 
             yawSlider.setValue(orbitYaw[0]);
             pitchSlider.setValue(orbitPitch[0]);

@@ -17,6 +17,7 @@ public class AuthViewModel {
     public AuthViewModel(FirebaseAuthenticationService authService) {
         this.authService = authService;
     }
+
     public void SignIn(){
         errorMessage.set("");
         signingIn.set(true);

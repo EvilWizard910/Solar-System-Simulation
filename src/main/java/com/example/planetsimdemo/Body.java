@@ -1,24 +1,20 @@
 package com.example.planetsimdemo;
-import javafx.scene.shape.Sphere;
-
-import static com.example.planetsimdemo.Conversions.sceneToKilometers;
 
 public class Body {
     private final String name;
     private final double mass;
-    //private final Sphere view;
 
     private double x, y, z;
     private double vx, vy, vz;
     private double ax, ay, az;
 
-   //Creates a body with mass, position x,y,z with velocity and acceleration on all 3 dimensions
+   //a Body object has all things needed for physics equations only. It has a name, position, velocity, acceleration and mass.
+   //these parameters are used in the physics equations in PhysicsEngine
     public Body(String name, double mass,
                        double x, double y, double z,
                        double vx, double vy, double vz) {
         this.name = name;
         this.mass = mass;
-        //this.view = view;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -45,7 +41,6 @@ public class Body {
     //getters
     public String getName() { return name; }
     public double getMass() { return mass; }
-    public Sphere getView() { return view; }
     public double getX() { return x; }
     public double getY() { return y; }
     public double getZ() { return z; }
@@ -55,7 +50,6 @@ public class Body {
     public double getAx() { return ax; }
     public double getAy() { return ay; }
     public double getAz() { return az; }
-    public double getRadius(){return sceneToKilometers(view.getRadius());}
 
 
     //more setters
@@ -69,6 +63,11 @@ public class Body {
         this.vx = vx;
         this.vy = vy;
         this.vz = vz;
+    }
+    public void setAcceleration(double ax, double ay, double az) {
+        this.ax = ax;
+        this.ay = ay;
+        this.az = az;
     }
 
     //part of Verlet integration

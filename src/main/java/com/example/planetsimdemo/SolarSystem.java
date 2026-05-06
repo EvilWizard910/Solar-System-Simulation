@@ -5,12 +5,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+//Builds the solar sytems that the users wants to see
 public final class SolarSystem {
     private final SolarSystemState state;
     private final PhysicsEngine physicsEngine;
 
     public SolarSystem(){
         this(SolarSystemState.defaultInitialConditions());
+    }
+    public SolarSystem(SolarSystemState state) {
+        this.state = state;
+        this.physicsEngine = new PhysicsEngine();
     }
     public SolarSystem(Collection<SolarSystemState.InitialCondition> initialConditions){
         this.state = new SolarSystemState(initialConditions);
@@ -23,7 +28,7 @@ public final class SolarSystem {
     public void updatePhysics(double dt){physicsEngine.update(state, dt);
     }
 
-    private Body getBody(String name){
+    public Body getBody(String name){
         return state.getBody(name);
     }
 
@@ -47,11 +52,26 @@ public final class SolarSystem {
 
     public List<SolarSystemState.InitialCondition> toInitialConditions(){return state.toInitialConditions();}
 
-    public boolean addNewBody(String originalName, String newName, String type, String parentName,
+    public boolean updateBody(String originalName, String newName, String type, String parentName,
                               double mass, double radiusKm, double semiMajorAxisAu, double eccentricity,
-                              double inclinationDegree, double ascendingNodeDegree, double arguementOfPeriapsisDegree,
-                              double trueAnomalyDegree, Color color){
-        return state.updateBody(originalName, newName, type, parentName,mass,radiusKm,semiMajorAxisAu,eccentricity,inclinationDegree,ascendingNodeDegree,arguementOfPeriapsisDegree,trueAnomalyDegree,color);
+                              double inclinationDegree, double ascendingNodeDegree, double argumentOfPeriapsisDegree,
+                              double trueAnomalyDeg, Color color){
+        return state.updateBody(
+                originalName, newName, type, parentName,
+                mass, radiusKm, semiMajorAxisAu, eccentricity,
+                inclinationDegree, ascendingNodeDegree, argumentOfPeriapsisDegree,
+                trueAnomalyDeg, color
+        );
+
+    }
+
+    public boolean addNewBody( String Name, String type, String parentName,
+                              double mass, double radiusKm, double semiMajorAxisAu, double eccentricity,
+                              double inclinationDegree, double ascendingNodeDegree, double argumentOfPeriapsisDegree,
+                              double trueAnomalyDeg, Color color){
+        return state.addNewBody( Name, type, parentName,
+                mass,radiusKm,semiMajorAxisAu,eccentricity,
+                inclinationDegree,ascendingNodeDegree,argumentOfPeriapsisDegree,trueAnomalyDeg,color);
     }
     public boolean removeBody(String name){
         return state.removeBody(name);
