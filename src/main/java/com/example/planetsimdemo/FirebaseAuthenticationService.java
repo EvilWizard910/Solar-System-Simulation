@@ -30,7 +30,7 @@ public class FirebaseAuthenticationService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() >= 400) {
-            throw new IOException("Sign in fialed " + response.body());
+            throw new IOException("Sign in failed " + response.body());
         }
         return parseAuthSession(response.body());
     }
@@ -51,7 +51,7 @@ public class FirebaseAuthenticationService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() >= 400) {
-            throw new IOException("Sign up fialed " + response.body());
+            throw new IOException("Sign up failed " + response.body());
         }
         return  parseAuthSession(response.body());
     }
