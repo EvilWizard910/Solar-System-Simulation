@@ -67,7 +67,7 @@ public class AuthViewModel {
 
     public void refreshSavedSystems(){
         AuthSession session = currentSession.get();
-        if(session != null || !session.isAuthenticated()){
+        if(session == null || !session.isAuthenticated()){
             savedSystems.clear();
             selectedSavedSystem.set(null);
             return;
@@ -115,7 +115,7 @@ public class AuthViewModel {
     }
 
     public boolean isSignedOut(){
-        return currentSession.get() != null&&currentSession.get().isAuthenticated();
+        return currentSession.get() == null&& !currentSession.get().isAuthenticated();
     }
 
     public StringProperty emailProperty(){return email;}

@@ -91,7 +91,7 @@ public class Design2Controller {
         authViewModel.currentSessionProperty().addListener((obs, oldValue, newValue) ->{
             boolean signedIn=newValue!=null&&newValue.isAuthenticated();
             signOutButton.setDisable(!signedIn);
-            signOutButton.setDisable(!signedIn);
+            saveButton.setDisable(!signedIn);
         });
     }
     private void bindBodyEditorSection(){
@@ -279,7 +279,7 @@ public class Design2Controller {
         bodyEditorViewModel.eccentricityProperty().set(parseDouble(eccentricityField.getText()));
         bodyEditorViewModel.inclinationDegProperty().set(parseDouble(inclinationDegreeField.getText()));
         bodyEditorViewModel.ascendingNodeDegProperty().set(parseDouble(ascendingNodeDegreeField.getText()));
-        bodyEditorViewModel.argumentOfPeriapsisDeg().set(parseDouble(argumentOfPeriapsisDegreeField.getText()));
+        bodyEditorViewModel.argumentOfPeriapsisDegProperty().set(parseDouble(argumentOfPeriapsisDegreeField.getText()));
         bodyEditorViewModel.trueAnomalyDegProperty().set(parseDouble(trueAnomalyDegField.getText()));
 
     }
@@ -292,7 +292,7 @@ public class Design2Controller {
         semiMajorAxisAuField.setText(Double.toString(bodyEditorViewModel.semiMajorAxisAuProperty().get()));
         eccentricityField.setText(Double.toString(bodyEditorViewModel.eccentricityProperty().get()));
         ascendingNodeDegreeField.setText(Double.toString(bodyEditorViewModel.ascendingNodeDegProperty().get()));
-        argumentOfPeriapsisDegreeField.setText(Double.toString(bodyEditorViewModel.argumentOfPeriapsisDeg().get()));
+        argumentOfPeriapsisDegreeField.setText(Double.toString(bodyEditorViewModel.argumentOfPeriapsisDegProperty().get()));
         trueAnomalyDegField.setText(Double.toString(bodyEditorViewModel.trueAnomalyDegProperty().get()));
         colorPicker.setValue(bodyEditorViewModel.colorProperty().get());
     }

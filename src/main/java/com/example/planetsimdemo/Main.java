@@ -1,31 +1,32 @@
 package com.example.planetsimdemo;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.scene.*;
-import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.transform.Rotate;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-
-import com.google.cloud.firestore.Firestore;
-
-import com.google.firebase.auth.*;
-import com.google.cloud.firestore.*;
-import com.google.api.core.ApiFuture;
-
-import java.io.FileInputStream;
-import java.util.Locale;
 
 public class Main extends Application {
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/Design2.fxml"));
+
+
+        VBox root = loader.load();
+        Scene scene = new Scene(root, 420, 900);
+
+        stage.setTitle("Planetary Simulation");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+/*
+* public class Main extends Application {
 
     Firestore firestore = new FirestoreContext().firestore();
     InitialConditionsRepository repository = new InitialConditionsRepository(firestore);
@@ -1039,4 +1040,4 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch();
     }
-}
+}*/

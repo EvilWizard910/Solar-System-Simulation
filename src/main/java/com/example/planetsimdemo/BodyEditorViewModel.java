@@ -27,7 +27,7 @@ public class BodyEditorViewModel {
     private final StringProperty errorMessage = new SimpleStringProperty("");
 
     public void clearForm(){
-        selectedBodyName.set("null");
+        selectedBodyName.set(null);
         name.set("");
         type.set("Planet");
         mass.set(0.0);
@@ -214,7 +214,7 @@ public class BodyEditorViewModel {
     public DoubleProperty eccentricityProperty(){return eccentricity;}
     public DoubleProperty inclinationDegProperty(){return inclinationDeg;}
     public DoubleProperty ascendingNodeDegProperty(){return ascendingNodeDeg;}
-    public DoubleProperty argumentOfPeriapsisDeg(){return argumentOfPeriapsisDeg;}
+    public DoubleProperty argumentOfPeriapsisDegProperty(){return argumentOfPeriapsisDeg;}
     public DoubleProperty trueAnomalyDegProperty(){return trueAnomalyDeg;}
 
     public StringProperty errorMessageProperty(){return errorMessage;}
