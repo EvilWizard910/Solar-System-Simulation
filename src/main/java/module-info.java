@@ -8,6 +8,7 @@ module com.example.planetsimdemo {
     requires google.cloud.core;
     requires com.google.api.apicommon;
     requires java.net.http;
+    requires javafx.fxml;
 
     exports com.example.planetsimdemo;
 }

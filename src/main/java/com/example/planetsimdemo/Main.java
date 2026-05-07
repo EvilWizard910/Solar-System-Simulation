@@ -209,8 +209,7 @@ public class Main extends Application {
         Body[] currentFocus = {solarSystemRef[0].getBody("Sun")};
 
 
-        //sidebar to switch between default system and firestore systems
-        SidebarScreen[] currentSidebarScreen = {SidebarScreen.CONTROLS};
+
 
         boolean[] signedIn = {false};
         String[] signedInEmail = {null};

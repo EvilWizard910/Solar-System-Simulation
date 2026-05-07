@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 public class FirestoreContext {
 
-    public Firestore firebase() {
+    public Firestore firestore() {
         try {
             if(FirebaseApp.getApps().isEmpty()) {
                 InputStream serviceAccount = getClass().getResourceAsStream("/key.json");
