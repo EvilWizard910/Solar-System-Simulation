@@ -26,6 +26,13 @@ public class SimulationScreen {
     private double sizeScale = 1.0;
     private String focusedBodyName = "Sun";
 
+    private double orbitYaw = 35.0;
+    private double orbitPitch = 25.0;
+    private double orbitDistance = 200.0;
+
+    private double lastMouseX;
+    private double lastMouseY;
+
     public SimulationScreen(SolarSystem solarSystem){
         this.solarSystem = solarSystem;
     }
@@ -39,6 +46,42 @@ public class SimulationScreen {
 
         SubScene subScene=new SubScene(world, 1200,900, true, SceneAntialiasing.BALANCED);
         subScene.setFill(Color.BLACK);
+
+        subScene.setOnMousePressed(event -> {
+            lastMouseX = event.getSceneX();
+            lastMouseY = event.getSceneY();
+            event.consume();
+        });
+
+        subScene.setOnMouseDragged(event -> {
+            double mouseX = event.getSceneX();
+            double mouseY = event.getSceneY();
+
+            double deltaX = mouseX - lastMouseX;
+            double deltaY = mouseY - lastMouseY;
+
+            if (event.isPrimaryButtonDown()) {
+                double rotateSensitivity = 0.25;
+
+                orbitYaw += deltaX * rotateSensitivity;
+                orbitPitch -= deltaY * rotateSensitivity;
+
+                orbitPitch = Math.max(-80, Math.min(80, orbitPitch));
+            }
+
+            if (event.isSecondaryButtonDown()) {
+                double zoomSensitivity = 0.01;
+                double zoomFactor = Math.pow(1.0 + zoomSensitivity, deltaY);
+
+                orbitDistance *= zoomFactor;
+                orbitDistance = Math.max(10.0, Math.min(2000.0, orbitDistance));
+            }
+
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+
+            event.consume();
+        });
 
         camera.setNearClip(.01);
         camera.setFarClip(100000);
@@ -123,18 +166,47 @@ public class SimulationScreen {
         timer.start();
     }
 
-    private void updateCamera(){
+    private void updateCamera() {
         Body focused = solarSystem.getBody(focusedBodyName);
-        if(focused==null){
+        if (focused == null) {
             return;
         }
-        double targetX=Conversions.metersToScene(focused.getX());
-        double targetY=Conversions.metersToScene(focused.getY());
-        double targetZ=Conversions.metersToScene(focused.getZ());
 
-        camera.setTranslateX(targetX);
-        camera.setTranslateY(targetY-30);
-        camera.setTranslateZ(targetZ-200);
+        double targetX = Conversions.metersToScene(focused.getX());
+        double targetY = Conversions.metersToScene(focused.getY());
+        double targetZ = Conversions.metersToScene(focused.getZ());
+
+        double yawRad = Math.toRadians(orbitYaw);
+        double pitchRad = Math.toRadians(orbitPitch);
+
+        double horizontal = orbitDistance * Math.cos(pitchRad);
+
+        double camX = targetX + Math.sin(yawRad) * horizontal;
+        double camY = targetY - Math.sin(pitchRad) * orbitDistance;
+        double camZ = targetZ - Math.cos(yawRad) * horizontal;
+
+        camera.setTranslateX(camX);
+        camera.setTranslateY(camY);
+        camera.setTranslateZ(camZ);
+
+        camera.setRotationAxis(javafx.geometry.Point3D.ZERO); // optional to remove if using transforms
+        camera.getTransforms().clear();
+
+        javafx.scene.transform.Rotate yawRotate =
+                new javafx.scene.transform.Rotate(Math.toDegrees(Math.atan2(targetX - camX, targetZ - camZ)),
+                        javafx.scene.transform.Rotate.Y_AXIS);
+
+        double dx = targetX - camX;
+        double dy = targetY - camY;
+        double dz = targetZ - camZ;
+
+        javafx.scene.transform.Rotate pitchRotate =
+                new javafx.scene.transform.Rotate(
+                        -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))),
+                        javafx.scene.transform.Rotate.X_AXIS
+                );
+
+        camera.getTransforms().addAll(yawRotate, pitchRotate);
     }
 
     private void updateSpherePosition(Sphere sphere, Body body){
