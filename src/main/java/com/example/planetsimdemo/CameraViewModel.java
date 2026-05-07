@@ -16,4 +16,5 @@ public class CameraViewModel {
     public DoubleProperty orbitYawProperty() {return orbitYaw;}
     public DoubleProperty orbitPitchProperty() {return orbitPitch;}
     public DoubleProperty orbitDistanceProperty() {return orbitDistance;}
+
 }
