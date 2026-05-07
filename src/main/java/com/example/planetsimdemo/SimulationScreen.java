@@ -10,8 +10,11 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.PointLight;
 import javafx.scene.AmbientLight;
 
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.example.planetsimdemo.Conversions.metersToScene;
 
 public class SimulationScreen {
     private  SolarSystem solarSystem;
@@ -23,12 +26,12 @@ public class SimulationScreen {
     private long lastTime = 0L;
 
     private double timeScale = 5000.0;
-    private double sizeScale = 1.0;
+    private double sizeScale = 0.0;
     private String focusedBodyName = "Sun";
 
-    private double orbitYaw = 35.0;
-    private double orbitPitch = 25.0;
-    private double orbitDistance = 200.0;
+    private double orbitYaw = 0.0;
+    private double orbitPitch = 0.0;
+    private double orbitDistance = 10.0;
 
     private double lastMouseX;
     private double lastMouseY;
@@ -74,7 +77,7 @@ public class SimulationScreen {
                 double zoomFactor = Math.pow(1.0 + zoomSensitivity, deltaY);
 
                 orbitDistance *= zoomFactor;
-                orbitDistance = Math.max(10.0, Math.min(2000.0, orbitDistance));
+                orbitDistance = Math.max(0.10, Math.min(200000.0, orbitDistance));
             }
 
             lastMouseX = mouseX;
@@ -83,7 +86,7 @@ public class SimulationScreen {
             event.consume();
         });
 
-        camera.setNearClip(.01);
+        camera.setNearClip(.001);
         camera.setFarClip(100000);
         camera.setTranslateZ(-200);
         camera.setTranslateY(-30);
@@ -142,7 +145,7 @@ public class SimulationScreen {
         timer = new AnimationTimer() {
                 @Override
                 public void handle(long now){
-                    if(lastTime == 0l){
+                    if(lastTime == 0L){
                         lastTime = now;
                         return;
                     }
@@ -150,7 +153,7 @@ public class SimulationScreen {
                     lastTime=now;
 
                 dt=Math.min(dt,.25);
-                solarSystem.updatePhysics(dt*5000);
+                solarSystem.updatePhysics(dt*timeScale);
 
                 for(String name : solarSystem.getBodyNames()){
                     Body body=solarSystem.getBody(name);
@@ -172,9 +175,9 @@ public class SimulationScreen {
             return;
         }
 
-        double targetX = Conversions.metersToScene(focused.getX());
-        double targetY = Conversions.metersToScene(focused.getY());
-        double targetZ = Conversions.metersToScene(focused.getZ());
+        double targetX = metersToScene(focused.getX());
+        double targetY = metersToScene(focused.getY());
+        double targetZ = metersToScene(focused.getZ());
 
         double yawRad = Math.toRadians(orbitYaw);
         double pitchRad = Math.toRadians(orbitPitch);
@@ -210,12 +213,18 @@ public class SimulationScreen {
     }
 
     private void updateSpherePosition(Sphere sphere, Body body){
-        sphere.setTranslateX(Conversions.metersToScene(body.getX()));
-        sphere.setTranslateY(Conversions.metersToScene(body.getY()));
-        sphere.setTranslateZ(Conversions.metersToScene(body.getZ()));
+        sphere.setTranslateX(metersToScene(body.getX()));
+        sphere.setTranslateY(metersToScene(body.getY()));
+        sphere.setTranslateZ(metersToScene(body.getZ()));
     }
 
-    private double toSceneRadius(double radiusKm){
-        return Math.max(0.5, radiusKm/5000);
+
+    private double toSceneRadius(double radiusKm) {
+        double t = sizeScale;
+
+        double realisticRadius = radiusKm / 2_000_000.0;
+        double uniformRadius = 10;
+
+        return realisticRadius + t * (uniformRadius - realisticRadius);
     }
 }

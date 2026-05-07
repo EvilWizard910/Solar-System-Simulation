@@ -195,7 +195,7 @@ public class Design2Controller {
             solarSystem=new SolarSystem(loadedState);
             bodyEditorViewModel.setSolarSystem(solarSystem);
             if(simulationScreen!=null){
-                simulationScreen.buildBodies();
+                simulationScreen.setSolarSystem(solarSystem);
             }
             refreshAllUi();
         }catch(Exception e){
