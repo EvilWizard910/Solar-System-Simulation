@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+        <?import javafx.scene.control.*?>
+        <?import javafx.scene.layout.*?>
+
+<VBox prefWidth="300" spacing="10"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.planetsimdemo.Design2Controller"
+      stylesheets="@style.css"
+      styleClass="root">
+
+    <ScrollPane fitToWidth="true">
+        <content>
+            <VBox spacing="10">
+
+                <TitledPane text="Account" expanded="false">
+                    <content>
+                        <VBox spacing="8">
+
+                            <TextField fx:id="emailField" promptText="Email"/>
+                            <PasswordField fx:id="passwordField" promptText="Password"/>
+
+                            <HBox spacing="8">
+                                <Button text="Sign In" onAction="#onSignIn" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                <Button text="Register" onAction="#onRegister" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                            </HBox>
+
+                            <Button text="Sign Out" fx:id="signOutButton" onAction="#onSignOut" maxWidth="Infinity"/>
+
+                            <Label text="Save System"/>
+                            <TextField fx:id="saveNameField" promptText="Save name"/>
+                            <Button text="Save" fx:id="saveButton" onAction="#onSaveSystem" maxWidth="Infinity"/>
+
+                            <Label text="Saved Systems"/>
+                            <ListView fx:id="savedSystemsList" prefHeight="120"/>
+                            <Button text="Load Selected Save" onAction="#onLoadSelectedSystem" maxWidth="Infinity"/>
+
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+                <TitledPane text="View" expanded="true">
+                    <content>
+                        <VBox spacing="10">
+
+                            <HBox spacing="10">
+                                <Label text="Focus"/>
+                                <ComboBox fx:id="focusDropdown" HBox.hgrow="ALWAYS"/>
+                            </HBox>
+
+                            <TitledPane text="Details" expanded="false">
+                                <content>
+                                    <GridPane hgap="10" vgap="6">
+
+                                        <Label text="Mass:" GridPane.rowIndex="0"/>
+                                        <Label fx:id="massLabel" text="-" GridPane.columnIndex="1"/>
+
+                                        <Label text="Radius:" GridPane.rowIndex="1"/>
+                                        <Label fx:id="radiusKmLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                        <Label text="Axis:" GridPane.rowIndex="2"/>
+                                        <Label fx:id="semiMajorAxisAuLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                        <Label text="Ecc:" GridPane.rowIndex="3"/>
+                                        <Label fx:id="eccentricityLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                                        <Label text="Incl:" GridPane.rowIndex="4"/>
+                                        <Label fx:id="inclinationDegreeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                                        <Label text="Node:" GridPane.rowIndex="5"/>
+                                        <Label fx:id="ascendingNodeDegreeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                                        <Label text="Periapsis:" GridPane.rowIndex="6"/>
+                                        <Label fx:id="argumentOfPeriapsisDegreeLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+
+                            <Label text="Time Scale"/>
+                            <Slider fx:id="timeScaleSlider" min="0.1" max="10" value="1"/>
+
+                            <Label text="Size Scale"/>
+                            <Slider fx:id="sizeScaleSlider" min="0.1" max="5" value="1"/>
+
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+                <TitledPane text="Add" expanded="false">
+                    <content>
+                        <VBox spacing="8">
+
+                            <TextField fx:id="nameField" promptText="Name"/>
+                            <ComboBox fx:id="typeDropdown" promptText="Type"/>
+                            <ComboBox fx:id="parentDropdown" promptText="Parent (for moons)"/>
+
+                            <TextField fx:id="massField" promptText="Mass"/>
+                            <TextField fx:id="radiusKmField" promptText="Radius Km"/>
+                            <TextField fx:id="semiMajorAxisAuField" promptText="Semimajor Axis AU"/>
+                            <TextField fx:id="eccentricityField" promptText="Eccentricity"/>
+                            <TextField fx:id="inclinationDegreeField" promptText="Inclination"/>
+                            <TextField fx:id="ascendingNodeDegreeField" promptText="Ascending Node"/>
+                            <TextField fx:id="argumentOfPeriapsisDegreeField" promptText="Arg. of Periapsis"/>
+                            <TextField fx:id="trueAnomalyDegField" promptText="True Anomaly"/>
+
+                            <ColorPicker fx:id="colorPicker"/>
+
+                            <Label text="Texture"/>
+                            <HBox spacing="8">
+                                <Button text="Choose Image" fx:id="addTextureButton" onAction="#onAddTexture"/>
+                                <Label fx:id="addTextureLabel" text="No file selected"/>
+                            </HBox>
+
+                            <Button text="Add Body" fx:id="addBodyButton" onAction="#onAddBody" maxWidth="Infinity"/>
+
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+                <TitledPane text="Edit" expanded="false">
+                    <content>
+                        <VBox spacing="10">
+
+                            <ListView fx:id="bodyList" prefHeight="120"/>
+
+                            <Label text="Mass"/>
+                            <Slider fx:id="massSlider"/>
+
+                            <Label text="Radius"/>
+                            <Slider fx:id="radiusKmSlider"/>
+
+                            <Label text="Axis"/>
+                            <Slider fx:id="semiMajorAxisAuSlider"/>
+
+                            <Label text="Eccentricity"/>
+                            <Slider fx:id="eccentricitySlider"/>
+
+                            <Label text="Inclination"/>
+                            <Slider fx:id="inclinationDegreeSlider"/>
+
+                            <Label text="Ascending Node"/>
+                            <Slider fx:id="ascendingNodeDegreeSlider"/>
+
+                            <Label text="Periapsis"/>
+                            <Slider fx:id="argumentOfPeriapsisDegreeSlider"/>
+
+                            <Label text="Texture"/>
+                            <HBox spacing="8">
+                                <Button text="Change Image" fx:id="editTextureButton" onAction="#onEditTexture"/>
+                                <Label fx:id="editTextureLabel" text="No file selected"/>
+                            </HBox>
+
+                            <HBox spacing="8">
+                                <Button text="Update Body" onAction="#onEditSelectedBody" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                <Button text="Delete Body" onAction="#onDeleteSelectedBody" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                            </HBox>
+
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</VBox>

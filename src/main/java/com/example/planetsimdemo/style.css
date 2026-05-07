@@ -1,0 +1,84 @@
+/* Transparent root */
+.root {
+    -fx-background-color: transparent;
+}
+
+/* Layout containers */
+.vbox, .hbox, .grid-pane, .scroll-pane, .titled-pane {
+    -fx-background-color: transparent;
+}
+
+/* TitledPane */
+.titled-pane > .title {
+    -fx-background-color: transparent;
+}
+
+.titled-pane > .content {
+    -fx-background-color: transparent;
+}
+
+/* Text */
+.label {
+    -fx-text-fill: white;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-border-color: white;
+}
+
+/* Inputs */
+.text-field, .password-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-border-color: white;
+    -fx-prompt-text-fill: gray;
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #2c2c2c;
+}
+
+.combo-box-popup .list-cell {
+    -fx-text-fill: white;
+}
+
+/* ListView */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+/* Sliders */
+.slider .track {
+    -fx-background-color: white;
+}
+
+.slider .thumb {
+    -fx-background-color: white;
+}
+
+/* ScrollPane */
+.scroll-pane, .viewport {
+    -fx-background-color: transparent;
+}
+
+
