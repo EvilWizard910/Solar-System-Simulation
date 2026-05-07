@@ -55,17 +55,14 @@ public class Design2Controller {
     private BodyEditorViewModel bodyEditorViewModel;
 
     public void initialize(){
-        solarSystem = new SolarSystem(SolarSystemState.defaultInitialConditions());
-        authViewModel = new AuthViewModel(new FirebaseAuthenticationService(),
+        authViewModel = new AuthViewModel(
+                new FirebaseAuthenticationService(),
                 new InitialConditionsRepository(new FirestoreContext().firestore()));
         bodyEditorViewModel=new BodyEditorViewModel(solarSystem);
 
-        configureStaticUi();
         bindAuthSection();
-        bindBodyEditorSection();
         bindViewSection();
         bindEditSection();
-        refreshAllUi();
     }
 
     private void configureStaticUi(){
@@ -150,6 +147,15 @@ public class Design2Controller {
         argumentOfPeriapsisDegreeSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
             argumentOfPeriapsisDegreeField.setText(Double.toString(newValue.doubleValue()));
         });
+    }
+
+    public void setSolarSystem(SolarSystem solarSystem){
+        this.solarSystem=solarSystem;
+        this.bodyEditorViewModel = new BodyEditorViewModel(solarSystem);
+
+        configureStaticUi();
+        bindBodyEditorSection();
+        refreshAllUi();
     }
     @FXML
     private void onSignIn(){

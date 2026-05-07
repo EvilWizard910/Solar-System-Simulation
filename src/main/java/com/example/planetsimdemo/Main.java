@@ -2,7 +2,10 @@ package com.example.planetsimdemo;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -10,11 +13,22 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        SolarSystem solarSystem = new SolarSystem(SolarSystemState.defaultInitialConditions());
+
+        SimulationScreen simulationScreen = new SimulationScreen(solarSystem);
+        Parent simulationRoot = simulationScreen.build();
+
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("/Design2.fxml"));
+        VBox UI = loader.load();
+
+        Design2Controller design2Controller = loader.getController();
+        design2Controller.setSolarSystem(solarSystem);
+
+        StackPane root = new StackPane(simulationRoot,UI);
+        StackPane.setAlignment(UI, Pos.CENTER_RIGHT);
 
 
-        VBox root = loader.load();
-        Scene scene = new Scene(root, 420, 900);
+        Scene scene = new Scene(root, 1400, 900);
 
         stage.setTitle("Planetary Simulation");
         stage.setScene(scene);

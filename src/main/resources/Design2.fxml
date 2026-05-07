@@ -3,7 +3,10 @@
         <?import javafx.scene.control.*?>
         <?import javafx.scene.layout.*?>
 
-<VBox prefWidth="300" spacing="10"
+<VBox prefWidth="300"
+      maxWidth="300"
+      minWidth="300"
+      spacing="10"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.example.planetsimdemo.Design2Controller"
       stylesheets="@style.css"
