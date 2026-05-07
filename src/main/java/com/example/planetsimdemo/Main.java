@@ -23,6 +23,7 @@ public class Main extends Application {
 
         Design2Controller design2Controller = loader.getController();
         design2Controller.setSolarSystem(solarSystem);
+        design2Controller.setSimulationScreen(simulationScreen);
 
         StackPane root = new StackPane(simulationRoot,UI);
         StackPane.setAlignment(UI, Pos.CENTER_RIGHT);

@@ -53,12 +53,12 @@ public class Design2Controller {
     private SolarSystem solarSystem;
     private AuthViewModel authViewModel;
     private BodyEditorViewModel bodyEditorViewModel;
+    private SimulationScreen simulationScreen;
 
     public void initialize(){
         authViewModel = new AuthViewModel(
                 new FirebaseAuthenticationService(),
                 new InitialConditionsRepository(new FirestoreContext().firestore()));
-        bodyEditorViewModel=new BodyEditorViewModel(solarSystem);
 
         bindAuthSection();
         bindViewSection();
@@ -107,15 +107,23 @@ public class Design2Controller {
     }
 
     private void bindViewSection(){
-        focusDropdown.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) ->
-                updateFocusedBodyDetails(newValue));
+        focusDropdown.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) ->{
+                updateFocusedBodyDetails(newValue);
+            if(simulationScreen!=null) {
+                simulationScreen.setFocusedBody(newValue);
+            }
+        });
 
         timeScaleSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-
+            if(simulationScreen!=null) {
+                simulationScreen.setTimeScale(newValue.doubleValue()*5000);
+            }
         });
 
         sizeScaleSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-
+            if(simulationScreen!=null) {
+                simulationScreen.setSizeScale(newValue.doubleValue());
+            }
         });
     }
 
@@ -186,6 +194,9 @@ public class Design2Controller {
             SolarSystemState loadedState=authViewModel.loadSelectedSystem();
             solarSystem=new SolarSystem(loadedState);
             bodyEditorViewModel.setSolarSystem(solarSystem);
+            if(simulationScreen!=null){
+                simulationScreen.buildBodies();
+            }
             refreshAllUi();
         }catch(Exception e){
             showError(e.getMessage());
@@ -200,6 +211,9 @@ public class Design2Controller {
             return;
         }
         refreshAllUi();
+        if(simulationScreen!=null){
+            simulationScreen.buildBodies();
+        }
         clearAddTextureSelection();
     }
 
@@ -211,6 +225,9 @@ public class Design2Controller {
             return;
         }
         refreshAllUi();
+        if(simulationScreen!=null){
+            simulationScreen.buildBodies();
+        }
     }
 
     @FXML
@@ -220,6 +237,9 @@ public class Design2Controller {
             return;
         }
         refreshAllUi();
+        if(simulationScreen!=null){
+            simulationScreen.buildBodies();
+        }
         clearEditTextureSelection();
     }
 
@@ -233,7 +253,9 @@ public class Design2Controller {
 
     }
 
-
+    public void setSimulationScreen(SimulationScreen simulationScreen){
+        this.simulationScreen=simulationScreen;
+    }
 
     private void refreshAllUi(){
         bodyEditorViewModel.refreshLists();
