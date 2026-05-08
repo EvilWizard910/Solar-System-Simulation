@@ -72,7 +72,7 @@ public class AuthViewModel {
             selectedSavedSystem.set(null);
             return;
         }
-        try{savedSystems.setAll(repository.listSystems(session.uid()));
+        try{savedSystems.setAll(repository.listSystems(session));
             if(savedSystems.isEmpty()){
             selectedSavedSystem.set(null);}
             else if(!savedSystems.contains(selectedSavedSystem.get())){
@@ -95,7 +95,7 @@ public class AuthViewModel {
             return;
         }
         try{
-            repository.saveSystem(session.uid(), name,state);
+            repository.saveSystem(session, name,state);
             refreshSavedSystems();
             selectedSavedSystem.set(name);
         }catch(Exception e){
@@ -111,11 +111,12 @@ public class AuthViewModel {
         String systemName=selectedSavedSystem.get();
         if(systemName==null || systemName.isBlank()){
             throw new IllegalStateException("Select a save system");}
-        return repository.loadSystem(session.uid(),systemName);
+        return repository.loadSystem(session,systemName);
     }
 
     public boolean isSignedOut(){
-        return currentSession.get() == null&& !currentSession.get().isAuthenticated();
+        AuthSession session = currentSession.get();
+        return session == null || !session.isAuthenticated();
     }
 
     public StringProperty emailProperty(){return email;}

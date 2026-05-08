@@ -8,6 +8,6 @@ public record AuthSession(
         long expiresInSeconds
 ){
     public boolean isAuthenticated(){
-        return idToken != null && !idToken.isEmpty();
+        return uid!=null && !uid.isBlank() && idToken!=null && !idToken.isBlank();
     }
 }

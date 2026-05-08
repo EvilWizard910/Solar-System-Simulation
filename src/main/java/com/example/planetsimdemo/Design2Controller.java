@@ -58,7 +58,7 @@ public class Design2Controller {
     public void initialize(){
         authViewModel = new AuthViewModel(
                 new FirebaseAuthenticationService(),
-                new InitialConditionsRepository(new FirestoreContext().firestore()));
+                new InitialConditionsRepository());
 
         bindAuthSection();
         bindViewSection();
