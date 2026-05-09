@@ -9,6 +9,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.scene.PointLight;
 import javafx.scene.AmbientLight;
+import javafx.scene.image.Image;
 
 
 import java.util.HashMap;
@@ -17,10 +18,10 @@ import java.util.Map;
 import static com.example.planetsimdemo.Conversions.metersToScene;
 
 public class SimulationScreen {
-    private  SolarSystem solarSystem;
-    private final Group world= new Group();
+    private SolarSystem solarSystem;
+    private final Group world = new Group();
     private final Map<String, Sphere> bodyViews = new HashMap<>();
-    private final PerspectiveCamera camera=new PerspectiveCamera(true);
+    private final PerspectiveCamera camera = new PerspectiveCamera(true);
 
     private AnimationTimer timer;
     private long lastTime = 0L;
@@ -36,18 +37,18 @@ public class SimulationScreen {
     private double lastMouseX;
     private double lastMouseY;
 
-    public SimulationScreen(SolarSystem solarSystem){
+    public SimulationScreen(SolarSystem solarSystem) {
         this.solarSystem = solarSystem;
     }
 
-    public Parent build(){
+    public Parent build() {
         buildBodies();
 
         PointLight light = new PointLight(Color.WHITE);
-        AmbientLight ambientLight = new AmbientLight(Color.color(.25,.25,.25));
-        world.getChildren().addAll(light,ambientLight);
+        AmbientLight ambientLight = new AmbientLight(Color.color(.25, .25, .25));
+        world.getChildren().addAll(light, ambientLight);
 
-        SubScene subScene=new SubScene(world, 1200,900, true, SceneAntialiasing.BALANCED);
+        SubScene subScene = new SubScene(world, 1200, 900, true, SceneAntialiasing.BALANCED);
         subScene.setFill(Color.BLACK);
 
         subScene.setOnMousePressed(event -> {
@@ -100,23 +101,23 @@ public class SimulationScreen {
         return root;
     }
 
-    public void setSolarSystem(SolarSystem solarSystem){
-        this.solarSystem=solarSystem;
+    public void setSolarSystem(SolarSystem solarSystem) {
+        this.solarSystem = solarSystem;
         buildBodies();
     }
 
-    public void setTimeScale(double timeScale){
-        this.timeScale=timeScale;
+    public void setTimeScale(double timeScale) {
+        this.timeScale = timeScale;
     }
 
-    public void setSizeScale(double sizeScale){
-        this.sizeScale=sizeScale;
+    public void setSizeScale(double sizeScale) {
+        this.sizeScale = sizeScale;
         buildBodies();
     }
 
-    public void setFocusedBody(String bodyName){
-        if(bodyName != null && solarSystem.getBody(bodyName) !=null){
-            this.focusedBodyName=bodyName;
+    public void setFocusedBody(String bodyName) {
+        if (bodyName != null && solarSystem.getBody(bodyName) != null) {
+            this.focusedBodyName = bodyName;
         }
     }
 
@@ -133,7 +134,7 @@ public class SimulationScreen {
             double radiusKm = solarSystem.getBodyRadiusKm(name);
             Color color = solarSystem.getBodyColor(name);
             Sphere sphere = new Sphere(toSceneRadius(radiusKm));
-            sphere.setMaterial(new PhongMaterial(color == null ? Color.WHITE : color));
+            sphere.setMaterial(createMaterialForBody(name, color));
 
             updateSpherePosition(sphere, body);
             bodyViews.put(name, sphere);
@@ -141,25 +142,25 @@ public class SimulationScreen {
         }
     }
 
-    private void startAnimation(){
+    private void startAnimation() {
         timer = new AnimationTimer() {
-                @Override
-                public void handle(long now){
-                    if(lastTime == 0L){
-                        lastTime = now;
-                        return;
-                    }
-                    double dt = (now-lastTime)/1_000_000_000.0;
-                    lastTime=now;
+            @Override
+            public void handle(long now) {
+                if (lastTime == 0L) {
+                    lastTime = now;
+                    return;
+                }
+                double dt = (now - lastTime) / 1_000_000_000.0;
+                lastTime = now;
 
-                dt=Math.min(dt,.25);
-                solarSystem.updatePhysics(dt*timeScale);
+                dt = Math.min(dt, .25);
+                solarSystem.updatePhysics(dt * timeScale);
 
-                for(String name : solarSystem.getBodyNames()){
-                    Body body=solarSystem.getBody(name);
-                    Sphere sphere=bodyViews.get(name);
+                for (String name : solarSystem.getBodyNames()) {
+                    Body body = solarSystem.getBody(name);
+                    Sphere sphere = bodyViews.get(name);
 
-                    if(body!=null && sphere!=null){
+                    if (body != null && sphere != null) {
                         updateSpherePosition(sphere, body);
                     }
                 }
@@ -212,12 +213,42 @@ public class SimulationScreen {
         camera.getTransforms().addAll(yawRotate, pitchRotate);
     }
 
-    private void updateSpherePosition(Sphere sphere, Body body){
+    private void updateSpherePosition(Sphere sphere, Body body) {
         sphere.setTranslateX(metersToScene(body.getX()));
         sphere.setTranslateY(metersToScene(body.getY()));
         sphere.setTranslateZ(metersToScene(body.getZ()));
     }
 
+    private PhongMaterial createMaterialForBody(String name, Color fallbackColor) {
+        PhongMaterial material = new PhongMaterial();
+
+        String texturePath = switch(name.toLowerCase()) {
+            case "sun" -> "/textures/sun.jpg";
+            case "mercury" -> "/textures/mercury.jpg";
+            case "venus" -> "/textures/venus.jpg";
+            case "earth" -> "/textures/earth.jpg";
+            case "mars" -> "/textures/mars.jpg";
+            case "jupiter" -> "/textures/jupiter.jpg";
+            case "saturn" -> "/textures/saturn.jpg";
+            case "uranus" -> "/textures/uranus.jpg";
+            case "neptune" -> "/textures/neptune.jpg";
+            case "moon" -> "/textures/moon.jpg";
+            default -> null;
+        };
+
+        if (texturePath != null) {
+            var stream = getClass().getResourceAsStream(texturePath);
+
+            if (stream != null) {
+                Image texture = new Image(stream);
+                material.setDiffuseMap(texture);
+                return material;
+
+            }
+        }
+    material.setDiffuseColor(fallbackColor == null ? Color.WHITE : fallbackColor);
+        return material;
+}
 
     private double toSceneRadius(double radiusKm) {
         double t = sizeScale;
