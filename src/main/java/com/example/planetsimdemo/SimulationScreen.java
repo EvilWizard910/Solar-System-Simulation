@@ -26,7 +26,7 @@ public class SimulationScreen {
     private AnimationTimer timer;
     private long lastTime = 0L;
 
-    private double timeScale = 5000.0;
+    private double timeScale = 1;
     private double sizeScale = 0.0;
     private String focusedBodyName = "Sun";
 
