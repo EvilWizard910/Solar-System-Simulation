@@ -21,6 +21,7 @@ public class SimulationScreen {
     private SolarSystem solarSystem;
     private final Group world = new Group();
     private final Map<String, Sphere> bodyViews = new HashMap<>();
+    private final Map<String, PointLight> starLights = new HashMap<>();
     private final PerspectiveCamera camera = new PerspectiveCamera(true);
 
     private AnimationTimer timer;
@@ -44,9 +45,9 @@ public class SimulationScreen {
     public Parent build() {
         buildBodies();
 
-        PointLight light = new PointLight(Color.WHITE);
+
         AmbientLight ambientLight = new AmbientLight(Color.color(.25, .25, .25));
-        world.getChildren().addAll(light, ambientLight);
+        world.getChildren().add(ambientLight);
 
         SubScene subScene = new SubScene(world, 1200, 900, true, SceneAntialiasing.BALANCED);
         subScene.setFill(Color.BLACK);
@@ -124,6 +125,7 @@ public class SimulationScreen {
     public void buildBodies() {
         world.getChildren().removeIf(node -> node instanceof Sphere);
         bodyViews.clear();
+        starLights.clear();
 
         for (String name : solarSystem.getBodyNames()) {
             Body body = solarSystem.getBody(name);
@@ -139,7 +141,20 @@ public class SimulationScreen {
             updateSpherePosition(sphere, body);
             bodyViews.put(name, sphere);
             world.getChildren().add(sphere);
+
+            if("Star".equals(solarSystem.getBodyType(name))) {
+                PointLight starLight = new PointLight(color==null? Color.WHITE : color);
+                updateLightPosition(starLight,body);
+                starLights.put(name, starLight);
+                world.getChildren().add(starLight);
+            }
         }
+    }
+
+    private void updateLightPosition(PointLight pointLight, Body body) {
+        pointLight.setTranslateX(metersToScene(body.getX()));
+        pointLight.setTranslateY(metersToScene(body.getY()));
+        pointLight.setTranslateZ(metersToScene(body.getZ()));
     }
 
     private void startAnimation() {
@@ -160,8 +175,12 @@ public class SimulationScreen {
                     Body body = solarSystem.getBody(name);
                     Sphere sphere = bodyViews.get(name);
 
+                    PointLight light = starLights.get(name);
                     if (body != null && sphere != null) {
                         updateSpherePosition(sphere, body);
+                        if(light!=null){
+                            updateLightPosition(light,body);
+                        }
                     }
                 }
                 updateCamera();
