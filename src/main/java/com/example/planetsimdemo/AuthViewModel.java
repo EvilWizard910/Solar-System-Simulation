@@ -114,6 +114,20 @@ public class AuthViewModel {
         return repository.loadSystem(session,systemName);
     }
 
+    public void deleteSelectedSystem() throws Exception{
+        AuthSession session = currentSession.get();
+        if(session == null||!session.isAuthenticated()){
+            throw new IllegalStateException("Sign in to delete");
+        }
+        String systemName=selectedSavedSystem.get();
+        if(systemName==null || systemName.isBlank()){
+            throw new IllegalStateException("Select a save system");
+        }
+
+        repository.deleteSystem(session,systemName);
+        refreshSavedSystems();
+    }
+
     public boolean isSignedOut(){
         AuthSession session = currentSession.get();
         return session == null || !session.isAuthenticated();

@@ -252,6 +252,16 @@ public class Design2Controller {
     }
 
     @FXML
+    private void onDeleteSelectedSystem(){
+        try{
+            authViewModel.deleteSelectedSystem();
+            showAuthErrorIfPresent();
+        }catch(Exception e){
+            showError(e.getMessage());
+        }
+    }
+
+    @FXML
     private void onEditTexture(){
 
     }
