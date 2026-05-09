@@ -23,6 +23,7 @@ public class Design2Controller {
     @FXML private Label argumentOfPeriapsisDegreeLabel;
     @FXML private Slider timeScaleSlider;
     @FXML private Slider sizeScaleSlider;
+    @FXML private Label timeScaleLabel;
 
     @FXML private TextField nameField;
     @FXML private ComboBox<String> typeDropdown;
@@ -54,6 +55,9 @@ public class Design2Controller {
     private AuthViewModel authViewModel;
     private BodyEditorViewModel bodyEditorViewModel;
     private SimulationScreen simulationScreen;
+
+    private static final double minTimeScale=1.0;
+    private static final double maxTimeScale=7*24*3600;
 
     public void initialize(){
         authViewModel = new AuthViewModel(
@@ -115,10 +119,9 @@ public class Design2Controller {
         });
 
         timeScaleSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if(simulationScreen!=null) {
-                simulationScreen.setTimeScale(newValue.doubleValue()*5000);
-            }
+            applyTimeScale(newValue.doubleValue());
         });
+        applyTimeScale(timeScaleSlider.getValue());
 
         sizeScaleSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
             if(simulationScreen!=null) {
@@ -255,6 +258,8 @@ public class Design2Controller {
 
     public void setSimulationScreen(SimulationScreen simulationScreen){
         this.simulationScreen=simulationScreen;
+        applyTimeScale(timeScaleSlider.getValue());
+        simulationScreen.setSizeScale(sizeScaleSlider.getValue());
     }
 
     private void refreshAllUi(){
@@ -361,5 +366,39 @@ public class Design2Controller {
             return 0.0;
         }
         return Double.parseDouble(text.trim());
+    }
+
+    private void applyTimeScale(double value){
+        double timeScale = sliderToTimeScale(value);
+        if(simulationScreen!=null){
+            simulationScreen.setTimeScale(timeScale);
+        }
+        if(timeScaleLabel!=null){
+            timeScaleLabel.setText(formatTimeScale(timeScale));
+        }
+    }
+
+    private double sliderToTimeScale(double value) {
+        double clamped = Math.max(0.0,Math.min(1.0,value));
+        double exponent = Math.log(maxTimeScale/minTimeScale);
+        return minTimeScale*Math.exp(exponent*clamped);
+    }
+
+    private String formatTimeScale(double timeScale) {
+        if (timeScale < 60.0) {
+            return String.format("%.2fx real time", timeScale);
+        }
+
+        double minutesPerSecond=timeScale / 60.0;
+        if(timeScale < 3600){
+            return String.format("%2f min/sec", minutesPerSecond);
+        }
+
+        double hoursPerSecond=timeScale / 3600;
+        if(timeScale < 86400){
+            return String.format("%2f hr/sec", hoursPerSecond);
+        }
+        double daysPerSecond=timeScale / 86400;
+        return String.format("%.2f day/sec", daysPerSecond);
     }
 }
