@@ -243,7 +243,6 @@ public class SimulationScreen {
                 Image texture = new Image(stream);
                 material.setDiffuseMap(texture);
                 return material;
-
             }
         }
     material.setDiffuseColor(fallbackColor == null ? Color.WHITE : fallbackColor);
