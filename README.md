@@ -1,86 +1,60 @@
-# Planet Simulation Project
+# Solar System Simulation
 
-## Project Overview
+A JavaFX 3D solar system simulator that models celestial bodies with gravitational physics, orbital elements, interactive camera controls, editable planets/moons/stars, and Firebase-backed save files.
 
-This project is a JavaFX-based 3D planetary simulation that models a solar system using real physics concepts instead of simple circular, “on-the-rails” movement.
+The project started as a basic planetary visualization, but the current version is closer to an interactive solar-system sandbox. Bodies are not just moved along fixed circular paths. They are initialized from orbital data and updated with Newtonian gravity and Velocity Verlet integration.
 
-The goal of the project is to create an interactive space simulation where planets and moons are not just animated along fixed paths, but instead move using gravitational physics, orbital data, and real-time updates. Users can view the solar system, focus on specific bodies, adjust the camera, change simulation speed, and dynamically add, edit, or remove celestial bodies.
+---
 
-## Problem This Project Solves
+## Features
 
-Many simple solar system simulations show planets moving in perfect circles at fixed speeds. That is easy to visualize, but it does not represent how real orbital motion works.
+### 3D JavaFX Solar System
 
-This project solves that by moving toward a physics-based simulation that uses:
+The application renders a 3D solar system using JavaFX spheres, lighting, textures, and a perspective camera.
 
-- Real planetary masses
-- Orbital elements
-- Newtonian gravity
-- Velocity Verlet integration
-- Adjustable simulation speed
-- Dynamic body creation
-- Interactive camera controls
-
-Instead of being a static demo, the simulation becomes an interactive sandbox where users can experiment with planets, moons, stars, orbits, and gravitational behavior.
-
-## Current Features
-
-### 1. 3D Solar System Visualization
-
-The simulation displays a 3D solar system using JavaFX.
-
-Currently included:
+Default bodies include:
 
 - Sun
 - Mercury
 - Venus
 - Earth
+- Moon
 - Mars
 - Jupiter
 - Saturn
 - Uranus
 - Neptune
 
-Each body has its own:
-
-- Name
-- Mass
-- Radius
-- Color
-- 3D sphere model
-- Position
-- Velocity
-- Acceleration
-
-The project converts real-world distances into scene units so large astronomical values can be displayed inside the JavaFX scene.
+Known default bodies use bundled texture images when available. Custom body colors are supported through the UI.
 
 ---
 
-### 2. Real Physics-Based Motion
+### Physics-Based Motion
 
-The simulation now uses physics instead of only fixed circular paths.
+Planet movement is handled by a physics engine instead of simple fixed-path animation.
 
 Implemented physics features:
 
-- Newtonian gravity between bodies
-- Acceleration updates from gravitational force
-- Position updates
-- Velocity updates
+- Newtonian gravity between all bodies
+- Acceleration calculations from gravitational force
+- Position and velocity updates
 - Velocity Verlet integration
-- Time-step based simulation updates
+- Real-time animation loop
+- Adjustable simulation time scale
 
 Each body stores:
 
-- Position on X, Y, and Z axes
-- Velocity on X, Y, and Z axes
-- Acceleration on X, Y, and Z axes
-
-This allows planets to move based on gravitational interactions rather than being manually animated.
+- Name
+- Mass
+- Position: `x`, `y`, `z`
+- Velocity: `vx`, `vy`, `vz`
+- Acceleration: `ax`, `ay`, `az`
 
 ---
 
-### 3. Orbital Elements Support
+### Orbital Elements
 
-Bodies can be created using orbital elements instead of only simple distance and angle values.
+Bodies can be initialized from orbital elements instead of hardcoded circular paths.
 
 Supported orbital values:
 
@@ -91,307 +65,239 @@ Supported orbital values:
 - Argument of periapsis
 - True anomaly
 
-These values allow the simulation to create more realistic elliptical and inclined orbits.
-
-This improves the original version because planets no longer need to spawn in a simple straight line or circular path. Their starting positions and velocities can be calculated from orbital data.
+This allows planets and moons to start from more realistic elliptical and inclined orbital states.
 
 ---
 
-### 4. Focused Body Camera System
+### Star / Planet / Moon System
 
-The camera can focus on a selected celestial body.
+The simulator supports three body types:
 
-Added camera features:
+- `Star`
+- `Planet`
+- `Moon`
 
-- Focus body dropdown
-- Camera follows the selected body
-- Camera orbits around the focused body
-- Auto-distance scaling based on body size
-- Reset camera button
-- Yaw control
-- Pitch control
-- Distance control
+Validation rules are built in:
 
-This makes the simulation easier to explore because the user can lock onto a planet, moon, or star instead of manually searching for it in space.
-
----
-
-### 5. Keyboard Camera Controls
-
-The simulation supports keyboard controls for camera movement.
-
-Keyboard controls:
-
-| Key | Action |
-|---|---|
-| Left Arrow | Rotate camera left |
-| Right Arrow | Rotate camera right |
-| Up Arrow | Zoom in |
-| Down Arrow | Zoom out |
-| W | Pitch camera up |
-| S | Pitch camera down |
-| A | Fine yaw left |
-| D | Fine yaw right |
-| I | Fine zoom in |
-| K | Fine zoom out |
-| J | Fine pitch up |
-| L | Fine pitch down |
-
-Keyboard input ignores text fields so typing into forms does not accidentally move the camera.
+- Stars can exist without orbital values.
+- Planets orbit the central star setup.
+- Moons require a parent planet.
+- Moons inherit their parent planet's position and velocity.
+- A moon cannot be created without a valid parent planet.
+- A planet with child moons cannot be deleted until its moons are removed first.
 
 ---
 
-### 6. Mouse Camera Controls
+### Add, Edit, and Delete Bodies
 
-Mouse controls were added for smoother camera movement.
+The side panel allows users to create and manage celestial bodies at runtime.
 
-Mouse controls:
-
-| Mouse Input | Action |
-|---|---|
-| Hold Left Click + Drag | Adjust yaw and pitch |
-| Hold Right Click + Drag Up/Down | Adjust camera distance |
-| Click Viewport | Refocus keyboard controls on the simulation |
-
-The mouse and keyboard both control the same camera sliders, so they work together instead of conflicting.
-
----
-
-### 7. Simulation Speed Control
-
-The project includes a simulation speed slider.
-
-The speed can scale from real-time movement up to much faster time steps, allowing users to observe orbital motion more quickly.
-
-The display automatically formats speed as:
-
-- Real-time multiplier
-- Minutes per second
-- Hours per second
-- Days per second
-
-This makes it easier to understand how fast the simulation is running.
-
----
-
-### 8. Body Scale Control
-
-A body scale slider allows the visual size of planets and stars to be adjusted.
-
-This is important because real planetary sizes are extremely small compared to orbital distances. Without scaling, most planets would be too small to see clearly.
-
-The simulation keeps the physical values separate from the visual scale, so changing the body scale does not change the actual physics values.
-
----
-
-### 9. Add / Edit / Remove Body System
-
-The project now includes a dynamic body management system.
-
-Users can:
-
-- Add new bodies
-- Edit existing bodies
-- Remove bodies
-- Clear the current selection
-- Refresh body lists
-- Select existing bodies from a dropdown
-
-Supported fields:
+Editable fields include:
 
 - Name
+- Type
+- Parent planet for moons
 - Mass
-- Radius
-- Semi-major axis
+- Radius in kilometers
+- Semi-major axis in AU
 - Eccentricity
 - Inclination
 - Ascending node
 - Argument of periapsis
 - True anomaly
-- Type
-- Parent planet
 - Color
 
-This means bodies are no longer locked into hardcoded definitions only. Users can create and modify their own stars, planets, and moons during runtime.
+The edit panel also includes sliders for changing major orbital/body values on selected bodies.
 
 ---
 
-### 10. Star / Planet / Moon Type System
+### Interactive Camera Controls
 
-The simulation supports different body types:
+The camera can focus on any body in the simulation.
 
-- Star
-- Planet
-- Moon
+View controls include:
 
-Type-specific behavior:
+- Focus dropdown
+- Body details panel
+- Camera orbit around selected body
+- Mouse drag camera rotation
+- Right-click drag zoom adjustment
+- Time scale slider
+- Size scale slider
 
-- Stars do not require orbital values.
-- Planets orbit the Sun.
-- Moons require a parent planet.
-- Moons inherit motion relative to their parent planet.
-- A moon cannot be created without a valid parent.
-- A planet with moons cannot be removed until its moons are removed first.
-
-This adds structure to the simulation and prevents invalid solar system setups.
+The size scale changes only the rendered body size. It does not change the physics values.
 
 ---
 
-### 11. Parent-Child Moon System
+### Firebase Authentication and Save Files
 
-Moons are connected to parent planets.
+The project includes Firebase support for saving and loading user-created solar systems.
 
-Implemented moon logic:
+Current Firebase features:
 
-- Moons must have a parent planet.
-- Moons are positioned relative to their parent.
-- Moons inherit the parent planet’s velocity.
-- Editing a planet rebuilds its child moons correctly.
-- Removing a planet is blocked if moons still orbit it.
+- Register account
+- Sign in
+- Sign out
+- Save current solar system state
+- List saved systems
+- Load selected save
+- Delete selected save
 
-This allows the project to support nested orbital systems instead of only planets orbiting the Sun.
+The app uses Firebase Authentication for accounts and Firestore for saved simulation states.
 
----
+Saved systems store body snapshots, including:
 
-### 12. Data and Metadata Management
-
-The `SolarSystem` class stores both physics data and display metadata.
-
-Stored body data includes:
-
-- Body object
-- Radius in kilometers
-- Distance / semi-major axis
-- Orbital angle / true anomaly
-- Body type
-- Parent body
+- Body metadata
+- Mass
+- Radius
 - Color
-- Orbital elements
-
-Useful methods include:
-
-- `getBody`
-- `getBodyNames`
-- `getPlanetNames`
-- `getBodyRadiusKm`
-- `getBodyDistanceAu`
-- `getBodyAngleDeg`
-- `getBodyType`
-- `getOrbitParent`
-- `getBodyColor`
-- `getOrbitElements`
-- `addNewBody`
-- `updateBody`
-- `removeBody`
-- `updatePhysics`
-- `setViewScale`
-
-This makes the project easier to expand because the data is organized instead of scattered throughout the code.
+- Position
+- Velocity
+- Acceleration
+- Orbit data
+- Parent-child body relationships
 
 ---
 
-## Major Improvements From Original Version
+## Tech Stack
 
-The original project started as a hardcoded 3D solar system where bodies moved in a fixed way.
-
-The current version improves that by adding:
-
-- All 8 planets
-- Real mass constants
-- Real radius values
-- Real orbital element inputs
-- Gravity-based movement
-- Velocity Verlet integration
-- Dynamic body creation
-- Dynamic editing
-- Dynamic removal
-- Body type validation
-- Parent planet support for moons
-- Camera focus system
-- Keyboard controls
-- Mouse controls
-- Simulation speed control
-- Visual scale control
-- Cleaner backend structure
-
-The project has moved from a basic visual demo toward a real interactive simulation.
+- Java 23
+- JavaFX 21.0.6
+- Maven
+- Firebase Authentication REST API
+- Firestore REST API
+- Jackson Databind
+- JUnit 5
 
 ---
 
-## Planned Features
+## Project Structure
 
-### Firebase Integration
+```text
+src/main/java/com/example/planetsimdemo/
+├── Main.java                         # Application entry point
+├── SimulationScreen.java             # 3D scene, camera, rendering, animation loop
+├── SolarSystem.java                  # High-level simulation wrapper
+├── SolarSystemState.java             # Body storage, metadata, orbital setup, snapshots
+├── Body.java                         # Physics body model
+├── PhysicsEngine.java                # Gravity and Verlet integration
+├── BodyEditorViewModel.java          # Add/edit/delete body state and validation bridge
+├── Design2Controller.java            # JavaFX UI controller
+├── AuthViewModel.java                # Authentication and save/load UI state
+├── FirebaseAuthenticationService.java# Firebase sign-in/sign-up service
+├── InitialConditionsRepository.java  # Firestore save/load/delete repository
+├── FirestoreJsonMapper.java          # Firestore JSON serialization/deserialization
+├── FirebaseClientConfig.java         # Firebase project configuration
+└── Conversions.java                  # Constants and unit conversion helpers
 
-Firebase is planned for persistent storage.
-
-Future Firebase features:
-
-- Save the current universe state
-- Load saved solar systems
-- Store custom planet data
-- Store custom moon data
-- Store star configurations
-- Allow users to restore previous simulations
-- Save edited body values between sessions
-
-This will allow the simulation to persist instead of resetting every time the application closes.
+src/main/resources/
+├── Design2.fxml                      # Main side-panel UI
+├── style.css                         # UI styling
+└── textures/                         # Planet/moon/sun texture assets
+```
 
 ---
 
-### More Future Improvements
+## Requirements
 
-Possible future features include:
+Before running the project, install:
 
-- Save/load buttons in the UI
-- Saturn rings
-- Click-to-focus body selection
+- Java 23 or newer
+- Maven
+- Internet access for Firebase login/save/load features
+
+JavaFX dependencies are handled through Maven.
+
+---
+
+## How to Run
+
+Clone the repository:
+
+```bash
+git clone https://github.com/EvilWizard910/Solar-System-Simulation.git
+cd Solar-System-Simulation
+```
+
+Run the application with Maven:
+
+```bash
+mvn clean javafx:run
+```
+
+The Maven JavaFX plugin launches:
+
+```text
+com.example.planetsimdemo/com.example.planetsimdemo.Main
+```
+
+---
+
+## How to Use
+
+### View the Solar System
+
+Open the app and use the `View` section to:
+
+- Select a body to focus on
+- View body details
+- Adjust simulation speed
+- Adjust rendered body size
+
+### Move the Camera
+
+- Hold left click and drag to rotate around the focused body.
+- Hold right click and drag up/down to adjust camera distance.
+- Select another body from the focus dropdown to follow it.
+
+### Add a Body
+
+Open the `Add` panel and enter the body values.
+
+For planets and moons, orbital values are required. For moons, a parent planet must be selected.
+
+### Edit or Delete a Body
+
+Open the `Edit` panel, select a body, change values, then update it. Delete is blocked when removing a planet that still has child moons.
+
+### Save or Load a System
+
+Open the `Account` panel.
+
+1. Register or sign in.
+2. Enter a save name.
+3. Click `Save`.
+4. Select saved systems from the list to load or delete them.
+
+---
+
+## Current Limitations
+
+- Collision detection is not implemented yet.
+- Custom texture upload buttons exist in the UI, but custom texture selection is not wired up yet.
+- Firebase configuration is currently stored in `FirebaseClientConfig.java`.
+- The simulation uses simplified orbital/physics assumptions and is intended as an educational sandbox, not a precision astronomy tool.
+- Very large time scales can make unstable or unusual systems behave unpredictably.
+
+---
+
+## Future Improvements
+
+Planned or possible improvements:
+
 - Collision handling
-- Better visual scaling
-- Preset solar systems
-- User-created systems
-- Improved Firebase authentication
-- Better UI layout for editing bodies
-- Import/export system data
-
----
-
-## Sprint Backlog
-
-### Completed
-
-- Added all 8 planets
-- Added Sun
-- Added kilometers-to-scene conversion
-- Added real mass constants
-- Added radius values
-- Added orbital elements
-- Implemented physics-based movement
-- Added Velocity Verlet integration
-- Added camera focus system
-- Added yaw, pitch, and distance controls
-- Added keyboard camera controls
-- Added mouse camera controls
-- Added simulation speed slider
-- Added body scale slider
-- Added Add / Edit / Remove body system
-- Added Star / Planet / Moon type system
-- Added parent planet support for moons
-- Added validation for invalid body setups
-
-### Still To Do
-
-- Connect simulation state to Firebase
-- Store planet variables in Firebase
-- Store moon variables in Firebase
-- Save current universe state
-- Load previous universe state
-- Improve UI organization
-- Add more visual features
+- Click-to-focus body selection directly from the 3D scene
+- Custom texture upload support
+- More preset solar systems
+- Import/export save files
+- Improved UI layout
+- Better camera controls
+- More advanced lighting and visual effects
+- Saturn ring rendering
+- Stronger Firebase configuration handling
 
 ---
 
 ## Summary
 
-This project is building an interactive, physics-based solar system simulator.
-
-It solves the problem of simple, unrealistic planet simulations by using real orbital concepts, gravity, dynamic body management, and interactive camera controls. Instead of only watching planets move on fixed circular tracks, users can explore, edit, and eventually save their own solar systems.
+Solar System Simulation is an interactive JavaFX space sandbox. It combines 3D rendering, real gravitational calculations, orbital elements, runtime body editing, and Firebase persistence so users can build, modify, save, and reload custom solar systems.
