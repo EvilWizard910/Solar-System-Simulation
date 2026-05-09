@@ -10,6 +10,7 @@ module com.example.planetsimdemo {
     requires google.cloud.core;
     requires com.google.api.apicommon;
     requires java.net.http;
+    requires java.sql;
 
     exports com.example.planetsimdemo;
     opens com.example.planetsimdemo to javafx.fxml;

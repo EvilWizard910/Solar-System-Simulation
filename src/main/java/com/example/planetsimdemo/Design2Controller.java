@@ -167,25 +167,34 @@ public class Design2Controller {
     }
     @FXML
     private void onSignIn(){
-        authViewModel.signIn();
-        showAuthErrorIfPresent();
+        if(authViewModel.signIn()){
+            showInfo("Signed in.");
+        }else{
+            showAuthErrorIfPresent();
+        }
     }
     @FXML
     private void onRegister(){
-        authViewModel.signUp();
-        showAuthErrorIfPresent();
+        if(authViewModel.signUp()){
+            showInfo("Account created and signed in.");
+        }else{
+            showAuthErrorIfPresent();
+        }
     }
 
     @FXML
     private void onSignOut(){
         authViewModel.signOut();
-        showAuthErrorIfPresent();
+        showInfo("Signed out.");
     }
 
     @FXML
     private void onSaveSystem(){
-        authViewModel.saveCurrentSession(solarSystem.getState());
-        showAuthErrorIfPresent();
+        if(authViewModel.saveCurrentSession(solarSystem.getState())){
+            showInfo("System saved.");
+        }else{
+            showAuthErrorIfPresent();
+        }
     }
 
     @FXML
@@ -198,6 +207,7 @@ public class Design2Controller {
                 simulationScreen.setSolarSystem(solarSystem);
             }
             refreshAllUi();
+            showInfo("System loaded.");
         }catch(Exception e){
             showError(e.getMessage());
         }
@@ -215,6 +225,7 @@ public class Design2Controller {
             simulationScreen.buildBodies();
         }
         clearAddTextureSelection();
+        showInfo("Body added.");
     }
 
     @FXML
@@ -228,6 +239,7 @@ public class Design2Controller {
         if(simulationScreen!=null){
             simulationScreen.buildBodies();
         }
+        showInfo("Body updated.");
     }
 
     @FXML
@@ -241,6 +253,7 @@ public class Design2Controller {
             simulationScreen.buildBodies();
         }
         clearEditTextureSelection();
+        showInfo("Body removed.");
     }
 
     @FXML
@@ -353,6 +366,13 @@ public class Design2Controller {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText(null);
         alert.setContentText(errorMessage);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String message){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

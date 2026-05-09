@@ -13,7 +13,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        SolarSystem solarSystem = new SolarSystem(SolarSystemState.defaultInitialConditions());
+        SolarSystem solarSystem = createInitialSolarSystem();
 
         SimulationScreen simulationScreen = new SimulationScreen(solarSystem);
         Parent simulationRoot = simulationScreen.build();
@@ -38,6 +38,17 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private SolarSystem createInitialSolarSystem() {
+        try {
+            InitialConditionsRepository repository =
+                    new InitialConditionsRepository(new FirestoreContext().firestore());
+            return new SolarSystem(repository.loadDefaultSystem());
+        } catch (Exception ex) {
+            System.err.println("Unable to load default system from Firebase. Using Java defaults: " + ex.getMessage());
+            return new SolarSystem(SolarSystemState.defaultInitialConditions());
+        }
     }
 }
 /*

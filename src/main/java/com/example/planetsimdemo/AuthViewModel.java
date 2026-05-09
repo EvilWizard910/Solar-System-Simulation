@@ -28,30 +28,36 @@ public class AuthViewModel {
         this.repository = repository;
     }
 
-    public void signIn(){
+    public boolean signIn(){
         errorMessage.set("");
         busy.set(true);
         try{
             AuthSession session = authService.signIn(email.get(),password.get());
             currentSession.set(session);
+            repository.ensureUser(session.uid(), session.email());
             password.set("");
             refreshSavedSystems();
+            return true;
         }catch(Exception e){
             errorMessage.set(e.getMessage());
+            return false;
         }finally {busy.set(false);}
     }
 
-    public void signUp(){
+    public boolean signUp(){
         errorMessage.set("");
         busy.set(true);
 
         try {
             AuthSession session = authService.signUp(email.get(),password.get());
             currentSession.set(session);
+            repository.ensureUser(session.uid(), session.email());
             password.set("");
             refreshSavedSystems();
+            return true;
         }catch(Exception e){
             errorMessage.set(e.getMessage());
+            return false;
         }finally {busy.set(false);}
     }
 
@@ -83,23 +89,26 @@ public class AuthViewModel {
         }
     }
 
-    public void saveCurrentSession(SolarSystemState state){
+    public boolean saveCurrentSession(SolarSystemState state){
+        errorMessage.set("");
         AuthSession session = currentSession.get();
         if(session == null||!session.isAuthenticated()){
             errorMessage.set("Sign in to save");
-            return;
+            return false;
         }
         String name=saveName.get()==null?"":saveName.get().trim();
         if(name.isEmpty()){
             errorMessage.set("Please enter a name for the save");
-            return;
+            return false;
         }
         try{
             repository.saveSystem(session.uid(), name,state);
             refreshSavedSystems();
             selectedSavedSystem.set(name);
+            return true;
         }catch(Exception e){
             errorMessage.set(e.getMessage());
+            return false;
         }
     }
 
