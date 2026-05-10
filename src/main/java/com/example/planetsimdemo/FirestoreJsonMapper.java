@@ -87,6 +87,8 @@ public final class FirestoreJsonMapper {
         fields.set("mass", doubleField(snapshot.mass()));
         fields.set("radiusKm", doubleField(snapshot.radiusKm()));
         fields.set("color", stringField(toColorString(snapshot.color())));
+        fields.set("rotationSpeedDegPerSecond", doubleField(snapshot.rotationSpeedDegPerSecond()));
+        fields.set("texturePath", nullableStringField(snapshot.texturePath()));
 
         fields.set("x", doubleField(snapshot.x()));
         fields.set("y", doubleField(snapshot.y()));
@@ -97,6 +99,7 @@ public final class FirestoreJsonMapper {
         fields.set("ax", doubleField(snapshot.ax()));
         fields.set("ay", doubleField(snapshot.ay()));
         fields.set("az", doubleField(snapshot.az()));
+
 
         fields.set("orbit", orbitValue(snapshot.orbit()));
 
@@ -139,6 +142,8 @@ public final class FirestoreJsonMapper {
                 getDouble(fields, "mass"),
                 getDouble(fields, "radiusKm"),
                 parseColor(getString(fields, "color")),
+                getDouble(fields, "rotationSpeedDegPerSecond"),
+                getNullableString(fields, "texturePath"),
                 getDouble(fields, "x"),
                 getDouble(fields, "y"),
                 getDouble(fields, "z"),

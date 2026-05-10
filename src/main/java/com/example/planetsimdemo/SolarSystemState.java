@@ -45,16 +45,20 @@ public class SolarSystemState {
             double mass,
             double radiusKm,
             Color color,
+            double rotationSpeedDegPerSecond,
+            String texturePath,
             OrbitElements orbit
-    ){}
+    ) {}
 
     public record BodyMetaData(
             String type,
             String parent,
             double radiusKm,
             Color color,
+            double rotationSpeedDegPerSecond,
+            String texturePath,
             OrbitElements orbit
-    ){}
+    ) {}
 
     private record OrbitalState(
             double x,
@@ -73,6 +77,16 @@ public class SolarSystemState {
 
     public SolarSystemState(Collection<InitialCondition> initialConditions){
         init(initialConditions);
+    }
+
+    public double getBodyRotationSpeedDegPerSecond(String name) {
+        BodyMetaData metadata = metadataByName.get(name);
+        return metadata == null ? 0.0 : metadata.rotationSpeedDegPerSecond();
+    }
+
+    public String getBodyTexturePath(String name) {
+        BodyMetaData metadata = metadataByName.get(name);
+        return metadata == null ? null : metadata.texturePath();
     }
 
     public List<Body> getBodies() {
@@ -128,6 +142,8 @@ public class SolarSystemState {
                     body.getMass(),
                     metadata.radiusKm(),
                     metadata.color(),
+                    metadata.rotationSpeedDegPerSecond(),
+                    metadata.texturePath(),
                     metadata.orbit()
             ));
         }
@@ -135,9 +151,10 @@ public class SolarSystemState {
     }
 
     public boolean addNewBody(String name, String type, String parentName,
-                              double mass, double radiusKm, double semiMajorAxisAu,double eccentricity,
-                              double inclinationDeg, double ascendingNodeDeg, double argumentOfPeriapsisDeg,
-                              double trueAnomalyDeg, Color color) {
+                               double mass, double radiusKm, double semiMajorAxisAu, double eccentricity,
+                               double inclinationDeg, double ascendingNodeDeg, double argumentOfPeriapsisDeg,
+                               double trueAnomalyDeg, Color color,
+                               double rotationSpeedDegPerSecond, String texturePath) {
         if (name == null || name.isBlank() || byName.containsKey(name)) {
             return false;
         }
@@ -178,7 +195,16 @@ public class SolarSystemState {
         Body body = createBody(name,normalizedType, parentName, mass, orbit);
         if(body==null){return false;}
 
-        registerBody(body, normalizedType, parentName, radiusKm, color ==null ? Color.WHITE: color, orbit);
+        registerBody(
+                body,
+                normalizedType,
+                parentName,
+                radiusKm,
+                color == null ? Color.WHITE : color,
+                rotationSpeedDegPerSecond,
+                cleanTexturePath(texturePath),
+                orbit
+        );
         return true;
     }
 
@@ -188,7 +214,8 @@ public class SolarSystemState {
                               double inclinationDeg,
                               double ascendingNodeDeg,
                               double argumentOfPeriapsisDeg,
-                              double trueAnomalyDeg, Color color) {
+                              double trueAnomalyDeg, Color color,
+                              double rotationSpeedDegPerSecond, String texturePath) {
         Body existing = byName.get(originalName);
         if (existing == null || newName == null || newName.isBlank()) {
             return false;
@@ -246,7 +273,16 @@ public class SolarSystemState {
         }
 
         removeBodyInternal(originalName);
-        registerBody(updatedBody, normalizedType, parentName, radiusKm, color==null?Color.WHITE:color, newOrbit);
+        registerBody(
+                updatedBody,
+                normalizedType,
+                parentName,
+                radiusKm,
+                color == null ? Color.WHITE : color,
+                rotationSpeedDegPerSecond,
+                cleanTexturePath(texturePath),
+                newOrbit
+        );
 
         for(InitialCondition child : children) {
             removeBodyInternal(child.name());
@@ -254,7 +290,16 @@ public class SolarSystemState {
             Body rebuiltChild = createBody(
                     child.name(), child.type(), newName, child.mass(), child.orbit());
             if (rebuiltChild != null) {
-                registerBody(rebuiltChild, child.type(), newName, child.radiusKm(), child.color(), child.orbit());
+                registerBody(
+                        rebuiltChild,
+                        child.type(),
+                        newName,
+                        child.radiusKm(),
+                        child.color(),
+                        child.rotationSpeedDegPerSecond(),
+                        child.texturePath(),
+                        child.orbit()
+                );
             }
         }
         return true;
@@ -272,15 +317,33 @@ public class SolarSystemState {
     private void init(Collection<InitialCondition> initialConditions) {
         for (InitialCondition condition : orderInitialConditions(initialConditions)) {
             String normalizedType = normalizeType(condition.type());
-            String parentName = TYPE_MOON.equals(normalizedType) ? condition.parent():null;
+            String parentName = TYPE_MOON.equals(normalizedType) ? condition.parent() : null;
 
-            Body body = createBody(condition.name(), normalizedType, parentName, condition.mass(), condition.orbit());
+            Body body = createBody(
+                    condition.name(),
+                    normalizedType,
+                    parentName,
+                    condition.mass(),
+                    condition.orbit()
+            );
+
             if (body == null) {
                 throw new IllegalStateException("Cannot create body for " + condition.name());
             }
-            registerBody(body, normalizedType, parentName, condition.radiusKm(), condition.color() == null ? Color.WHITE : condition.color(), condition.orbit());
+
+            registerBody(
+                    body,
+                    normalizedType,
+                    parentName,
+                    condition.radiusKm(),
+                    condition.color() == null ? Color.WHITE : condition.color(),
+                    condition.rotationSpeedDegPerSecond(),
+                    condition.texturePath(),
+                    condition.orbit()
+            );
         }
     }
+
     private List<InitialCondition> orderInitialConditions(Collection<InitialCondition> initialConditions){
         List<InitialCondition> ordered = new ArrayList<>(initialConditions);
         ordered.sort(Comparator
@@ -342,10 +405,31 @@ public class SolarSystemState {
         return new Body(name,mass,state.x(),state.y(),state.z(),state.vx(),state.vy(),state.vz());
     }
 
-    private void registerBody(Body body, String type, String parentName, double radiusKm, Color color, OrbitElements orbit) {
+    private void registerBody(Body body, String type, String parentName, double radiusKm,
+                              Color color, double rotationSpeedDegPerSecond,
+                              String texturePath, OrbitElements orbit) {
         bodies.add(body);
         byName.put(body.getName(), body);
-        metadataByName.put(body.getName(), new BodyMetaData(type, parentName, radiusKm, color, orbit));
+        metadataByName.put(
+                body.getName(),
+                new BodyMetaData(
+                        type,
+                        parentName,
+                        radiusKm,
+                        color,
+                        rotationSpeedDegPerSecond,
+                        cleanTexturePath(texturePath),
+                        orbit
+                )
+        );
+    }
+
+    private String cleanTexturePath(String texturePath) {
+        if (texturePath == null || texturePath.isBlank()) {
+            return null;
+        }
+
+        return texturePath.trim();
     }
 
     private void removeBodyInternal(String name) {
@@ -362,8 +446,16 @@ public class SolarSystemState {
             if(metadata!=null && parentName.equals(metadata.parent())) {
                 Body body = byName.get(name);
                 children.add(new InitialCondition(
-                        name, metadata.type(), metadata.parent(), body.getMass(),
-                        metadata.radiusKm(), metadata.color(), metadata.orbit()));
+                        name,
+                        metadata.type(),
+                        metadata.parent(),
+                        body.getMass(),
+                        metadata.radiusKm(),
+                        metadata.color(),
+                        metadata.rotationSpeedDegPerSecond(),
+                        metadata.texturePath(),
+                        metadata.orbit()
+                ));
             }
         }
         return children;
@@ -439,6 +531,8 @@ public class SolarSystemState {
             double mass,
             double radiusKm,
             Color color,
+            double rotationSpeedDegPerSecond,
+            String texturePath,
             double x,
             double y,
             double z,
@@ -465,6 +559,8 @@ public class SolarSystemState {
                     body.getMass(),
                     metadata.radiusKm(),
                     metadata.color(),
+                    metadata.rotationSpeedDegPerSecond(),
+                    metadata.texturePath(),
                     body.getX(),
                     body.getY(),
                     body.getZ(),
@@ -508,6 +604,8 @@ public class SolarSystemState {
                             snapshot.parent(),
                             snapshot.radiusKm(),
                             snapshot.color(),
+                            snapshot.rotationSpeedDegPerSecond(),
+                            snapshot.texturePath(),
                             snapshot.orbit()
                     ));
         }
@@ -515,31 +613,131 @@ public class SolarSystemState {
         return state;
     }
 
-    public static List<InitialCondition> defaultInitialConditions() {
-        List<InitialCondition> defaults = new ArrayList<>();
+        public static List<InitialCondition> defaultInitialConditions() {
+            List<InitialCondition> defaults = new ArrayList<>();
 
-        defaults.add(new InitialCondition("Sun", "Star", null, massOfSun, 700000, Color.YELLOW, null));
-        defaults.add(new InitialCondition("Mercury", "Planet", null, Mercury_Mass, 2439.7, Color.MISTYROSE,
-                new OrbitElements(0.3870993, 0.20564, 7.005, 48.3, 29.13, 193)));
-        defaults.add(new InitialCondition("Venus", "Planet", null, Venus_Mass, 6051.8, Color.BURLYWOOD,
-                new OrbitElements(0.7233336, 0.00678, 3.3947, 76.7, 54.9, 125)));
-        defaults.add(new InitialCondition("Earth", "Planet", null, EARTH_MASS, 6371, Color.DODGERBLUE,
-                new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0)));
-        defaults.add(new InitialCondition("Mars", "Planet", null, Mars_Mass, 3389.5, Color.ORANGERED,
-                new OrbitElements(1.52371, 0.09339, 1.85, 49.6, 286.5, 355)));
-        defaults.add(new InitialCondition("Jupiter", "Planet", null, Jupiter_Mass, 69911.0, Color.CORAL,
-                new OrbitElements(5.2029, 0.0484, 1.304, 100.4, 274.3, 185)));
-        defaults.add(new InitialCondition("Saturn", "Planet", null, Saturn_Mass, 58232, Color.DARKGRAY,
-                new OrbitElements(9.537, 0.0539, 2.486, 113.7, 338.9, 317)));
-        defaults.add(new InitialCondition("Uranus", "Planet", null, Uranus_Mass, 25362, Color.DARKTURQUOISE,
-                new OrbitElements(19.189, 0.04726, 0.773, 74.02, 96.9, 142)));
-        defaults.add(new InitialCondition("Neptune", "Planet", null, Neptune_Mass, 24622, Color.MIDNIGHTBLUE,
-                new OrbitElements(30.0699, 0.00859, 1.77, 131.784, 273.2, 260.5)));
-        defaults.add(new InitialCondition("Moon", "Moon", "Earth", Moon_Mass, 1737.4, Color.LIGHTGRAY,
-                new OrbitElements(0.00257, 0.0549, 5.1, 0, 0, 327)));
+            defaults.add(new InitialCondition(
+                    "Sun",
+                    "Star",
+                    null,
+                    massOfSun,
+                    700000,
+                    Color.YELLOW,
+                    3.0,
+                    "/textures/sun.jpg",
+                    null
+            ));
 
-        return defaults;
-    }
+            defaults.add(new InitialCondition(
+                    "Mercury",
+                    "Planet",
+                    null,
+                    Mercury_Mass,
+                    2439.7,
+                    Color.MISTYROSE,
+                    1.5,
+                    "/textures/mercury.jpg",
+                    new OrbitElements(0.3870993, 0.20564, 7.005, 48.3, 29.13, 193)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Venus",
+                    "Planet",
+                    null,
+                    Venus_Mass,
+                    6051.8,
+                    Color.BURLYWOOD,
+                    -1.0,
+                    "/textures/venus.jpg",
+                    new OrbitElements(0.7233336, 0.00678, 3.3947, 76.7, 54.9, 125)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Earth",
+                    "Planet",
+                    null,
+                    EARTH_MASS,
+                    6371,
+                    Color.DODGERBLUE,
+                    12.0,
+                    "/textures/earth.jpg",
+                    new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Mars",
+                    "Planet",
+                    null,
+                    Mars_Mass,
+                    3389.5,
+                    Color.ORANGERED,
+                    10.0,
+                    "/textures/mars.jpg",
+                    new OrbitElements(1.52371, 0.09339, 1.85, 49.6, 286.5, 355)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Jupiter",
+                    "Planet",
+                    null,
+                    Jupiter_Mass,
+                    69911.0,
+                    Color.CORAL,
+                    30.0,
+                    "/textures/jupiter.jpg",
+                    new OrbitElements(5.2029, 0.0484, 1.304, 100.4, 274.3, 185)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Saturn",
+                    "Planet",
+                    null,
+                    Saturn_Mass,
+                    58232,
+                    Color.DARKGRAY,
+                    25.0,
+                    "/textures/saturn.jpg",
+                    new OrbitElements(9.537, 0.0539, 2.486, 113.7, 338.9, 317)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Uranus",
+                    "Planet",
+                    null,
+                    Uranus_Mass,
+                    25362,
+                    Color.DARKTURQUOISE,
+                    -18.0,
+                    "/textures/uranus.jpg",
+                    new OrbitElements(19.189, 0.04726, 0.773, 74.02, 96.9, 142)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Neptune",
+                    "Planet",
+                    null,
+                    Neptune_Mass,
+                    24622,
+                    Color.MIDNIGHTBLUE,
+                    16.0,
+                    "/textures/neptune.jpg",
+                    new OrbitElements(30.0699, 0.00859, 1.77, 131.784, 273.2, 260.5)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Moon",
+                    "Moon",
+                    "Earth",
+                    Moon_Mass,
+                    1737.4,
+                    Color.LIGHTGRAY,
+                    2.0,
+                    "/textures/moon.jpg",
+                    new OrbitElements(0.00257, 0.0549, 5.1, 0, 0, 327)
+            ));
+
+            return defaults;
+        }
 
 
 }

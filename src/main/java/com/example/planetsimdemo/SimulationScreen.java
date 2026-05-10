@@ -10,6 +10,9 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.PointLight;
 import javafx.scene.AmbientLight;
 import javafx.scene.image.Image;
+import javafx.scene.transform.Rotate;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 import java.util.HashMap;
@@ -22,7 +25,10 @@ public class SimulationScreen {
     private final Group world = new Group();
     private final Map<String, Sphere> bodyViews = new HashMap<>();
     private final Map<String, PointLight> starLights = new HashMap<>();
+    private final Map<String, PhongMaterial> materialCache = new HashMap<>();
     private final PerspectiveCamera camera = new PerspectiveCamera(true);
+    private final Map<String, Rotate> bodyRotations = new HashMap<>();
+    private final Map<String, Double> bodySpinAngles = new HashMap<>();
 
     private AnimationTimer timer;
     private long lastTime = 0L;
@@ -112,8 +118,8 @@ public class SimulationScreen {
     }
 
     public void setSizeScale(double sizeScale) {
-        this.sizeScale = sizeScale;
-        buildBodies();
+        this.sizeScale = Math.max(0.0, Math.min(1.0, sizeScale));
+        updateBodyRadii();
     }
 
     public void setFocusedBody(String bodyName) {
@@ -123,9 +129,11 @@ public class SimulationScreen {
     }
 
     public void buildBodies() {
-        world.getChildren().removeIf(node -> node instanceof Sphere);
+        world.getChildren().removeIf(node -> node instanceof Sphere || node instanceof PointLight);
         bodyViews.clear();
         starLights.clear();
+        bodyRotations.clear();
+        bodySpinAngles.clear();
 
         for (String name : solarSystem.getBodyNames()) {
             Body body = solarSystem.getBody(name);
@@ -137,6 +145,12 @@ public class SimulationScreen {
             Color color = solarSystem.getBodyColor(name);
             Sphere sphere = new Sphere(toSceneRadius(radiusKm));
             sphere.setMaterial(createMaterialForBody(name, color));
+
+            Rotate spinRotation = new Rotate(0, Rotate.Y_AXIS);
+            sphere.getTransforms().add(spinRotation);
+
+            bodyRotations.put(name, spinRotation);
+            bodySpinAngles.put(name, 0.0);
 
             updateSpherePosition(sphere, body);
             bodyViews.put(name, sphere);
@@ -178,8 +192,10 @@ public class SimulationScreen {
                     PointLight light = starLights.get(name);
                     if (body != null && sphere != null) {
                         updateSpherePosition(sphere, body);
-                        if(light!=null){
-                            updateLightPosition(light,body);
+                        updateBodySpin(name, dt * timeScale);
+
+                        if (light != null) {
+                            updateLightPosition(light, body);
                         }
                     }
                 }
@@ -187,6 +203,37 @@ public class SimulationScreen {
             }
         };
         timer.start();
+    }
+
+    private void updateBodySpin(String bodyName, double scaledDt) {
+        Rotate rotation = bodyRotations.get(bodyName);
+        if (rotation == null) {
+            return;
+        }
+
+        double spinSpeed = getSpinSpeedDegreesPerSecond(bodyName);
+        double currentAngle = bodySpinAngles.getOrDefault(bodyName, 0.0);
+
+        double nextAngle = (currentAngle + spinSpeed * scaledDt) % 360.0;
+
+        bodySpinAngles.put(bodyName, nextAngle);
+        rotation.setAngle(nextAngle);
+    }
+
+    private double getSpinSpeedDegreesPerSecond(String bodyName) {
+        return solarSystem.getBodyRotationSpeedDegPerSecond(bodyName);
+    }
+
+    private void updateBodyRadii() {
+        for (String name : bodyViews.keySet()) {
+            Sphere sphere = bodyViews.get(name);
+            if (sphere == null) {
+                continue;
+            }
+
+            double radiusKm = solarSystem.getBodyRadiusKm(name);
+            sphere.setRadius(toSceneRadius(radiusKm));
+        }
     }
 
     private void updateCamera() {
@@ -239,9 +286,59 @@ public class SimulationScreen {
     }
 
     private PhongMaterial createMaterialForBody(String name, Color fallbackColor) {
-        PhongMaterial material = new PhongMaterial();
+        String texturePath = solarSystem.getBodyTexturePath(name);
 
-        String texturePath = switch(name.toLowerCase()) {
+        if (texturePath == null || texturePath.isBlank()) {
+            texturePath = getTexturePath(name);
+        }
+
+        if (texturePath != null) {
+            PhongMaterial cachedMaterial = materialCache.get(texturePath);
+            if (cachedMaterial != null) {
+                return cachedMaterial;
+            }
+
+            Image texture = loadTexture(texturePath);
+
+            if (texture != null) {
+                PhongMaterial material = new PhongMaterial();
+                material.setDiffuseMap(texture);
+                materialCache.put(texturePath, material);
+                return material;
+            }
+        }
+
+        Color color = fallbackColor == null ? Color.WHITE : fallbackColor;
+        String colorKey = "color:" + color;
+
+        return materialCache.computeIfAbsent(colorKey, key -> {
+            PhongMaterial material = new PhongMaterial();
+            material.setDiffuseColor(color);
+            return material;
+        });
+    }
+
+    private Image loadTexture(String texturePath) {
+        try {
+            if (texturePath.startsWith("/")) {
+                var stream = getClass().getResourceAsStream(texturePath);
+                return stream == null ? null : new Image(stream);
+            }
+
+            Path path = Path.of(texturePath);
+
+            if (!Files.exists(path)) {
+                return null;
+            }
+
+            return new Image(path.toUri().toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getTexturePath(String name) {
+        return switch (name.toLowerCase()) {
             case "sun" -> "/textures/sun.jpg";
             case "mercury" -> "/textures/mercury.jpg";
             case "venus" -> "/textures/venus.jpg";
@@ -254,19 +351,7 @@ public class SimulationScreen {
             case "moon" -> "/textures/moon.jpg";
             default -> null;
         };
-
-        if (texturePath != null) {
-            var stream = getClass().getResourceAsStream(texturePath);
-
-            if (stream != null) {
-                Image texture = new Image(stream);
-                material.setDiffuseMap(texture);
-                return material;
-            }
-        }
-    material.setDiffuseColor(fallbackColor == null ? Color.WHITE : fallbackColor);
-        return material;
-}
+    }
 
     private double toSceneRadius(double radiusKm) {
         double t = sizeScale;

@@ -3,6 +3,16 @@ package com.example.planetsimdemo;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 public class Design2Controller {
 
@@ -50,6 +60,8 @@ public class Design2Controller {
     @FXML private Slider argumentOfPeriapsisDegreeSlider;
     @FXML private Label editTextureLabel;
     @FXML private Button editTextureButton;
+    @FXML private TextField rotationSpeedDegPerSecondField;
+    @FXML private Slider rotationSpeedSlider;
 
     private SolarSystem solarSystem;
     private AuthViewModel authViewModel;
@@ -62,6 +74,9 @@ public class Design2Controller {
 
     private static final double minTimeScale=1.0;
     private static final double maxTimeScale=7*24*3600;
+    private static final long MAX_TEXTURE_BYTES = 2 * 1024 * 1024; // 2 MB
+    private static final double MAX_TEXTURE_WIDTH = 2048;
+    private static final double MAX_TEXTURE_HEIGHT = 2048;
 
     public void initialize(){
         authViewModel = new AuthViewModel(
@@ -173,6 +188,9 @@ public class Design2Controller {
             argumentOfPeriapsisDegreeField.setText(formatDouble(newValue.doubleValue()));
             applyLiveEdit();
         });
+        rotationSpeedSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            rotationSpeedDegPerSecondField.setText(Double.toString(newValue.doubleValue()));
+        });
     }
 
     private void applyLiveEdit(){
@@ -276,8 +294,18 @@ public class Design2Controller {
     }
 
     @FXML
-    private void onAddTexture(){
+    private void onAddTexture() {
+        try {
+            String copiedTexturePath = chooseAndCopyTextureFile();
+            if (copiedTexturePath == null) {
+                return;
+            }
 
+            bodyEditorViewModel.texturePathProperty().set(copiedTexturePath);
+            addTextureLabel.setText(Path.of(copiedTexturePath).getFileName().toString());
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
     }
 
     @FXML
@@ -291,8 +319,18 @@ public class Design2Controller {
     }
 
     @FXML
-    private void onEditTexture(){
+    private void onEditTexture() {
+        try {
+            String copiedTexturePath = chooseAndCopyTextureFile();
+            if (copiedTexturePath == null) {
+                return;
+            }
 
+            bodyEditorViewModel.texturePathProperty().set(copiedTexturePath);
+            editTextureLabel.setText(Path.of(copiedTexturePath).getFileName().toString());
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
     }
 
     public void setSimulationScreen(SimulationScreen simulationScreen){
@@ -353,6 +391,9 @@ public class Design2Controller {
         bodyEditorViewModel.ascendingNodeDegProperty().set(parseDouble(ascendingNodeDegreeField.getText()));
         bodyEditorViewModel.argumentOfPeriapsisDegProperty().set(parseDouble(argumentOfPeriapsisDegreeField.getText()));
         bodyEditorViewModel.trueAnomalyDegProperty().set(parseDouble(trueAnomalyDegField.getText()));
+        bodyEditorViewModel.rotationSpeedDegPerSecondProperty().set(
+                parseDouble(rotationSpeedDegPerSecondField.getText())
+        );
 
     }
     private void pushEditorValuesToUi(){
@@ -368,6 +409,17 @@ public class Design2Controller {
         argumentOfPeriapsisDegreeField.setText(Double.toString(bodyEditorViewModel.argumentOfPeriapsisDegProperty().get()));
         trueAnomalyDegField.setText(Double.toString(bodyEditorViewModel.trueAnomalyDegProperty().get()));
         colorPicker.setValue(bodyEditorViewModel.colorProperty().get());
+        rotationSpeedDegPerSecondField.setText(
+                Double.toString(bodyEditorViewModel.rotationSpeedDegPerSecondProperty().get())
+        );
+
+        String selectedTexture = bodyEditorViewModel.texturePathProperty().get();
+        String textureLabel = selectedTexture == null || selectedTexture.isBlank()
+                ? "No file selected"
+                : Path.of(selectedTexture).getFileName().toString();
+
+        addTextureLabel.setText(textureLabel);
+        editTextureLabel.setText(textureLabel);
     }
 
     private void syncEditSlidersFromForm(){
@@ -378,6 +430,7 @@ public class Design2Controller {
         ascendingNodeDegreeSlider.setValue(parseDouble(ascendingNodeDegreeField.getText()));
         inclinationDegreeSlider.setValue(parseDouble(inclinationDegreeField.getText()));
         argumentOfPeriapsisDegreeSlider.setValue(parseDouble(argumentOfPeriapsisDegreeField.getText()));
+        rotationSpeedSlider.setValue(parseDouble(rotationSpeedDegPerSecondField.getText()));
     }
 
     private void clearAddTextureSelection(){
@@ -471,6 +524,66 @@ public class Design2Controller {
         }
         double daysPerSecond=timeScale / 86400;
         return String.format("%.2f day/sec", daysPerSecond);
+    }
+    private String chooseAndCopyTextureFile() throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose JPG Texture");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("JPG Images", "*.jpg", "*.jpeg")
+        );
+
+        Window window = saveButton.getScene() == null ? null : saveButton.getScene().getWindow();
+        File selectedFile = fileChooser.showOpenDialog(window);
+
+        if (selectedFile == null) {
+            return null;
+        }
+
+        validateTextureFile(selectedFile);
+
+        Path textureDirectory = getTextureDirectory();
+        Files.createDirectories(textureDirectory);
+
+        Path destination = textureDirectory.resolve(UUID.randomUUID() + ".jpg");
+
+        Files.copy(
+                selectedFile.toPath(),
+                destination,
+                StandardCopyOption.REPLACE_EXISTING
+        );
+
+        return destination.toAbsolutePath().toString();
+    }
+
+    private void validateTextureFile(File file) throws IOException {
+        String fileName = file.getName().toLowerCase();
+
+        if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg")) {
+            throw new IOException("Texture must be a JPG image.");
+        }
+
+        long fileSize = Files.size(file.toPath());
+        if (fileSize > MAX_TEXTURE_BYTES) {
+            throw new IOException("Texture must be 2 MB or smaller.");
+        }
+
+        Image image = new Image(file.toURI().toString());
+
+        if (image.isError()) {
+            throw new IOException("Could not load texture image.");
+        }
+
+        if (image.getWidth() > MAX_TEXTURE_WIDTH || image.getHeight() > MAX_TEXTURE_HEIGHT) {
+            throw new IOException("Texture must be 2048x2048 or smaller.");
+        }
+    }
+
+    private Path getTextureDirectory() {
+        return Path.of(
+                System.getProperty("user.home"),
+                ".solar-system-simulation",
+                "textures"
+        );
     }
 
     private double multiplierFromSlider(double sliderValue){
