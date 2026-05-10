@@ -232,7 +232,7 @@ public class SolarSystemState {
             if (semiMajorAxisAu <= 0.0) {
                 return false;
             }
-            if (eccentricity <= 0.0 || eccentricity >= 1) {
+            if (eccentricity < 0.0 || eccentricity >= 1) {
                 return false;
             }
 

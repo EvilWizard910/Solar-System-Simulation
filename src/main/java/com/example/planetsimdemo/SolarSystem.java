@@ -31,25 +31,17 @@ public final class SolarSystem {
     public Body getBody(String name){
         return state.getBody(name);
     }
-
     public Set<String> getBodyNames(){
         return state.getBodyNames();
     }
-
     public Set<String> getPlanetNames(){
         return state.getPlanetNames();
     }
-
     public String getBodyType(String name){return state.getBodyType(name);}
-
     public String getOrbitParent(String name){return state.getOrbitParent(name);}
-
     public double getBodyRadiusKm(String name){return state.getBodyRadiusKm(name);}
-
     public Color getBodyColor(String name){return state.getBodyColor(name);}
-
     public SolarSystemState.OrbitElements getOrbitElements(String name){return state.getOrbitElements(name);}
-
     public List<SolarSystemState.InitialCondition> toInitialConditions(){return state.toInitialConditions();}
 
     public boolean updateBody(String originalName, String newName, String type, String parentName,

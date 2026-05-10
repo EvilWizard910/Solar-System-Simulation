@@ -130,25 +130,32 @@
                             <ListView fx:id="bodyList" prefHeight="120"/>
 
                             <Label text="Mass"/>
-                            <Slider fx:id="massSlider"/>
+                            <Slider fx:id="massSlider" min="-6.0" max="6" value="0.0"
+                            majorTickUnit="1.0" minorTickCount="0" blockIncrement=".25"/>
 
                             <Label text="Radius"/>
-                            <Slider fx:id="radiusKmSlider"/>
+                            <Slider fx:id="radiusKmSlider" min="0.1" max="10" value="1.0"
+                                    majorTickUnit="1.0" minorTickCount="4" blockIncrement="0.1"/>
 
                             <Label text="Axis"/>
-                            <Slider fx:id="semiMajorAxisAuSlider"/>
+                            <Slider fx:id="semiMajorAxisAuSlider" min="0.0001" max="35" value="1"
+                                    majorTickUnit="1.0" minorTickCount="4" blockIncrement="0.1"/>
 
                             <Label text="Eccentricity"/>
-                            <Slider fx:id="eccentricitySlider"/>
+                            <Slider fx:id="eccentricitySlider" min="0.0" max="0.99999" value="0.0"
+                            majorTickUnit="0.1" minorTickCount="4" blockIncrement="0.01"/>
 
                             <Label text="Inclination"/>
-                            <Slider fx:id="inclinationDegreeSlider"/>
+                            <Slider fx:id="inclinationDegreeSlider" min="-180.0" max="180.0" value="0.0"
+                            majorTickUnit="45" minorTickCount="2" blockIncrement="1"/>
 
                             <Label text="Ascending Node"/>
-                            <Slider fx:id="ascendingNodeDegreeSlider"/>
+                            <Slider fx:id="ascendingNodeDegreeSlider" min="-180.0" max="180.0" value="0.0"
+                                    majorTickUnit="45" minorTickCount="2" blockIncrement="1"/>
 
                             <Label text="Periapsis"/>
-                            <Slider fx:id="argumentOfPeriapsisDegreeSlider"/>
+                            <Slider fx:id="argumentOfPeriapsisDegreeSlider" min="-180.0" max="180.0" value="0.0"
+                                    majorTickUnit="45" minorTickCount="2" blockIncrement="1"/>
 
                             <Label text="Texture"/>
                             <HBox spacing="8">
