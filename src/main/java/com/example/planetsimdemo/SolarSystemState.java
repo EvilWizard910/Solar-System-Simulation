@@ -622,7 +622,7 @@ public class SolarSystemState {
                     null,
                     massOfSun,
                     700000,
-                    Color.YELLOW,
+                    Color.WHITE,
                     3.0,
                     "/textures/sun.jpg",
                     null
@@ -735,6 +735,67 @@ public class SolarSystemState {
                     "/textures/moon.jpg",
                     new OrbitElements(0.00257, 0.0549, 5.1, 0, 0, 327)
             ));
+
+            defaults.add(new InitialCondition(
+                    "Io",
+                    "Moon",
+                    "Jupiter",
+                    Io_Mass,
+                    1821.6,
+                    Color.LIMEGREEN,
+                    2.0,
+                    "/textures/io.jpg",
+                    new OrbitElements(0.00282, 0.004, 0.05, 240, 274.3, 173)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Europa",
+                    "Moon",
+                    "Jupiter",
+                    Europa_mass,
+                    1560.8,
+                    Color.WHITE,
+                    2.0,
+                    "/textures/europa.jpg",
+                    new OrbitElements(0.00448, 0.0101, 0.471, 120, 274.3, 37)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Ganymede",
+                    "Moon",
+                    "Jupiter",
+                    Ganymede_mass,
+                    1821.6,
+                    Color.DARKGRAY,
+                    2.0,
+                    "/textures/ganymede.jpg",
+                    new OrbitElements(0.00716, 0.0015, 0.204, 60, 274.3, 75)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Callisto",
+                    "Moon",
+                    "Jupiter",
+                    Callisto_mass,
+                    1821.6,
+                    Color.GRAY,
+                    2.0,
+                    "/textures/callisto.jpg",
+                    new OrbitElements(0.0126, 0.007, 0.205, 10, 274.3, 294)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Titan",
+                    "Moon",
+                    "Saturn",
+                    1.35e23,
+                    2575,
+                    Color.LIGHTYELLOW,
+                    2.0,
+                    "/textures/titan.jpg",
+                    new OrbitElements(0.008021505, 0.0288, 0.348, 169.24, 338.9, 69)
+            ));
+
 
             return defaults;
         }

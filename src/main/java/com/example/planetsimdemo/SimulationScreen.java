@@ -13,6 +13,10 @@ import javafx.scene.image.Image;
 import javafx.scene.transform.Rotate;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javafx.scene.shape.CullFace;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+
 
 
 import java.util.HashMap;
@@ -29,6 +33,7 @@ public class SimulationScreen {
     private final PerspectiveCamera camera = new PerspectiveCamera(true);
     private final Map<String, Rotate> bodyRotations = new HashMap<>();
     private final Map<String, Double> bodySpinAngles = new HashMap<>();
+    private final Map<String, MeshView> ringViews = new HashMap<>();
 
     private AnimationTimer timer;
     private long lastTime = 0L;
@@ -129,11 +134,12 @@ public class SimulationScreen {
     }
 
     public void buildBodies() {
-        world.getChildren().removeIf(node -> node instanceof Sphere || node instanceof PointLight);
+        world.getChildren().removeIf(node -> node instanceof Sphere || node instanceof PointLight|| node instanceof MeshView);
         bodyViews.clear();
         starLights.clear();
         bodyRotations.clear();
         bodySpinAngles.clear();
+        ringViews.clear();
 
         for (String name : solarSystem.getBodyNames()) {
             Body body = solarSystem.getBody(name);
@@ -155,6 +161,18 @@ public class SimulationScreen {
             updateSpherePosition(sphere, body);
             bodyViews.put(name, sphere);
             world.getChildren().add(sphere);
+
+            if("Saturn".equalsIgnoreCase(name)) {
+                double planetRadius = toSceneRadius(radiusKm);
+                MeshView ring= createSaturnRing(
+                        (float) (planetRadius*1.4),
+                        (float) (planetRadius*2.3),
+                        96
+                );
+                updateRingPosition(ring,body);
+                ringViews.put(name, ring);
+                world.getChildren().add(ring);
+            }
 
             if("Star".equals(solarSystem.getBodyType(name))) {
                 PointLight starLight = new PointLight(color==null? Color.WHITE : color);
@@ -188,11 +206,16 @@ public class SimulationScreen {
                 for (String name : solarSystem.getBodyNames()) {
                     Body body = solarSystem.getBody(name);
                     Sphere sphere = bodyViews.get(name);
+                    MeshView ring = ringViews.get(name);
 
                     PointLight light = starLights.get(name);
                     if (body != null && sphere != null) {
                         updateSpherePosition(sphere, body);
                         updateBodySpin(name, dt * timeScale);
+
+                        if(ring != null) {
+                            updateRingPosition(ring,body);
+                        }
 
                         if (light != null) {
                             updateLightPosition(light, body);
@@ -360,5 +383,44 @@ public class SimulationScreen {
         double uniformRadius = 10;
 
         return realisticRadius + t * (uniformRadius - realisticRadius);
+    }
+
+    private MeshView createSaturnRing(float innerRadius, float outerRadius, int segments) {
+        TriangleMesh mesh = new TriangleMesh();
+        mesh.getTexCoords().addAll(0, 0);
+
+        for (int i = 0; i < segments; i++) {
+            double angle = 2.0 * Math.PI * i / segments;
+            float cos = (float) Math.cos(angle);
+            float sin = (float) Math.sin(angle);
+
+            mesh.getPoints().addAll(
+                    innerRadius * cos, 0f, innerRadius * sin,
+                    outerRadius * cos, 0f, outerRadius * sin
+            );
+        }
+        for (int i = 0; i < segments; i++) {
+            int next = (i + 1) % segments;
+
+            int inner0 = i * 2;
+            int inner1 = next * 2;
+            int outer0 = inner0 + 1;
+            int outer1 = inner1 + 1;
+
+            mesh.getFaces().addAll(
+                    inner0, 0, outer0, 0, outer1, 0,
+                    inner0, 0, outer1, 0, inner1, 0);
+        }
+        MeshView ring = new MeshView(mesh);
+        ring.setMaterial(new PhongMaterial(Color.BURLYWOOD));
+        ring.setRotationAxis(Rotate.X_AXIS);
+        ring.setRotate(90);
+        return ring;
+    }
+
+    private void updateRingPosition(MeshView ring, Body body) {
+        ring.setTranslateX(metersToScene(body.getX()));
+        ring.setTranslateY(metersToScene(body.getY()));
+        ring.setTranslateZ(metersToScene(body.getZ()));
     }
 }
