@@ -25,6 +25,8 @@ public class BodyEditorViewModel {
     private final DoubleProperty trueAnomalyDeg = new SimpleDoubleProperty(0.0);
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
     private final StringProperty errorMessage = new SimpleStringProperty("");
+    private final DoubleProperty rotationSpeedDegPerSecond = new SimpleDoubleProperty(8.0);
+    private final StringProperty texturePath = new SimpleStringProperty();
 
     public void clearForm(){
         selectedBodyName.set(null);
@@ -40,6 +42,8 @@ public class BodyEditorViewModel {
         trueAnomalyDeg.set(0.0);
         color.set(Color.WHITE);
         errorMessage.set("");
+        rotationSpeedDegPerSecond.set(8.0);
+        texturePath.set(null);
     }
 
     public BodyEditorViewModel(SolarSystem solarSystem) {
@@ -82,6 +86,8 @@ public class BodyEditorViewModel {
         mass.set(body.getMass());
         radiusKm.set(system.getBodyRadiusKm(selected));
         color.set(system.getBodyColor(selected));
+        rotationSpeedDegPerSecond.set(system.getBodyRotationSpeedDegPerSecond(selected));
+        texturePath.set(system.getBodyTexturePath(selected));
 
         if(orbit != null){
             semiMajorAxisAu.set(orbit.semiMajorAxisAu());
@@ -119,7 +125,10 @@ public class BodyEditorViewModel {
                 ascendingNodeDeg.get(),
                 argumentOfPeriapsisDeg.get(),
                 trueAnomalyDeg.get(),
-                color.get()
+                color.get(),
+                rotationSpeedDegPerSecond.get(),
+                texturePath.get()
+
                 );
         if(!added){
             errorMessage.set("Could not add body. Check parameters.");
@@ -155,7 +164,9 @@ public class BodyEditorViewModel {
                 ascendingNodeDeg.get(),
                 argumentOfPeriapsisDeg.get(),
                 trueAnomalyDeg.get(),
-                color.get()
+                color.get(),
+                rotationSpeedDegPerSecond.get(),
+                texturePath.get()
         );
         if(!updated){
             errorMessage.set("Could not update body. Check parameters.");
@@ -187,6 +198,14 @@ public class BodyEditorViewModel {
         refreshLists();
         clearForm();
         return true;
+    }
+
+    public DoubleProperty rotationSpeedDegPerSecondProperty() {
+        return rotationSpeedDegPerSecond;
+    }
+
+    public StringProperty texturePathProperty() {
+        return texturePath;
     }
 
     public boolean isMoonSelected(){

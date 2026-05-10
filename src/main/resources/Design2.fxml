@@ -108,6 +108,7 @@
                             <TextField fx:id="ascendingNodeDegreeField" promptText="Ascending Node"/>
                             <TextField fx:id="argumentOfPeriapsisDegreeField" promptText="Arg. of Periapsis"/>
                             <TextField fx:id="trueAnomalyDegField" promptText="True Anomaly"/>
+                            <TextField fx:id="rotationSpeedDegPerSecondField" promptText="Rotation Speed Deg/Sec"/>
 
                             <ColorPicker fx:id="colorPicker"/>
 
@@ -149,6 +150,9 @@
 
                             <Label text="Periapsis"/>
                             <Slider fx:id="argumentOfPeriapsisDegreeSlider"/>
+
+                            <Label text="Rotation Speed"/>
+                            <Slider fx:id="rotationSpeedSlider" min="-60" max="60" value="8"/>
 
                             <Label text="Texture"/>
                             <HBox spacing="8">

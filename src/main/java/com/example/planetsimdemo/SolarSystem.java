@@ -48,6 +48,14 @@ public final class SolarSystem {
 
     public Color getBodyColor(String name){return state.getBodyColor(name);}
 
+    public double getBodyRotationSpeedDegPerSecond(String name) {
+        return state.getBodyRotationSpeedDegPerSecond(name);
+    }
+
+    public String getBodyTexturePath(String name) {
+        return state.getBodyTexturePath(name);
+    }
+
     public SolarSystemState.OrbitElements getOrbitElements(String name){return state.getOrbitElements(name);}
 
     public List<SolarSystemState.InitialCondition> toInitialConditions(){return state.toInitialConditions();}
@@ -55,23 +63,48 @@ public final class SolarSystem {
     public boolean updateBody(String originalName, String newName, String type, String parentName,
                               double mass, double radiusKm, double semiMajorAxisAu, double eccentricity,
                               double inclinationDegree, double ascendingNodeDegree, double argumentOfPeriapsisDegree,
-                              double trueAnomalyDeg, Color color){
+                              double trueAnomalyDeg, Color color,
+                              double rotationSpeedDegPerSecond, String texturePath) {
         return state.updateBody(
-                originalName, newName, type, parentName,
-                mass, radiusKm, semiMajorAxisAu, eccentricity,
-                inclinationDegree, ascendingNodeDegree, argumentOfPeriapsisDegree,
-                trueAnomalyDeg, color
+                originalName,
+                newName,
+                type,
+                parentName,
+                mass,
+                radiusKm,
+                semiMajorAxisAu,
+                eccentricity,
+                inclinationDegree,
+                ascendingNodeDegree,
+                argumentOfPeriapsisDegree,
+                trueAnomalyDeg,
+                color,
+                rotationSpeedDegPerSecond,
+                texturePath
         );
-
     }
 
-    public boolean addNewBody( String Name, String type, String parentName,
+    public boolean addNewBody(String name, String type, String parentName,
                               double mass, double radiusKm, double semiMajorAxisAu, double eccentricity,
                               double inclinationDegree, double ascendingNodeDegree, double argumentOfPeriapsisDegree,
-                              double trueAnomalyDeg, Color color){
-        return state.addNewBody( Name, type, parentName,
-                mass,radiusKm,semiMajorAxisAu,eccentricity,
-                inclinationDegree,ascendingNodeDegree,argumentOfPeriapsisDegree,trueAnomalyDeg,color);
+                              double trueAnomalyDeg, Color color,
+                              double rotationSpeedDegPerSecond, String texturePath) {
+        return state.addNewBody(
+                name,
+                type,
+                parentName,
+                mass,
+                radiusKm,
+                semiMajorAxisAu,
+                eccentricity,
+                inclinationDegree,
+                ascendingNodeDegree,
+                argumentOfPeriapsisDegree,
+                trueAnomalyDeg,
+                color,
+                rotationSpeedDegPerSecond,
+                texturePath
+        );
     }
     public boolean removeBody(String name){
         return state.removeBody(name);
