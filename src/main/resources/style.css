@@ -11,6 +11,15 @@
 /* TitledPane */
 .titled-pane > .title {
     -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.titled-pane > .title {
+    -fx-background-color: transparent;
+}
+
+.titled-pane > .title> .text {
+    -fx-fill: white;
 }
 
 .titled-pane > .content {
@@ -65,6 +74,7 @@
 .list-cell {
     -fx-background-color: transparent;
     -fx-text-fill: white;
+
 }
 
 /* Sliders */

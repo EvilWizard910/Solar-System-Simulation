@@ -51,6 +51,7 @@ public class Design2Controller {
     @FXML private Button addTextureButton;
 
     @FXML private ListView<String> bodyList;
+    @FXML private TextField selectedBodyField;
     @FXML private Slider massSlider;
     @FXML private Slider radiusKmSlider;
     @FXML private Slider semiMajorAxisAuSlider;
@@ -151,6 +152,7 @@ public class Design2Controller {
 
     private void bindEditSection(){
         bodyList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+            selectedBodyField.setText(newValue==null?"":newValue);
             bodyEditorViewModel.selectedBodyNameProperty().set(newValue);
             bodyEditorViewModel.loadSelectedBody();
             pushEditorValuesToUi();
@@ -291,6 +293,7 @@ public class Design2Controller {
             simulationScreen.buildBodies();
         }
         clearEditTextureSelection();
+        selectedBodyField.clear();
     }
 
     @FXML

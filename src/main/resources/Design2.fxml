@@ -129,6 +129,7 @@
                         <VBox spacing="10">
 
                             <ListView fx:id="bodyList" prefHeight="120"/>
+                            <TextField fx:id="selectedBodyField" promptText="Selected Body" editable="false"/>
 
                             <Label text="Mass"/>
                             <Slider fx:id="massSlider" min="-6.0" max="6" value="0.0"
