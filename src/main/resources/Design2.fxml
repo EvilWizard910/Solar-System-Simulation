@@ -38,7 +38,7 @@
                             <ListView fx:id="savedSystemsList" prefHeight="120"/>
                             <Button text="Load Selected Save" onAction="#onLoadSelectedSystem" maxWidth="Infinity"/>
                             <Button text="Delete Selected Save" onAction="#onDeleteSelectedSystem" maxWidth="Infinity"/>
-
+                            <Button text="Load Default System" onAction="#onLoadDefaultConditions" maxWidth="Infinity"/>
                         </VBox>
                     </content>
                 </TitledPane>

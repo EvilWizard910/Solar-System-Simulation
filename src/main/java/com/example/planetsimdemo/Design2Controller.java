@@ -282,6 +282,20 @@ public class Design2Controller {
     }
 
     @FXML
+    private void onLoadDefaultConditions(){
+        solarSystem=new SolarSystem(SolarSystemState.defaultInitialConditions());
+        bodyEditorViewModel.setSolarSystem(solarSystem);
+        if(simulationScreen!=null){
+            simulationScreen.setSolarSystem(solarSystem);
+        }
+        refreshAllUi();
+        bodyList.getSelectionModel().clearSelection();
+        selectedBodyField.clear();
+        clearAddTextureSelection();
+        clearEditTextureSelection();
+    }
+
+    @FXML
     private void onAddBody(){
         pullEditorValuesFromUi();
         if(!bodyEditorViewModel.addBody()){
