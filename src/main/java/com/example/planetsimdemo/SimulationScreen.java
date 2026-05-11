@@ -34,6 +34,8 @@ public class SimulationScreen {
     private final Map<String, Rotate> bodyRotations = new HashMap<>();
     private final Map<String, Double> bodySpinAngles = new HashMap<>();
     private final Map<String, MeshView> ringViews = new HashMap<>();
+    private final Map<String, Rotate> bodyTiltRotations = new HashMap<>();
+    private final Map<String, Rotate> bodySpinRotations = new HashMap<>();
 
     private AnimationTimer timer;
     private long lastTime = 0L;
@@ -137,7 +139,8 @@ public class SimulationScreen {
         world.getChildren().removeIf(node -> node instanceof Sphere || node instanceof PointLight|| node instanceof MeshView);
         bodyViews.clear();
         starLights.clear();
-        bodyRotations.clear();
+        bodyTiltRotations.clear();
+        bodySpinRotations.clear();
         bodySpinAngles.clear();
         ringViews.clear();
 
@@ -152,11 +155,15 @@ public class SimulationScreen {
             Sphere sphere = new Sphere(toSceneRadius(radiusKm));
             sphere.setMaterial(createMaterialForBody(name, color));
 
-            Rotate spinRotation = new Rotate(0, Rotate.Y_AXIS);
-            sphere.getTransforms().add(spinRotation);
 
-            bodyRotations.put(name, spinRotation);
-            bodySpinAngles.put(name, 0.0);
+           Rotate tiltRotation = new Rotate(getAxialTiltDegrees(name), Rotate.X_AXIS);
+           Rotate spinRotation = new Rotate(0, Rotate.Y_AXIS);
+
+            sphere.getTransforms().addAll(tiltRotation,spinRotation);
+
+            bodyTiltRotations.put(name, tiltRotation);
+            bodySpinRotations.put(name, spinRotation);
+            bodySpinAngles.put(name,0.0);
 
             updateSpherePosition(sphere, body);
             bodyViews.put(name, sphere);
@@ -169,6 +176,11 @@ public class SimulationScreen {
                         (float) (planetRadius*2.3),
                         96
                 );
+
+                double tilt=getAxialTiltDegrees(name);
+                ring.getTransforms().add(new Rotate(tilt+90, Rotate.X_AXIS));
+                ring.setCullFace(CullFace.NONE);
+
                 updateRingPosition(ring,body);
                 ringViews.put(name, ring);
                 world.getChildren().add(ring);
@@ -229,14 +241,13 @@ public class SimulationScreen {
     }
 
     private void updateBodySpin(String bodyName, double scaledDt) {
-        Rotate rotation = bodyRotations.get(bodyName);
+        Rotate rotation = bodySpinRotations.get(bodyName);
         if (rotation == null) {
             return;
         }
 
         double spinSpeed = getSpinSpeedDegreesPerSecond(bodyName);
         double currentAngle = bodySpinAngles.getOrDefault(bodyName, 0.0);
-
         double nextAngle = (currentAngle + spinSpeed * scaledDt) % 360.0;
 
         bodySpinAngles.put(bodyName, nextAngle);
@@ -255,7 +266,16 @@ public class SimulationScreen {
             }
 
             double radiusKm = solarSystem.getBodyRadiusKm(name);
-            sphere.setRadius(toSceneRadius(radiusKm));
+            double sceneRadius = toSceneRadius(radiusKm);
+            sphere.setRadius(sceneRadius);
+
+            MeshView ring = ringViews.get(name);
+            if (ring != null) {
+                double basePlanetRadius = radiusKm/2000000;
+                double scale = sceneRadius / basePlanetRadius;
+                ring.setScaleX(scale);
+                ring.setScaleZ(scale);
+            }
         }
     }
 
@@ -372,6 +392,11 @@ public class SimulationScreen {
             case "uranus" -> "/textures/uranus.jpg";
             case "neptune" -> "/textures/neptune.jpg";
             case "moon" -> "/textures/moon.jpg";
+            case "io" -> "/textures/io.jpg";
+            case "europa" -> "/textures/europa.jpg";
+            case "ganymede" -> "/textures/ganymede.jpg";
+            case "callisto" -> "/textures/callisto.jpg";
+            case "titan" -> "/textures/titan.jpg";
             default -> null;
         };
     }
@@ -423,4 +448,23 @@ public class SimulationScreen {
         ring.setTranslateY(metersToScene(body.getY()));
         ring.setTranslateZ(metersToScene(body.getZ()));
     }
+
+    private double getAxialTiltDegrees(String name) {
+        return switch (name.toLowerCase()){
+            case "sun" -> 90.0;
+            case "mercury" -> 90.00;
+            case "venus" -> 267.4;
+            case "earth" -> 113.44;
+            case "mars" -> 115.19;
+            case "jupiter" -> 93.13;
+            case "saturn" -> 116.73;
+            case "uranus" -> 187.77;
+            case "neptune" -> 118.32;
+            case "moon" -> 96.68;
+            case "titan"-> 116.73;
+            default -> 90;
+        };
+    }
+
+
 }
