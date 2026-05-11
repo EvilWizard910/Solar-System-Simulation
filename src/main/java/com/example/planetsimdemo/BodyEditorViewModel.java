@@ -25,7 +25,7 @@ public class BodyEditorViewModel {
     private final DoubleProperty trueAnomalyDeg = new SimpleDoubleProperty(0.0);
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
     private final StringProperty errorMessage = new SimpleStringProperty("");
-    private final DoubleProperty rotationSpeedDegPerSecond = new SimpleDoubleProperty(8.0);
+    private final DoubleProperty rotationSpeedDegPerSecond = new SimpleDoubleProperty(0.00418);
     private final StringProperty texturePath = new SimpleStringProperty();
 
     public void clearForm(){
@@ -42,7 +42,7 @@ public class BodyEditorViewModel {
         trueAnomalyDeg.set(0.0);
         color.set(Color.WHITE);
         errorMessage.set("");
-        rotationSpeedDegPerSecond.set(8.0);
+        rotationSpeedDegPerSecond.set(0.00418);
         texturePath.set(null);
     }
 

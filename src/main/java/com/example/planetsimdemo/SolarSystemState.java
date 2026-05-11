@@ -613,9 +613,12 @@ public class SolarSystemState {
         return state;
     }
 
+
+
         public static List<InitialCondition> defaultInitialConditions() {
             List<InitialCondition> defaults = new ArrayList<>();
 
+            double earthDay=0.00418;
             defaults.add(new InitialCondition(
                     "Sun",
                     "Star",
@@ -623,7 +626,7 @@ public class SolarSystemState {
                     massOfSun,
                     700000,
                     Color.WHITE,
-                    3.0,
+                    earthDay/27,
                     "/textures/sun.jpg",
                     null
             ));
@@ -635,7 +638,7 @@ public class SolarSystemState {
                     Mercury_Mass,
                     2439.7,
                     Color.MISTYROSE,
-                    1.5,
+                    earthDay/58.65,
                     "/textures/mercury.jpg",
                     new OrbitElements(0.3870993, 0.20564, 7.005, 48.3, 29.13, 193)
             ));
@@ -647,7 +650,7 @@ public class SolarSystemState {
                     Venus_Mass,
                     6051.8,
                     Color.BURLYWOOD,
-                    -1.0,
+                    -earthDay/243,
                     "/textures/venus.jpg",
                     new OrbitElements(0.7233336, 0.00678, 3.3947, 76.7, 54.9, 125)
             ));
@@ -659,7 +662,7 @@ public class SolarSystemState {
                     EARTH_MASS,
                     6371,
                     Color.DODGERBLUE,
-                    12.0,
+                    earthDay,
                     "/textures/earth.jpg",
                     new OrbitElements(1.0000, 0.0167, 0.00005, -11.26064, 114.20783, 100.0)
             ));
@@ -671,7 +674,7 @@ public class SolarSystemState {
                     Mars_Mass,
                     3389.5,
                     Color.ORANGERED,
-                    10.0,
+                    earthDay/1.026,
                     "/textures/mars.jpg",
                     new OrbitElements(1.52371, 0.09339, 1.85, 49.6, 286.5, 355)
             ));
@@ -683,7 +686,7 @@ public class SolarSystemState {
                     Jupiter_Mass,
                     69911.0,
                     Color.CORAL,
-                    30.0,
+                    0.4134*earthDay,
                     "/textures/jupiter.jpg",
                     new OrbitElements(5.2029, 0.0484, 1.304, 100.4, 274.3, 185)
             ));
@@ -695,7 +698,7 @@ public class SolarSystemState {
                     Saturn_Mass,
                     58232,
                     Color.DARKGRAY,
-                    25.0,
+                    0.44*earthDay,
                     "/textures/saturn.jpg",
                     new OrbitElements(9.537, 0.0539, 2.486, 113.7, 338.9, 317)
             ));
@@ -707,7 +710,7 @@ public class SolarSystemState {
                     Uranus_Mass,
                     25362,
                     Color.DARKTURQUOISE,
-                    -18.0,
+                    -.718*earthDay,
                     "/textures/uranus.jpg",
                     new OrbitElements(19.189, 0.04726, 0.773, 74.02, 96.9, 142)
             ));
@@ -719,7 +722,7 @@ public class SolarSystemState {
                     Neptune_Mass,
                     24622,
                     Color.MIDNIGHTBLUE,
-                    16.0,
+                            .671*earthDay,
                     "/textures/neptune.jpg",
                     new OrbitElements(30.0699, 0.00859, 1.77, 131.784, 273.2, 260.5)
             ));
@@ -731,7 +734,7 @@ public class SolarSystemState {
                     Moon_Mass,
                     1737.4,
                     Color.LIGHTGRAY,
-                    2.0,
+                    earthDay/27.3,
                     "/textures/moon.jpg",
                     new OrbitElements(0.00257, 0.0549, 5.1, 0, 0, 327)
             ));
@@ -743,7 +746,7 @@ public class SolarSystemState {
                     Io_Mass,
                     1821.6,
                     Color.LIMEGREEN,
-                    2.0,
+                    earthDay/1.77,
                     "/textures/io.jpg",
                     new OrbitElements(0.00282, 0.004, 0.05, 240, 274.3, 173)
             ));
@@ -755,7 +758,7 @@ public class SolarSystemState {
                     Europa_mass,
                     1560.8,
                     Color.WHITE,
-                    2.0,
+                    earthDay/3.55,
                     "/textures/europa.jpg",
                     new OrbitElements(0.00448, 0.0101, 0.471, 120, 274.3, 37)
             ));
@@ -765,9 +768,9 @@ public class SolarSystemState {
                     "Moon",
                     "Jupiter",
                     Ganymede_mass,
-                    1821.6,
+                    2633,
                     Color.DARKGRAY,
-                    2.0,
+                    earthDay/7.15,
                     "/textures/ganymede.jpg",
                     new OrbitElements(0.00716, 0.0015, 0.204, 60, 274.3, 75)
             ));
@@ -779,7 +782,7 @@ public class SolarSystemState {
                     Callisto_mass,
                     1821.6,
                     Color.GRAY,
-                    2.0,
+                    earthDay/16.689,
                     "/textures/callisto.jpg",
                     new OrbitElements(0.0126, 0.007, 0.205, 10, 274.3, 294)
             ));
@@ -791,9 +794,21 @@ public class SolarSystemState {
                     1.35e23,
                     2575,
                     Color.LIGHTYELLOW,
-                    2.0,
+                    earthDay/15.9167,
                     "/textures/titan.jpg",
                     new OrbitElements(0.008021505, 0.0288, 0.348, 169.24, 338.9, 69)
+            ));
+
+            defaults.add(new InitialCondition(
+                    "Triton",
+                    "Moon",
+                    "Neptune",
+                    2.14e22,
+                    1353.4,
+                    Color.LIGHTGRAY,
+                    -earthDay/5.876,
+                    "/textures/triton.jpg",
+                    new OrbitElements(0.008021505, 0, 130, 217.25, 299, 231)
             ));
 
 
