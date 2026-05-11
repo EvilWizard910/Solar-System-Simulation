@@ -99,6 +99,16 @@ public class Design2Controller {
         parentDropdown.setDisable(true);
         signOutButton.setDisable(true);
         saveButton.setDisable(true);
+
+        massField.setTooltip(new Tooltip("Kilograms"));
+        radiusKmField.setTooltip(new Tooltip("Kilometers"));
+        semiMajorAxisAuField.setTooltip(new Tooltip("Distance : Astronomical Units"));
+        eccentricityField.setTooltip(new Tooltip("In between 0 and 1"));
+        inclinationDegreeField.setTooltip(new Tooltip("The angle of the orbit"));
+        ascendingNodeDegreeField.setTooltip(new Tooltip("The angle in which an orbiting body goes above its center of orbit"));
+        argumentOfPeriapsisDegreeField.setTooltip(new Tooltip("The degree of a body's orbit where it is closest to the center"));
+        trueAnomalyDegField.setTooltip(new Tooltip("The degree of the body's position in its orbit"));
+
     }
 
     private void bindAuthSection(){
@@ -150,48 +160,62 @@ public class Design2Controller {
         });
     }
 
+    private boolean syncingEditUi = false;
     private void bindEditSection(){
         bodyList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-            selectedBodyField.setText(newValue==null?"":newValue);
-            bodyEditorViewModel.selectedBodyNameProperty().set(newValue);
-            bodyEditorViewModel.loadSelectedBody();
-            pushEditorValuesToUi();
-            captureSelectedBodyBases();
-            syncEditSlidersFromForm();
+            syncingEditUi=true;
+            try {
+                selectedBodyField.setText(newValue == null ? "" : newValue);
+                bodyEditorViewModel.selectedBodyNameProperty().set(newValue);
+                bodyEditorViewModel.loadSelectedBody();
+                pushEditorValuesToUi();
+                captureSelectedBodyBases();
+                configureEditSlidersForSelectedBody();
+                syncEditSlidersFromForm();
+            }finally {syncingEditUi=false;}
         });
         massSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             double mass = selectedBaseMass*multiplierFromSlider(newValue.doubleValue());
             massField.setText(formatDouble(mass));
             applyLiveEdit();
         });
         radiusKmSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-           double radiusKm = selectedBaseRadiusKm*newValue.doubleValue();
-            radiusKmField.setText(formatDouble(radiusKm));
+            if(syncingEditUi) {return;}
+
+            radiusKmField.setText(formatDouble(newValue.doubleValue()));
             applyLiveEdit();
         });
         semiMajorAxisAuSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             double axis = selectedBaseSemiMajorAxisAu*newValue.doubleValue();
             semiMajorAxisAuField.setText(formatDouble(axis));
             applyLiveEdit();
         });
         eccentricitySlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             eccentricityField.setText(formatDouble(newValue.doubleValue()));
             applyLiveEdit();
         });
         inclinationDegreeSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             inclinationDegreeField.setText(formatDouble(newValue.doubleValue()));
             applyLiveEdit();
         });
         ascendingNodeDegreeSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             ascendingNodeDegreeField.setText(formatDouble(newValue.doubleValue()));
             applyLiveEdit();
         });
         argumentOfPeriapsisDegreeSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             argumentOfPeriapsisDegreeField.setText(formatDouble(newValue.doubleValue()));
             applyLiveEdit();
         });
         rotationSpeedSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if(syncingEditUi) {return;}
             rotationSpeedDegPerSecondField.setText(Double.toString(newValue.doubleValue()));
+            applyLiveEdit();
         });
     }
 
@@ -204,8 +228,12 @@ public class Design2Controller {
             return;
         }
         pullEditorValuesFromUi();
-        if (bodyEditorViewModel.updateBody()&&simulationScreen!=null){
-            simulationScreen.buildBodies();
+        if (bodyEditorViewModel.updateBody()){
+            String bodyName = bodyEditorViewModel.selectedBodyNameProperty().get();
+            bodyList.getSelectionModel().select(bodyName);
+            if(simulationScreen!=null) {
+                simulationScreen.buildBodies();
+            }
         }
     }
 
@@ -427,7 +455,7 @@ public class Design2Controller {
 
     private void syncEditSlidersFromForm(){
         massSlider.setValue(Math.log10(Math.max(parseDouble(massField.getText()), 1.0) / selectedBaseMass));
-        radiusKmSlider.setValue(parseDouble(radiusKmField.getText()) / selectedBaseRadiusKm);
+        radiusKmSlider.setValue(parseDouble(radiusKmField.getText()));
         semiMajorAxisAuSlider.setValue(parseDouble(semiMajorAxisAuField.getText()) / selectedBaseSemiMajorAxisAu);
         eccentricitySlider.setValue(parseDouble(eccentricityField.getText()));
         ascendingNodeDegreeSlider.setValue(parseDouble(ascendingNodeDegreeField.getText()));
@@ -492,7 +520,7 @@ public class Design2Controller {
 
         radiusKmSlider.setMin(1.0);
         radiusKmSlider.setMax(Math.max(radiusKm*2.0,1000));
-        radiusKmSlider.setValue(Math.max(radiusKm,1.0));
+        radiusKmSlider.setValue(radiusKm);
 
         semiMajorAxisAuSlider.setMin(0.0001);
         semiMajorAxisAuSlider.setMax(Math.max(semiMajorAxisAu*2.0,100));
