@@ -43,7 +43,7 @@ public class SimulationScreen {
     private double timeScale = 1;
     private double sizeScale = 0.0;
     private String focusedBodyName = "Sun";
-    private static final double dtMax=3600;
+    private static final double dtMax=1800;
 
     private double orbitYaw = 0.0;
     private double orbitPitch = 0.0;
@@ -171,7 +171,7 @@ public class SimulationScreen {
             world.getChildren().add(sphere);
 
             if("Saturn".equalsIgnoreCase(name)) {
-                double planetRadius = toSceneRadius(radiusKm);
+                double planetRadius = radiusKm/2000000;
                 MeshView ring= createSaturnRing(
                         (float) (planetRadius*1.4),
                         (float) (planetRadius*2.3),
@@ -275,11 +275,8 @@ public class SimulationScreen {
             MeshView ring = ringViews.get(name);
             if (ring != null) {
                 double basePlanetRadius = radiusKm / 2_000_000.0;
-                double baseOuterRingRadius = basePlanetRadius * 2.3;
+                double scale = sceneRadius/basePlanetRadius;
 
-                double desiredOuterRingRadius = sceneRadius * 2.3;
-                double cappedOuterRingRadius = Math.min(desiredOuterRingRadius, 16.0); // tune this cap
-                double scale = cappedOuterRingRadius / baseOuterRingRadius;
                 ring.setScaleX(scale);
                 ring.setScaleZ(scale);
             }

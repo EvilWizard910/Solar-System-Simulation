@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 
 public class Main extends Application {
 
@@ -29,7 +30,8 @@ public class Main extends Application {
 
         Scene scene = new Scene(root, 1400, 900);
 
-        stage.setTitle("Planetary Simulation");
+        stage.setTitle("Solar System Sandbox");
+        stage.getIcons().add(new Image(Main.class.getResourceAsStream("/icon.jpg")));
         stage.setScene(scene);
         stage.show();
     }
