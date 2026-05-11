@@ -274,8 +274,12 @@ public class SimulationScreen {
 
             MeshView ring = ringViews.get(name);
             if (ring != null) {
-                double basePlanetRadius = radiusKm/2000000;
-                double scale = sceneRadius / basePlanetRadius;
+                double basePlanetRadius = radiusKm / 2_000_000.0;
+                double baseOuterRingRadius = basePlanetRadius * 2.3;
+
+                double desiredOuterRingRadius = sceneRadius * 2.3;
+                double cappedOuterRingRadius = Math.min(desiredOuterRingRadius, 16.0); // tune this cap
+                double scale = cappedOuterRingRadius / baseOuterRingRadius;
                 ring.setScaleX(scale);
                 ring.setScaleZ(scale);
             }
