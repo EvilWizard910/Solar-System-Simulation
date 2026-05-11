@@ -43,6 +43,7 @@ public class SimulationScreen {
     private double timeScale = 1;
     private double sizeScale = 0.0;
     private String focusedBodyName = "Sun";
+    private static final double dtMax=3600;
 
     private double orbitYaw = 0.0;
     private double orbitPitch = 0.0;
@@ -213,7 +214,9 @@ public class SimulationScreen {
                 lastTime = now;
 
                 dt = Math.min(dt, .25);
-                solarSystem.updatePhysics(dt * timeScale);
+                double scaledDt = dt*timeScale;
+                int subSteps = Math.max(1,(int) Math.ceil(scaledDt / dtMax));
+                for (int i = 0; i < subSteps; i++) {solarSystem.updatePhysics(dt * timeScale);}
 
                 for (String name : solarSystem.getBodyNames()) {
                     Body body = solarSystem.getBody(name);

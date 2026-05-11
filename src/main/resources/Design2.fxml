@@ -132,15 +132,15 @@
                             <TextField fx:id="selectedBodyField" promptText="Selected Body" editable="false"/>
 
                             <Label text="Mass"/>
-                            <Slider fx:id="massSlider" min="-6.0" max="6" value="0.0"
-                            majorTickUnit="1.0" minorTickCount="0" blockIncrement=".25"/>
+                            <Slider fx:id="massSlider" min="1e20" max="2e30" value="6e24"
+                            majorTickUnit="1.0e29" minorTickCount="4" blockIncrement="1e23"/>
 
                             <Label text="Radius"/>
                             <Slider fx:id="radiusKmSlider" min="100" max="1500000" value="6371"
                                     majorTickUnit="50000" minorTickCount="4" blockIncrement="0.1"/>
 
                             <Label text="Axis"/>
-                            <Slider fx:id="semiMajorAxisAuSlider" min="0.0001" max="35" value="1"
+                            <Slider fx:id="semiMajorAxisAuSlider" min=".01" max="35" value="1"
                                     majorTickUnit="1.0" minorTickCount="4" blockIncrement="0.1"/>
 
                             <Label text="Eccentricity"/>
