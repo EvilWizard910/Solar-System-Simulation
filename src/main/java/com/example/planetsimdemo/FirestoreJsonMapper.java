@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/*This class pulls all variables in the SolarSystemState and maps it into a string for a JSON file for firebase. That is all bodies, there positon
+ velocities, accelerations(all in x,y and z), orbital elements, radius, mass, color, typem parent and orbital speed. It does save file paths for
+ uploaded textures, but it does not save the jpeg/jpg/png that is used as the texture. It creates a snapshot of the SolarSystemState. This class
+ can also fetch the JSON file and read it, turning the string in the json file back into a SolarSystemState*/
 public final class FirestoreJsonMapper {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

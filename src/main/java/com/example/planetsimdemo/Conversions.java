@@ -1,7 +1,7 @@
 package com.example.planetsimdemo;
 
 public class Conversions {
-    //store these in firebase in future
+    //This class was used more in earlier builds, but serves to store variables used for physics equations
     public static final double G = 0.00000000006674;
     public static final double massOfSun = 1.98847e30;
     public static final double EARTH_MASS = 5.9722e24;
@@ -24,5 +24,4 @@ public class Conversions {
     public static double metersToScene(double meters) {
         return meters / 2.0e9;
     }
-    public static double sceneToKilometers(double scene){return scene*2.0e6;}
 }

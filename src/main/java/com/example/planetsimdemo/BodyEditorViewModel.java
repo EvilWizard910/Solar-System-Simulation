@@ -106,6 +106,7 @@ public class BodyEditorViewModel {
         }
     }
 
+    //reads textfields and build a body
     public boolean addBody(){
         SolarSystem system =  solarSystem.get();
         if(system == null){
@@ -139,6 +140,7 @@ public class BodyEditorViewModel {
         return true;
     }
 
+    //used to read reload a body for testing and for user entered variables
     public boolean updateBody(){
         SolarSystem system =  solarSystem.get();
         String originalName = selectedBodyName.get();
